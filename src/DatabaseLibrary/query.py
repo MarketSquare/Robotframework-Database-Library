@@ -11,7 +11,10 @@ class Query(object):
         Constructor
         '''
         
-    def get_my_value(self, assertionMessage = 'You can provide an assertion message here.'):
-        """Retrieves a value"""
-        raise AssertionError("Always an error. Message: '%s'." % (assertionMessage)) 
+    def query(self, selectStatement):
+        """Uses the input select statement to query for the values that will be returned."""
+        '''raise AssertionError("Always an error. Message: '%s'." % (assertionMessage))'''
+        cur = self._dbconnection.cursor()
+        cur.execute (selectStatement);
+        return cur.fetchall()
         
