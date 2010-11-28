@@ -24,9 +24,24 @@ class DatabaseLibrary(ConnectionManager, Query, Assertion):
     
     This can allow you to query your database after an action has been made to verify the results.
     
-    This is compatible* with any db2api module.
+    This is `compatible*` with any Database API Specification 2.0 module.
     
-    `* - or at least theoretically it should be compatible. Currently tested only with psycopg2.`
+    
+    
+    References:
+    
+     + Database API Specification 2.0 - http://www.python.org/dev/peps/pep-0249/
+     
+     + Lists of DB API 2.0 - http://wiki.python.org/moin/DatabaseInterfaces
+     
+     + Python Database Programming - http://wiki.python.org/moin/DatabaseProgramming/
+    
+    Notes:
+    
+    
+    
+    `compatible* - or at least theoretically it should be compatible. Currently tested only with postgresql
+    (using psycopg2).`
     """
     
     ROBOT_LIBRARY_SCOPE = 'GLOBAL'
