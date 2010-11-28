@@ -18,9 +18,9 @@ class ConnectionManager(object):
     """
 
     def __init__(self):
-        '''
+        """
         Initializes _dbconnection to None.
-        '''
+        """
         self._dbconnection = None
         
     def connect_to_database(self, dbProvider, database, username, password):
