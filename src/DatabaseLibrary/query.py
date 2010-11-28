@@ -16,11 +16,6 @@ class Query(object):
     Query handles all the querying done by the Database Library. 
     """
 
-    def __init__(self):
-        '''
-        Constructor
-        '''
-        
     def query(self, selectStatement):
         """Uses the input select statement to query for the values that will be returned."""
         '''raise AssertionError("Always an error. Message: '%s'." % (assertionMessage))'''

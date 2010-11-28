@@ -17,10 +17,9 @@ class ConnectionManager(object):
     Connection Manager handles the connection & disconnection to the database.
     """
 
-
     def __init__(self):
         '''
-        Constructor
+        Initializes _dbconnection to None.
         '''
         self._dbconnection = None
         
