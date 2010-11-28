@@ -23,13 +23,20 @@ class ConnectionManager(object):
         """
         self._dbconnection = None
         
-    def connect_to_database(self, dbProvider, database, username, password):
+    def connect_to_database(self, dbProvider, dbName, username, password):
+        """
+        Connect to the database wherein the provider is `dbProvider` while 
+        using the given `dbName`, `username`, and `password`. 
+        """
         if dbProvider == "postgres":
             import psycopg2
-            self._dbconnection = psycopg2.connect (database=database, user=username, password=password)
+            self._dbconnection = psycopg2.connect (database=dbName, user=username, password=password)
         else:
             raise AssertionError("The database provider '%' is not supported" % dbProvider)
         
     def disconnect_from_database(self):
+        """
+        Disconnects from the database.
+        """
         self._dbconnection.close()
         

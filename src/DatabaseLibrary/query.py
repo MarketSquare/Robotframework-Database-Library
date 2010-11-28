@@ -17,7 +17,14 @@ class Query(object):
     """
 
     def query(self, selectStatement):
-        """Uses the input select statement to query for the values that will be returned."""
+        """
+        Uses the input `selectStatement` to query for the values that 
+        will be returned as a list of tuples.
+        
+        Tip: try specifying the column names in your select statements 
+        much as possible to prevent any unnecessary surprises with schema
+        changes and to easily see what your [] indexing is trying to retrieve.
+        """
         cur = self._dbconnection.cursor()
         cur.execute (selectStatement);
         return cur.fetchall()

@@ -18,6 +18,11 @@ class Assertion(object):
     """
 
     def check_if_exists_in_database(self,selectStatement):
+        """
+        Check if any row would be returned by given the input 
+        `selectStatement`. If there are no results, then this will 
+        throw an AssertionError.
+        """
         if not self.query(selectStatement):
             raise AssertionError("Expected to have have at least one row from '%s' "
                                  "but got 0 rows." % selectStatement)
