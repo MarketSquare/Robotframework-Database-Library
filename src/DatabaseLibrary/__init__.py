@@ -16,6 +16,8 @@ from connection_manager import ConnectionManager
 from query import Query
 from assertion import Assertion
 
+__version__ = '0.1'
+
 class DatabaseLibrary(ConnectionManager, Query, Assertion):
     """
     Database Library contains utilities meant for Robot Framework's usage.
@@ -25,4 +27,3 @@ class DatabaseLibrary(ConnectionManager, Query, Assertion):
     
     ROBOT_LIBRARY_SCOPE = 'GLOBAL'
 
-    
