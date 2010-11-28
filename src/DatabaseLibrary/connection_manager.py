@@ -13,9 +13,9 @@
 #  limitations under the License.
 
 class ConnectionManager(object):
-    '''
-    classdocs
-    '''
+    """
+    Connection Manager handles the connection & disconnection to the database.
+    """
 
 
     def __init__(self):

@@ -13,10 +13,9 @@
 #  limitations under the License.
 
 class Assertion(object):
-    '''
-    classdocs
-    '''
-
+    """
+    Assertion handles all the assertions of Database Library.
+    """
 
     def __init__(self):
         '''

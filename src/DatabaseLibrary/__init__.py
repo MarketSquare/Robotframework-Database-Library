@@ -18,7 +18,9 @@ from assertion import Assertion
 
 class DatabaseLibrary(ConnectionManager, Query, Assertion):
     """
-    Contains Database utilities meant for Robot Framework's usage.
+    Database Library contains utilities meant for Robot Framework's usage.
+    
+    This can allow you to query your database after an action has been made to verify the results.
     """
     
     ROBOT_LIBRARY_SCOPE = 'GLOBAL'

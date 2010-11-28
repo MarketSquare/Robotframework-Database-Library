@@ -12,6 +12,9 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 class Query(object):
+    """
+    Query handles all the querying done by the Database Library. 
+    """
 
     def __init__(self):
         '''
