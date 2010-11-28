@@ -22,8 +22,10 @@ class Query(object):
         will be returned as a list of tuples.
         
         Tip: try specifying the column names in your select statements 
-        much as possible to prevent any unnecessary surprises with schema
-        changes and to easily see what your [] indexing is trying to retrieve.
+        as much as possible to prevent any unnecessary surprises with schema
+        changes and to easily see what your [] indexing is trying to retrieve 
+        (i.e. instead of `"select * from my_table"`, try 
+        `"select id, col_1, col_2 from my_table"`).
         """
         cur = self._dbconnection.cursor()
         cur.execute (selectStatement);
