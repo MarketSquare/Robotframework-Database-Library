@@ -23,13 +23,13 @@ class ConnectionManager(object):
         """
         self._dbconnection = None
         
-    def connect_to_database(self, db2apiModuleName, dbName, username, password):
+    def connect_to_database(self, dbapiModuleName, dbName, username, password):
         """
-        Loads the db2api module given `db2apiModuleName` then uses it to 
+        Loads the DB API 2.0 module given `dbapiModuleName` then uses it to 
         connect to the database using `dbName`, `username`, and `password`. 
         """
-        db2api = __import__(db2apiModuleName);
-        self._dbconnection = db2api.connect (database=dbName, user=username, password=password)
+        db_api_2 = __import__(dbapiModuleName);
+        self._dbconnection = db_api_2.connect (database=dbName, user=username, password=password)
         
     def disconnect_from_database(self):
         """
