@@ -23,6 +23,10 @@ class DatabaseLibrary(ConnectionManager, Query, Assertion):
     Database Library contains utilities meant for Robot Framework's usage.
     
     This can allow you to query your database after an action has been made to verify the results.
+    
+    This is compatible* with any db2api module.
+    
+    `* - or at least theoretically it should be compatible. Currently tested only with psycopg2.`
     """
     
     ROBOT_LIBRARY_SCOPE = 'GLOBAL'
