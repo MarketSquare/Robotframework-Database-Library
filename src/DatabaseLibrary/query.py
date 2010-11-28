@@ -27,4 +27,3 @@ class Query(object):
         cur = self._dbconnection.cursor()
         cur.execute (selectStatement);
         return cur.fetchall()
-        

@@ -26,4 +26,3 @@ class Assertion(object):
         if not self.query(selectStatement):
             raise AssertionError("Expected to have have at least one row from '%s' "
                                  "but got 0 rows." % selectStatement)
-        
