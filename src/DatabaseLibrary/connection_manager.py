@@ -25,14 +25,14 @@ class ConnectionManager(object):
         """
         self._dbconnection = None
         
-    def connect_to_database(self, dbapiModuleName=None, dbName=None, username=None, password=None, dbPropertiesFile="./resources/db.cfg"):
+    def connect_to_database(self, dbapiModuleName=None, dbName=None, username=None, password=None, dbConfigFile="./resources/db.cfg"):
         """
         Loads the DB API 2.0 module given `dbapiModuleName` then uses it to 
         connect to the database using `dbName`, `username`, and `password`. 
         """
     
         config = ConfigParser.ConfigParser()
-        config.read([dbPropertiesFile])
+        config.read([dbConfigFile])
         
         dbapiModuleName = dbapiModuleName or config.get('default', 'dbapiModuleName')
         dbName = dbName or config.get('default', 'db.name')
