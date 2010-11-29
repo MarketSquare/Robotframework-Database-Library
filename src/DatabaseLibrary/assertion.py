@@ -22,6 +22,18 @@ class Assertion(object):
         Check if any row would be returned by given the input 
         `selectStatement`. If there are no results, then this will 
         throw an AssertionError.
+        
+        For example, given we have a table `person` with the following data:
+        | id | first_name  | last_name |
+        |  1 | Franz Allan | See       |
+        
+        When you have the following assertions in your robot
+        | Check if exists in database | select id from person where first_name = 'Franz Allan' |
+        | Check if exists in database | select id from person where first_name = 'John' |
+        
+        Then you will get the following:
+        | Check if exists in database | select id from person where first_name = 'Franz Allan' | # PASS |
+        | Check if exists in database | select id from person where first_name = 'John' | # FAIL |          
         """
         if not self.query(selectStatement):
             raise AssertionError("Expected to have have at least one row from '%s' "

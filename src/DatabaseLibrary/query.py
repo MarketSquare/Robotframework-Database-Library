@@ -26,6 +26,24 @@ class Query(object):
         changes and to easily see what your [] indexing is trying to retrieve 
         (i.e. instead of `"select * from my_table"`, try 
         `"select id, col_1, col_2 from my_table"`).
+        
+        For example, given we have a table `person` with the following data:
+        | id | first_name  | last_name |
+        |  1 | Franz Allan | See       |
+        
+        When you do the following:
+        | @{queryResults} | Query | select * from person |
+        | Log Many | @{queryResults} |
+        
+        You will get the following:
+        [1, 'Franz Allan', 'See']
+        
+        Also, you can do something like this:
+        | ${queryResults} | Query | select * from person |
+        | Log | ${queryResults[0][1]}, ${queryResults[0][0]} |
+        
+        And get the following
+        See, Franz Allan
         """
         cur = self._dbconnection.cursor()
         cur.execute (selectStatement);

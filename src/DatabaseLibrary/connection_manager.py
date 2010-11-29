@@ -29,9 +29,22 @@ class ConnectionManager(object):
         """
         Loads the DB API 2.0 module given `dbapiModuleName` then uses it to 
         connect to the database using `dbName`, `dbUsername`, and `dbPassword`.
+        
         Optionally, you can specify a `dbConfigFile` wherein it will load the
         default property values for `dbapiModuleName`, `dbName` `dbUsername` 
-        and `dbPassword`
+        and `dbPassword` (note: specifying `dbapiModuleName`, `dbName` 
+        `dbUsername` or `dbPassword` directly will override the properties of
+        the same key in `dbConfigFile`). If no `dbConfigFile` is specified, it
+        defaults to `./resources/db.cfg`. 
+        
+        The `dbConfigFile` is useful if you don't want to check into your SCM
+        your database credentials.
+        
+        Example usage:
+        | Connect to Database | psycopg2 | my_db | postgres | s3cr3t | default.cfg |
+        | Connect to Database | psycopg2 | my_db | postgres | s3cr3t |
+        | Connect to Database | dbConfigFile=default.cfg |
+        | Connect to Database |  
         """
     
         config = ConfigParser.ConfigParser()
