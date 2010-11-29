@@ -12,6 +12,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import ConfigParser
+
 class ConnectionManager(object):
     """
     Connection Manager handles the connection & disconnection to the database.
@@ -23,11 +25,20 @@ class ConnectionManager(object):
         """
         self._dbconnection = None
         
-    def connect_to_database(self, dbapiModuleName, dbName, username, password):
+    def connect_to_database(self, dbapiModuleName=None, dbName=None, username=None, password=None, dbPropertiesFile="./resources/db.cfg"):
         """
         Loads the DB API 2.0 module given `dbapiModuleName` then uses it to 
         connect to the database using `dbName`, `username`, and `password`. 
         """
+    
+        config = ConfigParser.ConfigParser()
+        config.read([dbPropertiesFile])
+        
+        dbapiModuleName = dbapiModuleName or config.get('default', 'dbapiModuleName')
+        dbName = dbName or config.get('default', 'db.name')
+        username = username or config.get('default', 'db.username')
+        password = password or config.get('default', 'db.password')
+        
         db_api_2 = __import__(dbapiModuleName);
         self._dbconnection = db_api_2.connect (database=dbName, user=username, password=password)
         
