@@ -21,7 +21,8 @@ class Query(object):
         Uses the input `selectStatement` to query for the values that 
         will be returned as a list of tuples.
         
-        Tip: try specifying the column names in your select statements 
+        Tip: Unless you want to log all column values of the specified rows, 
+        try specifying the column names in your select statements 
         as much as possible to prevent any unnecessary surprises with schema
         changes and to easily see what your [] indexing is trying to retrieve 
         (i.e. instead of `"select * from my_table"`, try 
@@ -39,7 +40,7 @@ class Query(object):
         [1, 'Franz Allan', 'See']
         
         Also, you can do something like this:
-        | ${queryResults} | Query | select * from person |
+        | ${queryResults} | Query | select first_name, last_name from person |
         | Log | ${queryResults[0][1]}, ${queryResults[0][0]} |
         
         And get the following

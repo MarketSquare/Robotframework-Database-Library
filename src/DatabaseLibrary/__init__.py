@@ -10,13 +10,13 @@
 #  distributed under the License is distributed on an "AS IS" BASIS,
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
-#  limitations under the License.__version__ = '0.1'
+#  limitations under the License.
 
 from connection_manager import ConnectionManager
 from query import Query
 from assertion import Assertion
 
-__version__ = '0.1'
+__version__ = '0.2'
 
 class DatabaseLibrary(ConnectionManager, Query, Assertion):
     """
@@ -42,6 +42,22 @@ class DatabaseLibrary(ConnectionManager, Query, Assertion):
     
     `compatible* - or at least theoretically it should be compatible. Currently tested only with postgresql
     (using psycopg2).`
+    
+    Example Usage:
+    | # Setup |
+    | Connect to Database |
+    | # Drive UI to do some action | 
+    | Go To | http://localhost/person/form.html | | # From selenium library |
+    | Input Text |  name=first_name | Franz Allan | # From selenium library |
+    | Input Text |  name=last_name | See | # From selenium library |
+    | Click Button | Save | | # From selenium library |
+    | # Log results | 
+    | @{queryResults} | Query | select * from person |
+    | Log Many | @{queryResults} |
+    | # Verify if persisted in the database |
+    | Check if exists in database | select id from person where first_name = 'Franz Allan' and last_name = 'See' |
+    | # Teardown |
+    | Disconnect from Database | 
     """
     
     ROBOT_LIBRARY_SCOPE = 'GLOBAL'
