@@ -42,19 +42,19 @@ class ConnectionManager(object):
         
         Example usage:
         | # explicitly specifies all db property values |
-        | Connect to Database | psycopg2 | my_db | postgres | s3cr3t | 
+        | Connect To Database | psycopg2 | my_db | postgres | s3cr3t | 
 
         | # loads all property values from default.cfg |
-        | Connect to Database | dbConfigFile=default.cfg | 
+        | Connect To Database | dbConfigFile=default.cfg | 
         
         | # loads all property values from ./resources/db.cfg |
-        | Connect to Database |  
+        | Connect To Database |  
         
         | # uses explicit `dbapiModuleName` and `dbName` but uses the `dbUsername` and `dbPassword` in 'default.cfg' |
-        | Connect to Database | psycopg2 | my_db_test | dbConfigFile=default.cfg |
+        | Connect To Database | psycopg2 | my_db_test | dbConfigFile=default.cfg |
         
         | # uses explicit `dbapiModuleName` and `dbName` but uses the `dbUsername` and `dbPassword` in './resources/db.cfg' |
-        | Connect to Database | psycopg2 | my_db_test |    
+        | Connect To Database | psycopg2 | my_db_test |    
         """
     
         config = ConfigParser.ConfigParser()
@@ -73,7 +73,7 @@ class ConnectionManager(object):
         Disconnects from the database.
         
         For example:
-        | Disconnect from Database | # disconnects from current connection to the database | 
+        | Disconnect From Database | # disconnects from current connection to the database | 
         """
         self._dbconnection.close()
         

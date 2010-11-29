@@ -46,6 +46,8 @@ class DatabaseLibrary(ConnectionManager, Query, Assertion):
     Example Usage:
     | # Setup |
     | Connect to Database |
+    | # Guard assertion (verify that test started in expected state). |
+    | Check if not exists in database | select id from person where first_name = 'Franz Allan' and last_name = 'See' |
     | # Drive UI to do some action | 
     | Go To | http://localhost/person/form.html | | # From selenium library |
     | Input Text |  name=first_name | Franz Allan | # From selenium library |

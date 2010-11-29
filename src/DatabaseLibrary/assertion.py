@@ -28,13 +28,38 @@ class Assertion(object):
         |  1 | Franz Allan | See       |
         
         When you have the following assertions in your robot
-        | Check if exists in database | select id from person where first_name = 'Franz Allan' |
-        | Check if exists in database | select id from person where first_name = 'John' |
+        | Check if Exists In Database | select id from person where first_name = 'Franz Allan' |
+        | Check if Exists In Database | select id from person where first_name = 'John' |
         
         Then you will get the following:
-        | Check if exists in database | select id from person where first_name = 'Franz Allan' | # PASS |
-        | Check if exists in database | select id from person where first_name = 'John' | # FAIL |          
+        | Check if Exists In Database | select id from person where first_name = 'Franz Allan' | # PASS |
+        | Check if Exists In Database | select id from person where first_name = 'John' | # FAIL |          
         """
         if not self.query(selectStatement):
             raise AssertionError("Expected to have have at least one row from '%s' "
                                  "but got 0 rows." % selectStatement)
+            
+    def check_if_not_exists_in_database(self,selectStatement):
+        """
+        This is the negation of `check_if_exists_in_database`.
+        
+        Check if no rows would be returned by given the input 
+        `selectStatement`. If there are any results, then this will 
+        throw an AssertionError.
+        
+        For example, given we have a table `person` with the following data:
+        | id | first_name  | last_name |
+        |  1 | Franz Allan | See       |
+        
+        When you have the following assertions in your robot
+        | Check if Not Exists In Database | select id from person where first_name = 'John' |
+        | Check if Not Exists In Database | select id from person where first_name = 'Franz Allan' |
+        
+        Then you will get the following:
+        | Check if Not Exists In Database | select id from person where first_name = 'John' | # PASS |          
+        | Check if Not Exists In Database | select id from person where first_name = 'Franz Allan' | # FAIL |
+        """
+        queryResults = self.query(selectStatement) 
+        if queryResults:
+            raise AssertionError("Expected to have have no rows from '%s' "
+                                 "but got some rows : %s." % (selectStatement, queryResults))
