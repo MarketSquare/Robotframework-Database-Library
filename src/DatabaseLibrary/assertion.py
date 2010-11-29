@@ -28,12 +28,12 @@ class Assertion(object):
         |  1 | Franz Allan | See       |
         
         When you have the following assertions in your robot
-        | Check if Exists In Database | select id from person where first_name = 'Franz Allan' |
-        | Check if Exists In Database | select id from person where first_name = 'John' |
+        | Check If Exists In Database | select id from person where first_name = 'Franz Allan' |
+        | Check If Exists In Database | select id from person where first_name = 'John' |
         
         Then you will get the following:
-        | Check if Exists In Database | select id from person where first_name = 'Franz Allan' | # PASS |
-        | Check if Exists In Database | select id from person where first_name = 'John' | # FAIL |          
+        | Check If Exists In Database | select id from person where first_name = 'Franz Allan' | # PASS |
+        | Check If Exists In Database | select id from person where first_name = 'John' | # FAIL |          
         """
         if not self.query(selectStatement):
             raise AssertionError("Expected to have have at least one row from '%s' "
@@ -52,12 +52,12 @@ class Assertion(object):
         |  1 | Franz Allan | See       |
         
         When you have the following assertions in your robot
-        | Check if Not Exists In Database | select id from person where first_name = 'John' |
-        | Check if Not Exists In Database | select id from person where first_name = 'Franz Allan' |
+        | Check If Not Exists In Database | select id from person where first_name = 'John' |
+        | Check If Not Exists In Database | select id from person where first_name = 'Franz Allan' |
         
         Then you will get the following:
-        | Check if Not Exists In Database | select id from person where first_name = 'John' | # PASS |          
-        | Check if Not Exists In Database | select id from person where first_name = 'Franz Allan' | # FAIL |
+        | Check If Not Exists In Database | select id from person where first_name = 'John' | # PASS |          
+        | Check If Not Exists In Database | select id from person where first_name = 'Franz Allan' | # FAIL |
         """
         queryResults = self.query(selectStatement) 
         if queryResults:
