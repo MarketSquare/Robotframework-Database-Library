@@ -25,22 +25,25 @@ class ConnectionManager(object):
         """
         self._dbconnection = None
         
-    def connect_to_database(self, dbapiModuleName=None, dbName=None, username=None, password=None, dbConfigFile="./resources/db.cfg"):
+    def connect_to_database(self, dbapiModuleName=None, dbName=None, dbUsername=None, dbPassword=None, dbConfigFile="./resources/db.cfg"):
         """
         Loads the DB API 2.0 module given `dbapiModuleName` then uses it to 
-        connect to the database using `dbName`, `username`, and `password`. 
+        connect to the database using `dbName`, `dbUsername`, and `dbPassword`.
+        Optionally, you can specify a `dbConfigFile` wherein it will load the
+        default property values for `dbapiModuleName`, `dbName` `dbUsername` 
+        and `dbPassword`
         """
     
         config = ConfigParser.ConfigParser()
         config.read([dbConfigFile])
         
         dbapiModuleName = dbapiModuleName or config.get('default', 'dbapiModuleName')
-        dbName = dbName or config.get('default', 'db.name')
-        username = username or config.get('default', 'db.username')
-        password = password or config.get('default', 'db.password')
+        dbName = dbName or config.get('default', 'dbName')
+        dbUsername = dbUsername or config.get('default', 'dbUsername')
+        dbPassword = dbPassword or config.get('default', 'dbPassword')
         
         db_api_2 = __import__(dbapiModuleName);
-        self._dbconnection = db_api_2.connect (database=dbName, user=username, password=password)
+        self._dbconnection = db_api_2.connect (database=dbName, user=dbUsername, password=dbPassword)
         
     def disconnect_from_database(self):
         """
