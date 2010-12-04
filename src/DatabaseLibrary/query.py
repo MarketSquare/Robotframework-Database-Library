@@ -11,6 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+
 class Query(object):
     """
     Query handles all the querying done by the Database Library. 
@@ -46,6 +47,47 @@ class Query(object):
         And get the following
         See, Franz Allan
         """
-        cur = self._dbconnection.cursor()
-        cur.execute (selectStatement);
-        return cur.fetchall()
+        cur = None
+        try:
+            cur = self._dbconnection.cursor()
+            cur.execute (selectStatement);
+            allRows = cur.fetchall()
+            return allRows
+        finally :
+            if cur :
+                cur.close() 
+
+    def execute_sql_script(self, sqlScriptFileName):
+        sqlScriptFile = open(sqlScriptFileName)
+
+        cur = None
+        try:
+            cur = self._dbconnection.cursor()        
+            sqlStatement = ''
+            for line in sqlScriptFile:
+                line = line.strip()
+                if line.startswith('#'):
+                    continue
+                
+                sqlFragments = line.split(';')
+                if len(sqlFragments) == 0:
+                    sqlStatement += line + ' ';
+                else:
+                    for sqlFragment in sqlFragments:
+                        sqlFragment = sqlFragment.strip()
+                        if len(sqlFragment) == 0:
+                            continue
+                    
+                        sqlStatement += sqlFragment + ' ';
+                        
+                        cur.execute(sqlStatement)
+                        sqlStatement = ''
+
+            sqlStatement = sqlStatement.strip()    
+            if len(sqlStatement) != 0:
+                cur.execute(sqlStatement)
+                
+            self._dbconnection.commit()
+        finally:
+            if cur :
+                cur.close()
