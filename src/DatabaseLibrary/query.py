@@ -58,6 +58,50 @@ class Query(object):
                 cur.close() 
 
     def execute_sql_script(self, sqlScriptFileName):
+        """
+        Executes the content of the `sqlScriptFileName` as SQL commands. 
+        Useful for setting the database to a known state before running 
+        your tests, or clearing out your test data after running each a 
+        test. 
+        
+        SQL commands are expected to be delimited by a semi-colon (';').
+        
+        For example:
+        delete from person_employee_table;
+        delete from person_table;
+        delete from employee_table; 
+        
+        Also, the last SQL command can optionally omit its trailing semi-colon.
+        
+        For example:
+        delete from person_employee_table;
+        delete from person_table;
+        delete from employee_table
+        
+        Given this, that means you can create spread your SQL commands in several
+        lines.
+        
+        For example:
+        delete 
+          from person_employee_table;
+        delete 
+          from person_table;
+        delete 
+          from employee_table
+        
+        However, lines that starts with a number sign (`#`) are treated as a
+        commented line. Thus, none of the contents of that line will be executed.
+        
+        For example:
+        # Delete the bridging table first...
+        delete 
+          from person_employee_table;
+          # ...and then the bridged tables.
+        delete 
+          from person_table;
+        delete 
+          from employee_table
+        """
         sqlScriptFile = open(sqlScriptFileName)
 
         cur = None
@@ -70,7 +114,7 @@ class Query(object):
                     continue
                 
                 sqlFragments = line.split(';')
-                if len(sqlFragments) == 0:
+                if len(sqlFragments) == 1:
                     sqlStatement += line + ' ';
                 else:
                     for sqlFragment in sqlFragments:
