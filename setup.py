@@ -30,7 +30,7 @@ def main():
           description  = 'Database utility library for Robot Framework',
           author       = 'Franz Allan Valencia See',
           author_email = 'franz.see@gmail.com',
-          url          = 'http://code.google.com/p/franz.see/',
+          url          = 'https://github.com/franz-see/Robotframework-Database-Library',
           package_dir  = { '' : 'src'},
           packages     = ['DatabaseLibrary']
           )
