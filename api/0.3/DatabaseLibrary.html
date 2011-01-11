@@ -1,0 +1,501 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title>DatabaseLibrary</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style media="all" type="text/css">
+body {
+  background: white;
+  color: black;
+  font-size: small;
+  font-family: sans-serif;
+  padding: 0.1em 0.5em;
+}
+a.name, span.name {
+  font-style: italic;
+}
+a, a:link, a:visited {
+  color: #c30;
+}
+a:hover, a:active {
+  text-decoration: underline;
+  color: black;
+}
+div.shortcuts {
+  margin: 1em 0em;
+  font-size: 0.9em;
+}
+div.shortcuts a {
+  text-decoration: none;
+  color: black;
+}
+div.shortcuts a:hover {
+  text-decoration: underline;
+}
+table.keywords {
+  border: 2px solid black;
+  border-collapse: collapse;
+  empty-cells: show;
+  margin: 0.3em 0em;
+  width: 100%;
+}
+table.keywords th, table.keywords td {
+  border: 2px solid black;
+  padding: 0.2em;
+  vertical-align: top;
+}
+table.keywords th {
+  background: #bbb;
+  color: black;
+}
+table.keywords td.kw {
+  width: 150px;
+  font-weight: bold;
+}
+table.keywords td.arg {
+  width: 300px;
+  font-style: italic;
+}
+table.doc {
+  border: 1px solid black;
+  background: transparent;
+  border-collapse: collapse;
+  empty-cells: show;
+  font-size: 0.85em;
+}
+table.doc td {
+  border: 1px solid black;
+  padding: 0.1em 0.3em;
+  height: 1.2em;
+
+}
+#footer {
+  font-size: 0.9em;
+}
+</style>
+<style media="print" type="text/css">
+body {
+  margin: 0px 1px;
+  padding: 0px;
+  font-size: 10px;
+}
+a {
+  text-decoration: none;
+}
+</style>
+</head>
+<body>
+<h1>DatabaseLibrary</h1>
+<b>Scope:</b> global<br>
+<b>Named arguments: </b>
+supported
+
+<h2 id="introduction">Introduction</h2>
+<p>Database Library contains utilities meant for Robot Framework's usage.<br />
+<br />
+This can allow you to query your database after an action has been made to verify the results.<br />
+<br />
+This is <span class="name">compatible*</span> with any Database API Specification 2.0 module.<br />
+<br />
+References:<br />
+<br />
++ Database API Specification 2.0 - <a href="http://www.python.org/dev/peps/pep-0249/">http://www.python.org/dev/peps/pep-0249/</a><br />
+<br />
++ Lists of DB API 2.0 - <a href="http://wiki.python.org/moin/DatabaseInterfaces">http://wiki.python.org/moin/DatabaseInterfaces</a><br />
+<br />
++ Python Database Programming - <a href="http://wiki.python.org/moin/DatabaseProgramming/">http://wiki.python.org/moin/DatabaseProgramming/</a><br />
+<br />
+Notes:<br />
+<br />
+<span class="name">compatible* - or at least theoretically it should be compatible. Currently tested only with postgresql (using psycopg2).</span><br />
+<br />
+Example Usage:<br />
+<table border="1" class="doc">
+<tr>
+<td># Setup</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Connect to Database</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td># Guard assertion (verify that test started in expected state).</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Check if not exists in database</td>
+<td>select id from person where first_name = 'Franz Allan' and last_name = 'See'</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td># Drive UI to do some action</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Go To</td>
+<td><a href="http://localhost/person/form.html">http://localhost/person/form.html</a></td>
+<td></td>
+<td># From selenium library</td>
+</tr>
+<tr>
+<td>Input Text</td>
+<td>name=first_name</td>
+<td>Franz Allan</td>
+<td># From selenium library</td>
+</tr>
+<tr>
+<td>Input Text</td>
+<td>name=last_name</td>
+<td>See</td>
+<td># From selenium library</td>
+</tr>
+<tr>
+<td>Click Button</td>
+<td>Save</td>
+<td></td>
+<td># From selenium library</td>
+</tr>
+<tr>
+<td># Log results</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>@{queryResults}</td>
+<td>Query</td>
+<td>select * from person</td>
+<td></td>
+</tr>
+<tr>
+<td>Log Many</td>
+<td>@{queryResults}</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td># Verify if persisted in the database</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Check if exists in database</td>
+<td>select id from person where first_name = 'Franz Allan' and last_name = 'See'</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td># Teardown</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Disconnect from Database</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</table>
+</p>
+
+
+<h2>Shortcuts</h2>
+<div class='shortcuts'>
+<a href="#Check If Exists In Database" title="Check if any row would be returned by given the input ">Check&nbsp;If&nbsp;Exists&nbsp;In&nbsp;Database</a>
+&nbsp;&middot;&nbsp;
+<a href="#Check If Not Exists In Database" title="This is the negation of `check_if_exists_in_database`.">Check&nbsp;If&nbsp;Not&nbsp;Exists&nbsp;In&nbsp;Database</a>
+&nbsp;&middot;&nbsp;
+<a href="#Connect To Database" title="Loads the DB API 2.0 module given `dbapiModuleName` then uses it to ">Connect&nbsp;To&nbsp;Database</a>
+&nbsp;&middot;&nbsp;
+<a href="#Disconnect From Database" title="Disconnects from the database.">Disconnect&nbsp;From&nbsp;Database</a>
+&nbsp;&middot;&nbsp;
+<a href="#Execute Sql Script" title="Executes the content of the `sqlScriptFileName` as SQL commands. ">Execute&nbsp;Sql&nbsp;Script</a>
+&nbsp;&middot;&nbsp;
+<a href="#Query" title="Uses the input `selectStatement` to query for the values that ">Query</a>
+</div>
+
+<h2>Keywords</h2>
+<table border="1" class="keywords">
+<tr>
+  <th class="kw">Keyword</th>
+  <th class="arg">Arguments</th>
+  <th class="doc">Documentation</th>
+</tr>
+<tr>
+  <td class="kw"><a name="Check If Exists In Database"></a>Check If Exists In Database</td>
+  <td class="arg">selectStatement</td>
+  <td class="doc">Check if any row would be returned by given the input <span class="name">selectStatement</span>. If there are no results, then this will throw an AssertionError.<br />
+<br />
+For example, given we have a table <span class="name">person</span> with the following data:<br />
+<table border="1" class="doc">
+<tr>
+<td>id</td>
+<td>first_name</td>
+<td>last_name</td>
+</tr>
+<tr>
+<td>1</td>
+<td>Franz Allan</td>
+<td>See</td>
+</tr>
+</table>
+<br />
+When you have the following assertions in your robot<br />
+<table border="1" class="doc">
+<tr>
+<td>Check If Exists In Database</td>
+<td>select id from person where first_name = 'Franz Allan'</td>
+</tr>
+<tr>
+<td>Check If Exists In Database</td>
+<td>select id from person where first_name = 'John'</td>
+</tr>
+</table>
+<br />
+Then you will get the following:<br />
+<table border="1" class="doc">
+<tr>
+<td>Check If Exists In Database</td>
+<td>select id from person where first_name = 'Franz Allan'</td>
+<td># PASS</td>
+</tr>
+<tr>
+<td>Check If Exists In Database</td>
+<td>select id from person where first_name = 'John'</td>
+<td># FAIL</td>
+</tr>
+</table>
+</td>
+</tr>
+<tr>
+  <td class="kw"><a name="Check If Not Exists In Database"></a>Check If Not Exists In Database</td>
+  <td class="arg">selectStatement</td>
+  <td class="doc">This is the negation of <span class="name">check_if_exists_in_database</span>.<br />
+<br />
+Check if no rows would be returned by given the input <span class="name">selectStatement</span>. If there are any results, then this will throw an AssertionError.<br />
+<br />
+For example, given we have a table <span class="name">person</span> with the following data:<br />
+<table border="1" class="doc">
+<tr>
+<td>id</td>
+<td>first_name</td>
+<td>last_name</td>
+</tr>
+<tr>
+<td>1</td>
+<td>Franz Allan</td>
+<td>See</td>
+</tr>
+</table>
+<br />
+When you have the following assertions in your robot<br />
+<table border="1" class="doc">
+<tr>
+<td>Check If Not Exists In Database</td>
+<td>select id from person where first_name = 'John'</td>
+</tr>
+<tr>
+<td>Check If Not Exists In Database</td>
+<td>select id from person where first_name = 'Franz Allan'</td>
+</tr>
+</table>
+<br />
+Then you will get the following:<br />
+<table border="1" class="doc">
+<tr>
+<td>Check If Not Exists In Database</td>
+<td>select id from person where first_name = 'John'</td>
+<td># PASS</td>
+</tr>
+<tr>
+<td>Check If Not Exists In Database</td>
+<td>select id from person where first_name = 'Franz Allan'</td>
+<td># FAIL</td>
+</tr>
+</table>
+</td>
+</tr>
+<tr>
+  <td class="kw"><a name="Connect To Database"></a>Connect To Database</td>
+  <td class="arg">dbapiModuleName=None, dbName=None, dbUsername=None, dbPassword=None, dbConfigFile=./resources/db.cfg</td>
+  <td class="doc">Loads the DB API 2.0 module given <span class="name">dbapiModuleName</span> then uses it to connect to the database using <span class="name">dbName</span>, <span class="name">dbUsername</span>, and <span class="name">dbPassword</span>.<br />
+<br />
+Optionally, you can specify a <span class="name">dbConfigFile</span> wherein it will load the default property values for <span class="name">dbapiModuleName</span>, <span class="name">dbName</span> <span class="name">dbUsername</span> and <span class="name">dbPassword</span> (note: specifying <span class="name">dbapiModuleName</span>, <span class="name">dbName</span> <span class="name">dbUsername</span> or <span class="name">dbPassword</span> directly will override the properties of the same key in <span class="name">dbConfigFile</span>). If no <span class="name">dbConfigFile</span> is specified, it defaults to <span class="name">./resources/db.cfg</span>.<br />
+<br />
+The <span class="name">dbConfigFile</span> is useful if you don't want to check into your SCM your database credentials.<br />
+<br />
+Example usage:<br />
+<table border="1" class="doc">
+<tr>
+<td># explicitly specifies all db property values</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Connect To Database</td>
+<td>psycopg2</td>
+<td>my_db</td>
+<td>postgres</td>
+<td>s3cr3t</td>
+</tr>
+</table>
+<br />
+<table border="1" class="doc">
+<tr>
+<td># loads all property values from default.cfg</td>
+<td></td>
+</tr>
+<tr>
+<td>Connect To Database</td>
+<td>dbConfigFile=default.cfg</td>
+</tr>
+</table>
+<br />
+<table border="1" class="doc">
+<tr>
+<td># loads all property values from ./resources/db.cfg</td>
+</tr>
+<tr>
+<td>Connect To Database</td>
+</tr>
+</table>
+<br />
+<table border="1" class="doc">
+<tr>
+<td># uses explicit <span class="name">dbapiModuleName</span> and <span class="name">dbName</span> but uses the <span class="name">dbUsername</span> and <span class="name">dbPassword</span> in 'default.cfg'</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Connect To Database</td>
+<td>psycopg2</td>
+<td>my_db_test</td>
+<td>dbConfigFile=default.cfg</td>
+</tr>
+</table>
+<br />
+<table border="1" class="doc">
+<tr>
+<td># uses explicit <span class="name">dbapiModuleName</span> and <span class="name">dbName</span> but uses the <span class="name">dbUsername</span> and <span class="name">dbPassword</span> in './resources/db.cfg'</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Connect To Database</td>
+<td>psycopg2</td>
+<td>my_db_test</td>
+</tr>
+</table>
+</td>
+</tr>
+<tr>
+  <td class="kw"><a name="Disconnect From Database"></a>Disconnect From Database</td>
+  <td class="arg"></td>
+  <td class="doc">Disconnects from the database.<br />
+<br />
+For example:<br />
+<table border="1" class="doc">
+<tr>
+<td>Disconnect From Database</td>
+<td># disconnects from current connection to the database</td>
+</tr>
+</table>
+</td>
+</tr>
+<tr>
+  <td class="kw"><a name="Execute Sql Script"></a>Execute Sql Script</td>
+  <td class="arg">sqlScriptFileName</td>
+  <td class="doc">Executes the content of the <span class="name">sqlScriptFileName</span> as SQL commands. Useful for setting the database to a known state before running your tests, or clearing out your test data after running each a test.<br />
+<br />
+SQL commands are expected to be delimited by a semi-colon (';').<br />
+<br />
+For example: delete from person_employee_table; delete from person_table; delete from employee_table;<br />
+<br />
+Also, the last SQL command can optionally omit its trailing semi-colon.<br />
+<br />
+For example: delete from person_employee_table; delete from person_table; delete from employee_table<br />
+<br />
+Given this, that means you can create spread your SQL commands in several lines.<br />
+<br />
+For example: delete from person_employee_table; delete from person_table; delete from employee_table<br />
+<br />
+However, lines that starts with a number sign (<span class="name">#</span>) are treated as a commented line. Thus, none of the contents of that line will be executed.<br />
+<br />
+For example: # Delete the bridging table first... delete from person_employee_table; # ...and then the bridged tables. delete from person_table; delete from employee_table</td>
+</tr>
+<tr>
+  <td class="kw"><a name="Query"></a>Query</td>
+  <td class="arg">selectStatement</td>
+  <td class="doc">Uses the input <span class="name">selectStatement</span> to query for the values that will be returned as a list of tuples.<br />
+<br />
+Tip: Unless you want to log all column values of the specified rows, try specifying the column names in your select statements as much as possible to prevent any unnecessary surprises with schema changes and to easily see what your [] indexing is trying to retrieve (i.e. instead of <span class="name">"select * from my_table"</span>, try <span class="name">"select id, col_1, col_2 from my_table"</span>).<br />
+<br />
+For example, given we have a table <span class="name">person</span> with the following data:<br />
+<table border="1" class="doc">
+<tr>
+<td>id</td>
+<td>first_name</td>
+<td>last_name</td>
+</tr>
+<tr>
+<td>1</td>
+<td>Franz Allan</td>
+<td>See</td>
+</tr>
+</table>
+<br />
+When you do the following:<br />
+<table border="1" class="doc">
+<tr>
+<td>@{queryResults}</td>
+<td>Query</td>
+<td>select * from person</td>
+</tr>
+<tr>
+<td>Log Many</td>
+<td>@{queryResults}</td>
+<td></td>
+</tr>
+</table>
+<br />
+You will get the following: [1, 'Franz Allan', 'See']<br />
+<br />
+Also, you can do something like this:<br />
+<table border="1" class="doc">
+<tr>
+<td>${queryResults}</td>
+<td>Query</td>
+<td>select first_name, last_name from person</td>
+</tr>
+<tr>
+<td>Log</td>
+<td>${queryResults[0][1]}, ${queryResults[0][0]}</td>
+<td></td>
+</tr>
+</table>
+<br />
+And get the following See, Franz Allan</td>
+</tr>
+</table>
+<p id="footer">
+Altogether 6 keywords.<br />
+Generated by <a href="http://code.google.com/p/robotframework/wiki/LibraryDocumentationTool">libdoc.py</a>
+on 2011-01-12 04:41:28.
+</p>
+</body>
+</html>
