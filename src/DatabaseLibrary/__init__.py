@@ -16,7 +16,7 @@ from connection_manager import ConnectionManager
 from query import Query
 from assertion import Assertion
 
-__version__ = '0.2'
+__version__ = '0.3'
 
 class DatabaseLibrary(ConnectionManager, Query, Assertion):
     """
