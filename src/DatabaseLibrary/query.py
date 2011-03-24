@@ -55,7 +55,71 @@ class Query(object):
             return allRows
         finally :
             if cur :
-                cur.close() 
+                self._dbconnection.rollback() 
+
+    def row_count(self, selectStatement):
+        """
+        Uses the input `selectStatement` to query the database and returns
+        the number of rows from the query.
+        
+        For example, given we have a table `person` with the following data:
+        | id | first_name  | last_name |
+        |  1 | Franz Allan | See       |
+        |  2 | Jerry       | Schneider |
+        
+        When you do the following:
+        | ${rowCount} | Row Count | select * from person |
+        | Log | ${rowCount} |
+        
+        You will get the following:
+        2
+        
+        Also, you can do something like this:
+        | ${rowCount} | Row Count | select * from person where id = 2 |
+        | Log | ${rowCount} |
+        
+        And get the following
+        1
+        """
+        cur = None
+        try:
+            cur = self._dbconnection.cursor()
+            cur.execute (selectStatement);
+            rowCount = cur.rowcount
+            return rowCount
+        finally :
+            if cur :
+                self._dbconnection.rollback() 
+                #cur.close() 
+
+    def description(self, selectStatement):
+        """
+        Uses the input `selectStatement` to query a table in the db which
+        will be used to determine the description.
+                
+        For example, given we have a table `person` with the following data:
+        | id | first_name  | last_name |
+        |  1 | Franz Allan | See       |
+        
+        When you do the following:
+        | @{queryResults} | Description | select * from person |
+        | Log Many | @{queryResults} |
+        
+        You will get the following:
+        [Column(name='id', type_code=1043, display_size=None, internal_size=255, precision=None, scale=None, null_ok=None)]
+        [Column(name='first_name', type_code=1043, display_size=None, internal_size=255, precision=None, scale=None, null_ok=None)]
+        [Column(name='last_name', type_code=1043, display_size=None, internal_size=255, precision=None, scale=None, null_ok=None)]
+        """
+        cur = None
+        try:
+            cur = self._dbconnection.cursor()
+            cur.execute (selectStatement);
+            description = cur.description
+            return description
+        finally :
+            if cur :
+                self._dbconnection.rollback() 
+                #cur.close() 
 
     def execute_sql_script(self, sqlScriptFileName):
         """
@@ -134,4 +198,4 @@ class Query(object):
             self._dbconnection.commit()
         finally:
             if cur :
-                cur.close()
+                self._dbconnection.rollback() 
