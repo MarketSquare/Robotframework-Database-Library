@@ -90,7 +90,6 @@ class Query(object):
         finally :
             if cur :
                 self._dbconnection.rollback() 
-                #cur.close() 
 
     def description(self, selectStatement):
         """
@@ -119,7 +118,6 @@ class Query(object):
         finally :
             if cur :
                 self._dbconnection.rollback() 
-                #cur.close() 
 
     def execute_sql_script(self, sqlScriptFileName):
         """
