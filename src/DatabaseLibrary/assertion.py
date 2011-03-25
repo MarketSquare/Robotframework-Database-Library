@@ -154,3 +154,23 @@ class Assertion(object):
         if (num_rows >= int(numRows.encode('ascii'))):
             raise AssertionError("Expected less rows to be returned from '%s' "
                                  "than the returned rows of %s" % (selectStatement, num_rows))
+                                 
+    def table_must_exist(self,tableName):
+        """
+        Check if the table given exists in the database.
+        
+        For example, given we have a table `person` in a database
+        
+        When you do the following:
+        | Table Must Exist | person |
+
+        Then you will get the following:
+        | Table Must Exist | person | # PASS |
+        | Table Must Exist | first_name | # FAIL |
+        """
+        selectStatement = ("select * from information_schema.tables where table_name='%s'" % tableName)
+        num_rows = self.row_count(selectStatement)
+        if (num_rows == 0):
+            raise AssertionError("Table '%s' does not exist in the db" % tableName)
+
+
