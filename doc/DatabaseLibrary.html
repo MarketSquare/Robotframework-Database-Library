@@ -219,11 +219,25 @@ Example Usage:<br />
 &nbsp;&middot;&nbsp;
 <a href="#Connect To Database" title="Loads the DB API 2.0 module given `dbapiModuleName` then uses it to ">Connect&nbsp;To&nbsp;Database</a>
 &nbsp;&middot;&nbsp;
+<a href="#Description" title="Uses the input `selectStatement` to query a table in the db which">Description</a>
+&nbsp;&middot;&nbsp;
 <a href="#Disconnect From Database" title="Disconnects from the database.">Disconnect&nbsp;From&nbsp;Database</a>
 &nbsp;&middot;&nbsp;
 <a href="#Execute Sql Script" title="Executes the content of the `sqlScriptFileName` as SQL commands. ">Execute&nbsp;Sql&nbsp;Script</a>
 &nbsp;&middot;&nbsp;
 <a href="#Query" title="Uses the input `selectStatement` to query for the values that ">Query</a>
+&nbsp;&middot;&nbsp;
+<a href="#Row Count" title="Uses the input `selectStatement` to query the database and returns">Row&nbsp;Count</a>
+&nbsp;&middot;&nbsp;
+<a href="#Row Count Is 0" title="Check if any rows are returned from the submitted `selectStatement`.">Row&nbsp;Count&nbsp;Is&nbsp;0</a>
+&nbsp;&middot;&nbsp;
+<a href="#Row Count Is Equal To X" title="Check if the number of rows returned from `selectStatement` is equal to">Row&nbsp;Count&nbsp;Is&nbsp;Equal&nbsp;To&nbsp;X</a>
+&nbsp;&middot;&nbsp;
+<a href="#Row Count Is Greater Than X" title="Check if the number of rows returned from `selectStatement` is greater">Row&nbsp;Count&nbsp;Is&nbsp;Greater&nbsp;Than&nbsp;X</a>
+&nbsp;&middot;&nbsp;
+<a href="#Row Count Is Less Than X" title="Check if the number of rows returned from `selectStatement` is less">Row&nbsp;Count&nbsp;Is&nbsp;Less&nbsp;Than&nbsp;X</a>
+&nbsp;&middot;&nbsp;
+<a href="#Table Must Exist" title="Check if the table given exists in the database.">Table&nbsp;Must&nbsp;Exist</a>
 </div>
 
 <h2>Keywords</h2>
@@ -329,7 +343,7 @@ Then you will get the following:<br />
 </tr>
 <tr>
   <td class="kw"><a name="Connect To Database"></a>Connect To Database</td>
-  <td class="arg">dbapiModuleName=None, dbName=None, dbUsername=None, dbPassword=None, dbConfigFile=./resources/db.cfg</td>
+  <td class="arg">dbapiModuleName=None, dbName=None, dbUsername=None, dbPassword=None, dbHost=localhost, dbPort=5432, dbConfigFile=./resources/db.cfg</td>
   <td class="doc">Loads the DB API 2.0 module given <span class="name">dbapiModuleName</span> then uses it to connect to the database using <span class="name">dbName</span>, <span class="name">dbUsername</span>, and <span class="name">dbPassword</span>.<br />
 <br />
 Optionally, you can specify a <span class="name">dbConfigFile</span> wherein it will load the default property values for <span class="name">dbapiModuleName</span>, <span class="name">dbName</span> <span class="name">dbUsername</span> and <span class="name">dbPassword</span> (note: specifying <span class="name">dbapiModuleName</span>, <span class="name">dbName</span> <span class="name">dbUsername</span> or <span class="name">dbPassword</span> directly will override the properties of the same key in <span class="name">dbConfigFile</span>). If no <span class="name">dbConfigFile</span> is specified, it defaults to <span class="name">./resources/db.cfg</span>.<br />
@@ -340,19 +354,9 @@ Example usage:<br />
 <table border="1" class="doc">
 <tr>
 <td># explicitly specifies all db property values</td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td>Connect To Database</td>
-<td>psycopg2</td>
-<td>my_db</td>
-<td>postgres</td>
-<td>s3cr3t</td>
 </tr>
 </table>
+| Connect To Database | psycopg2 | my_db | postgres | s3cr3t | tiger.foobar.com | 5432<br />
 <br />
 <table border="1" class="doc">
 <tr>
@@ -402,6 +406,41 @@ Example usage:<br />
 </tr>
 </table>
 </td>
+</tr>
+<tr>
+  <td class="kw"><a name="Description"></a>Description</td>
+  <td class="arg">selectStatement</td>
+  <td class="doc">Uses the input <span class="name">selectStatement</span> to query a table in the db which will be used to determine the description.<br />
+<br />
+For example, given we have a table <span class="name">person</span> with the following data:<br />
+<table border="1" class="doc">
+<tr>
+<td>id</td>
+<td>first_name</td>
+<td>last_name</td>
+</tr>
+<tr>
+<td>1</td>
+<td>Franz Allan</td>
+<td>See</td>
+</tr>
+</table>
+<br />
+When you do the following:<br />
+<table border="1" class="doc">
+<tr>
+<td>@{queryResults}</td>
+<td>Description</td>
+<td>select * from person</td>
+</tr>
+<tr>
+<td>Log Many</td>
+<td>@{queryResults}</td>
+<td></td>
+</tr>
+</table>
+<br />
+You will get the following: [Column(name='id', type_code=1043, display_size=None, internal_size=255, precision=None, scale=None, null_ok=None)] [Column(name='first_name', type_code=1043, display_size=None, internal_size=255, precision=None, scale=None, null_ok=None)] [Column(name='last_name', type_code=1043, display_size=None, internal_size=255, precision=None, scale=None, null_ok=None)]</td>
 </tr>
 <tr>
   <td class="kw"><a name="Disconnect From Database"></a>Disconnect From Database</td>
@@ -491,11 +530,308 @@ Also, you can do something like this:<br />
 <br />
 And get the following See, Franz Allan</td>
 </tr>
+<tr>
+  <td class="kw"><a name="Row Count"></a>Row Count</td>
+  <td class="arg">selectStatement</td>
+  <td class="doc">Uses the input <span class="name">selectStatement</span> to query the database and returns the number of rows from the query.<br />
+<br />
+For example, given we have a table <span class="name">person</span> with the following data:<br />
+<table border="1" class="doc">
+<tr>
+<td>id</td>
+<td>first_name</td>
+<td>last_name</td>
+</tr>
+<tr>
+<td>1</td>
+<td>Franz Allan</td>
+<td>See</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Jerry</td>
+<td>Schneider</td>
+</tr>
+</table>
+<br />
+When you do the following:<br />
+<table border="1" class="doc">
+<tr>
+<td>${rowCount}</td>
+<td>Row Count</td>
+<td>select * from person</td>
+</tr>
+<tr>
+<td>Log</td>
+<td>${rowCount}</td>
+<td></td>
+</tr>
+</table>
+<br />
+You will get the following: 2<br />
+<br />
+Also, you can do something like this:<br />
+<table border="1" class="doc">
+<tr>
+<td>${rowCount}</td>
+<td>Row Count</td>
+<td>select * from person where id = 2</td>
+</tr>
+<tr>
+<td>Log</td>
+<td>${rowCount}</td>
+<td></td>
+</tr>
+</table>
+<br />
+And get the following 1</td>
+</tr>
+<tr>
+  <td class="kw"><a name="Row Count Is 0"></a>Row Count Is 0</td>
+  <td class="arg">selectStatement</td>
+  <td class="doc">Check if any rows are returned from the submitted <span class="name">selectStatement</span>. If there are, then this will throw an AssertionError.<br />
+<br />
+For example, given we have a table <span class="name">person</span> with the following data:<br />
+<table border="1" class="doc">
+<tr>
+<td>id</td>
+<td>first_name</td>
+<td>last_name</td>
+</tr>
+<tr>
+<td>1</td>
+<td>Franz Allan</td>
+<td>See</td>
+</tr>
+</table>
+<br />
+When you have the following assertions in your robot<br />
+<table border="1" class="doc">
+<tr>
+<td>Row Count is 0</td>
+<td>select id from person where first_name = 'Franz Allan'</td>
+</tr>
+<tr>
+<td>Row Count is 0</td>
+<td>select id from person where first_name = 'John'</td>
+</tr>
+</table>
+<br />
+Then you will get the following:<br />
+<table border="1" class="doc">
+<tr>
+<td>Row Count is 0</td>
+<td>select id from person where first_name = 'Franz Allan'</td>
+<td># FAIL</td>
+</tr>
+<tr>
+<td>Row Count is 0</td>
+<td>select id from person where first_name = 'John'</td>
+<td># PASS</td>
+</tr>
+</table>
+</td>
+</tr>
+<tr>
+  <td class="kw"><a name="Row Count Is Equal To X"></a>Row Count Is Equal To X</td>
+  <td class="arg">selectStatement, numRows</td>
+  <td class="doc">Check if the number of rows returned from <span class="name">selectStatement</span> is equal to the value submitted. If not, then this will throw an AssertionError.<br />
+<br />
+For example, given we have a table <span class="name">person</span> with the following data:<br />
+<table border="1" class="doc">
+<tr>
+<td>id</td>
+<td>first_name</td>
+<td>last_name</td>
+</tr>
+<tr>
+<td>1</td>
+<td>Franz Allan</td>
+<td>See</td>
+</tr>
+<tr>
+<td>1</td>
+<td>Jerry</td>
+<td>Schneider</td>
+</tr>
+</table>
+<br />
+When you have the following assertions in your robot<br />
+<table border="1" class="doc">
+<tr>
+<td>Row Count Is Equal To X</td>
+<td>select id from person</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Row Count Is Equal To X</td>
+<td>select id from person where first_name = 'John'</td>
+<td>0</td>
+</tr>
+</table>
+<br />
+Then you will get the following:<br />
+<table border="1" class="doc">
+<tr>
+<td>Row Count Is Equal To X</td>
+<td>select id from person</td>
+<td>1</td>
+<td># FAIL</td>
+</tr>
+<tr>
+<td>Row Count Is Equal To X</td>
+<td>select id from person where first_name = 'John'</td>
+<td>0</td>
+<td># PASS</td>
+</tr>
+</table>
+</td>
+</tr>
+<tr>
+  <td class="kw"><a name="Row Count Is Greater Than X"></a>Row Count Is Greater Than X</td>
+  <td class="arg">selectStatement, numRows</td>
+  <td class="doc">Check if the number of rows returned from <span class="name">selectStatement</span> is greater than the value submitted. If not, then this will throw an AssertionError.<br />
+<br />
+For example, given we have a table <span class="name">person</span> with the following data:<br />
+<table border="1" class="doc">
+<tr>
+<td>id</td>
+<td>first_name</td>
+<td>last_name</td>
+</tr>
+<tr>
+<td>1</td>
+<td>Franz Allan</td>
+<td>See</td>
+</tr>
+<tr>
+<td>1</td>
+<td>Jerry</td>
+<td>Schneider</td>
+</tr>
+</table>
+<br />
+When you have the following assertions in your robot<br />
+<table border="1" class="doc">
+<tr>
+<td>Row Count Is Greater Than X</td>
+<td>select id from person</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Row Count Is Greater Than X</td>
+<td>select id from person where first_name = 'John'</td>
+<td>0</td>
+</tr>
+</table>
+<br />
+Then you will get the following:<br />
+<table border="1" class="doc">
+<tr>
+<td>Row Count Is Greater Than X</td>
+<td>select id from person</td>
+<td>1</td>
+<td># PASS</td>
+</tr>
+<tr>
+<td>Row Count Is Greater Than X</td>
+<td>select id from person where first_name = 'John'</td>
+<td>0</td>
+<td># FAIL</td>
+</tr>
+</table>
+</td>
+</tr>
+<tr>
+  <td class="kw"><a name="Row Count Is Less Than X"></a>Row Count Is Less Than X</td>
+  <td class="arg">selectStatement, numRows</td>
+  <td class="doc">Check if the number of rows returned from <span class="name">selectStatement</span> is less than the value submitted. If not, then this will throw an AssertionError.<br />
+<br />
+For example, given we have a table <span class="name">person</span> with the following data:<br />
+<table border="1" class="doc">
+<tr>
+<td>id</td>
+<td>first_name</td>
+<td>last_name</td>
+</tr>
+<tr>
+<td>1</td>
+<td>Franz Allan</td>
+<td>See</td>
+</tr>
+<tr>
+<td>1</td>
+<td>Jerry</td>
+<td>Schneider</td>
+</tr>
+</table>
+<br />
+When you have the following assertions in your robot<br />
+<table border="1" class="doc">
+<tr>
+<td>Row Count Is Less Than X</td>
+<td>select id from person</td>
+<td>3</td>
+</tr>
+<tr>
+<td>Row Count Is Less Than X</td>
+<td>select id from person where first_name = 'John'</td>
+<td>1</td>
+</tr>
+</table>
+<br />
+Then you will get the following:<br />
+<table border="1" class="doc">
+<tr>
+<td>Row Count Is Less Than X</td>
+<td>select id from person</td>
+<td>3</td>
+<td># PASS</td>
+</tr>
+<tr>
+<td>Row Count Is Less Than X</td>
+<td>select id from person where first_name = 'John'</td>
+<td>1</td>
+<td># FAIL</td>
+</tr>
+</table>
+</td>
+</tr>
+<tr>
+  <td class="kw"><a name="Table Must Exist"></a>Table Must Exist</td>
+  <td class="arg">tableName</td>
+  <td class="doc">Check if the table given exists in the database.<br />
+<br />
+For example, given we have a table <span class="name">person</span> in a database<br />
+<br />
+When you do the following:<br />
+<table border="1" class="doc">
+<tr>
+<td>Table Must Exist</td>
+<td>person</td>
+</tr>
+</table>
+<br />
+Then you will get the following:<br />
+<table border="1" class="doc">
+<tr>
+<td>Table Must Exist</td>
+<td>person</td>
+<td># PASS</td>
+</tr>
+<tr>
+<td>Table Must Exist</td>
+<td>first_name</td>
+<td># FAIL</td>
+</tr>
+</table>
+</td>
+</tr>
 </table>
 <p id="footer">
-Altogether 6 keywords.<br />
+Altogether 13 keywords.<br />
 Generated by <a href="http://code.google.com/p/robotframework/wiki/LibraryDocumentationTool">libdoc.py</a>
-on 2011-01-12 04:41:28.
+on 2011-03-27 17:24:51.
 </p>
 </body>
 </html>

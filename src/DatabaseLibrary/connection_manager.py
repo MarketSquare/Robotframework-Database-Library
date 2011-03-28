@@ -25,7 +25,7 @@ class ConnectionManager(object):
         """
         self._dbconnection = None
         
-    def connect_to_database(self, dbapiModuleName=None, dbName=None, dbUsername=None, dbPassword=None, dbHost=None, dbPort="5432", dbConfigFile="./resources/db.cfg"):
+    def connect_to_database(self, dbapiModuleName=None, dbName=None, dbUsername=None, dbPassword=None, dbHost='localhost', dbPort="5432", dbConfigFile="./resources/db.cfg"):
         """
         Loads the DB API 2.0 module given `dbapiModuleName` then uses it to 
         connect to the database using `dbName`, `dbUsername`, and `dbPassword`.
