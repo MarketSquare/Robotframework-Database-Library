@@ -94,7 +94,7 @@ class Assertion(object):
         For example, given we have a table `person` with the following data:
         | id | first_name  | last_name |
         |  1 | Franz Allan | See       |
-        |  1 | Jerry       | Schneider |
+        |  2 | Jerry       | Schneider |
         
         When you have the following assertions in your robot
         | Row Count Is Equal To X | select id from person | 1 |
@@ -117,7 +117,7 @@ class Assertion(object):
         For example, given we have a table `person` with the following data:
         | id | first_name  | last_name |
         |  1 | Franz Allan | See       |
-        |  1 | Jerry       | Schneider |
+        |  2 | Jerry       | Schneider |
         
         When you have the following assertions in your robot
         | Row Count Is Greater Than X | select id from person | 1 |
@@ -140,7 +140,7 @@ class Assertion(object):
         For example, given we have a table `person` with the following data:
         | id | first_name  | last_name |
         |  1 | Franz Allan | See       |
-        |  1 | Jerry       | Schneider |
+        |  2 | Jerry       | Schneider |
         
         When you have the following assertions in your robot
         | Row Count Is Less Than X | select id from person | 3 |
