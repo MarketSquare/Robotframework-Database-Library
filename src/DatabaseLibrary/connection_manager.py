@@ -72,6 +72,24 @@ class ConnectionManager(object):
             self._dbconnection = db_api_2.connect (db=dbName, user=dbUsername, passwd=dbPassword, host=dbHost, port=dbPort)
         else:
             self._dbconnection = db_api_2.connect (database=dbName, user=dbUsername, password=dbPassword, host=dbHost, port=dbPort)
+            
+    def connect_to_database_using_custom_params(self, dbapiModuleName=None, db_connect_string=''):
+        """
+        Loads the DB API 2.0 module given `dbapiModuleName` then uses it to 
+        connect to the database using the map string `db_custom_param_string`.
+        
+        Example usage:
+        | # for psycopg2 |
+        | Connect To Database Using Custom Params | psycopg2 | "database='my_db_test', user='postgres', password='s3cr3t', host='tiger.foobar.com', port=5432" |
+        
+        | # for JayDeBeApi | 
+        | Connect To Database Using Custom Params | JayDeBeApi | "'oracle.jdbc.driver.OracleDriver', 'my_db_test', 'super_admin', 's3cr3t'" |
+        """
+        db_api_2 = __import__(dbapiModuleName);
+        
+        db_connect_string = 'db_api_2.connect(%s)' % db_connect_string
+        
+        self._dbconnection = eval(db_connect_string)
         
     def disconnect_from_database(self):
         """
