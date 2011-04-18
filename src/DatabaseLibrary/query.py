@@ -119,6 +119,33 @@ class Query(object):
             if cur :
                 self._dbconnection.rollback() 
 
+    def delete_all_rows_from_table(self, tableName):
+        """
+        Delete all the rows within a given table.
+        
+        For example, given we have a table `person` in a database
+        
+        When you do the following:
+        | Delete All Rows From Table | person |
+
+        If all the rows can be successfully deleted, then you will get:
+        | Delete All Rows From Table | person | # PASS |
+        If the table doesn't exist or all the data can't be deleted, then you
+        will get:
+        | Delete All Rows From Table | first_name | # FAIL |
+        """
+        cur = None
+        selectStatement = ("delete from %s;" % tableName)
+        try:
+            cur = self._dbconnection.cursor()
+            result = cur.execute(selectStatement);
+            if result is not None:
+                return result.fetchall();
+            self._dbconnection.commit()
+        finally :
+            if cur :
+                self._dbconnection.rollback() 
+
     def execute_sql_script(self, sqlScriptFileName):
         """
         Executes the content of the `sqlScriptFileName` as SQL commands. 
