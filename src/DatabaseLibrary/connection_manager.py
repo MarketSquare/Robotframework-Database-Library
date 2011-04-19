@@ -91,6 +91,31 @@ class ConnectionManager(object):
         
         self._dbconnection = eval(db_connect_string)
         
+    def connect_to_mongodb(self, dbHost='localhost', dbPort=27017, dbPoolSize=None, dbAutoStart=None, dbTimeout=None, dbSlaveOkay=False, dbNetworkTimeout=None, dbDocClass=dict, dbTZAware=False):
+        #class pymongo.connection.Connection([host='localhost'[, port=27017[, pool_size=None[, auto_start_request=None[, timeout=None[, slave_okay=False[, network_timeout=None[, document_class=dict[, tz_aware=False]]]]]]]]])
+        """
+        Loads pymongo and connects to the MongoDB host using parameters submitted.
+        
+        Example usage:
+        | # To connect to foo.bar.org's MongoDB service on port 27017 |
+        | Connect To MongoDB | foo.bar.org | ${27017} |
+        
+        """
+        dbapiModuleName = 'pymongo'
+        db_api_2 = __import__(dbapiModuleName);
+        
+        dbPort = int(dbPort)
+        print "host is               [ %s ]" % dbHost
+        print "port is               [ %s ]" % dbPort
+        print "pool_size is          [ %s ]" % dbPoolSize
+        print "auto_start_request is [ %s ]" % dbAutoStart
+        print "timeout is            [ %s ]" % dbTimeout
+        print "slave_okay is         [ %s ]" % dbSlaveOkay
+        print "document_class is     [ %s ]" % dbDocClass
+        print "tz_aware is           [ %s ]" % dbTZAware
+        
+        self._dbconnection = db_api_2.connection.Connection (host=dbHost, port=dbPort, pool_size=dbPoolSize, auto_start_request=dbAutoStart, timeout=dbTimeout, slave_okay=dbSlaveOkay, network_timeout=dbNetworkTimeout, document_class=dbDocClass, tz_aware=dbTZAware);
+        
     def disconnect_from_database(self):
         """
         Disconnects from the database.
@@ -99,4 +124,13 @@ class ConnectionManager(object):
         | Disconnect From Database | # disconnects from current connection to the database | 
         """
         self._dbconnection.close()
+        
+    def disconnect_from_mongodb(self):
+        """
+        Disconnects from the MongoDB server.
+        
+        For example:
+        | Disconnect From MongoDB | # disconnects from current connection to the MongoDB server | 
+        """
+        self._dbconnection.disconnect()
         
