@@ -1,6 +1,5 @@
 *** Settings ***
-Resource        ../iplant_resources.txt
-Library         MongoDBLibrary
+Library         DatabaseLibrary
 
 *** Variables ***
 ${MDBHost}  localhost
