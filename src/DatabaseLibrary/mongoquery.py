@@ -51,8 +51,6 @@ class MongoQuery(object):
         db = None
         try:
             dbName = str(dbName)
-            #print "dbName is [ %s ]" % dbName
-            #print "dbName is [ %s ]" % type(dbName)
             db = self._dbconnection['%s' % (dbName,)]
             allCollections = db.collection_names()
             return allCollections
@@ -73,10 +71,6 @@ class MongoQuery(object):
         cur = None
         try:
             dbDelName = str(dbDelName)
-            #print "dbDelName is [ %s ]" % dbDelName
-            #print "dbDelName is [ %s ]" % type(dbDelName)
-            #allResults = self._dbconnection.drop_database('%s' % (dbDelName))
-            #return allResults
             self._dbconnection.drop_database('%s' % (dbDelName))
         finally :
             if cur :
@@ -95,10 +89,6 @@ class MongoQuery(object):
         db = None
         try:
             dbName = str(dbName)
-            #print "dbName is     [ %s ]" % dbName
-            #print "dbName is     [ %s ]" % type(dbName)
-            #print "dbCollName is [ %s ]" % dbCollName
-            #print "dbCollName is [ %s ]" % type(dbCollName)
             db = self._dbconnection['%s' % (dbName,)]
             db.drop_collection('%s' % (dbCollName))
         finally :
@@ -118,10 +108,6 @@ class MongoQuery(object):
         try:
             dbName = str(dbName)
             dbCollName = str(dbCollName)
-            #print "dbName is     [ %s ]" % dbName
-            #print "dbName is     [ %s ]" % type(dbName)
-            #print "dbCollName is [ %s ]" % dbCollName
-            #print "dbCollName is [ %s ]" % type(dbCollName)
             db = self._dbconnection['%s' % (dbName,)]
             allResults = db.validate_collection('%s' % dbCollName)
             return allResults
@@ -141,13 +127,8 @@ class MongoQuery(object):
         try:
             dbName = str(dbName)
             dbCollName = str(dbCollName)
-            #print "dbName is     [ %s ]" % dbName
-            #print "dbName is     [ %s ]" % type(dbName)
-            #print "dbCollName is [ %s ]" % dbCollName
-            #print "dbCollName is [ %s ]" % type(dbCollName)
             db = self._dbconnection['%s' % (dbName,)]
             coll = db['%s' % (dbCollName)]
-            #print "coll is       [ %s ]" % coll
             count = coll.count()
             return count
         finally :
@@ -175,23 +156,13 @@ class MongoQuery(object):
         db = None
         try:
             dbName = str(dbName)
-            #print "dbName is             [ %s ]" % dbName
-            #print "dbName is             [ %s ]" % type(dbName)
             dbCollName = str(dbCollName)
-            #print "dbCollName is         [ %s ]" % dbCollName
-            #print "dbCollName is         [ %s ]" % type(dbCollName)
             recordJSON = dict(json.loads(recordJSON))
             if recordJSON.has_key('_id'):
                 recordJSON['_id']=ObjectId(recordJSON['_id'])
-            #print "recordJSON is         [ %s ]" % recordJSON
-            #print "recordJSON is         [ %s ]" % type(recordJSON)
             db = self._dbconnection['%s' % (dbName,)]
             coll = db['%s' % (dbCollName)]
-            #print "coll is               [ %s ]" % coll
-            #print "type of coll is       [ %s ]" % type(coll)
             allResults = coll.save(recordJSON)
-            #print "allResults is         [ %s ]" % allResults
-            #print "type of allResults is [ %s ]" % type(allResults)
             return allResults
         finally :
             if db :
@@ -240,16 +211,8 @@ class MongoQuery(object):
             dbName = str(dbName)
             dbCollName = str(dbCollName)
             recordJSON = dict(json.loads(recordJSON))
-            #print "dbName is       [ %s ]" % dbName
-            #print "dbName is       [ %s ]" % type(dbName)
-            #print "dbCollName is   [ %s ]" % dbCollName
-            #print "dbCollName is   [ %s ]" % type(dbCollName)
-            #print "recordJSON is   [ %s ]" % recordJSON
-            #print "recordJSON is   [ %s ]" % type(recordJSON)
             db = self._dbconnection['%s' % (dbName,)]
             coll = db['%s' % (dbCollName)]
-            #print "coll is         [ %s ]" % coll
-            #print "type of coll is [ %s ]" % type(coll)
             for d in coll.find(recordJSON):
                 results = '%s%s' % (results, d.items())
             return results
@@ -279,22 +242,12 @@ class MongoQuery(object):
         db = None
         try:
             dbName = str(dbName)
-            #print "dbName is       [ %s ]" % dbName
-            #print "dbName is       [ %s ]" % type(dbName)
             dbCollName = str(dbCollName)
-            #print "dbCollName is   [ %s ]" % dbCollName
-            #print "dbCollName is   [ %s ]" % type(dbCollName)
-            #print "recordJSON is   [ %s ]" % recordJSON
-            #print "recordJSON is   [ %s ]" % type(recordJSON)
             recordJSON = json.loads(recordJSON)
             if recordJSON.has_key('_id'):
                 recordJSON['_id']=ObjectId(recordJSON['_id'])
-            #print "recordJSON is   [ %s ]" % recordJSON
-            #print "recordJSON is   [ %s ]" % type(recordJSON)
             db = self._dbconnection['%s' % (dbName,)]
             coll = db['%s' % (dbCollName)]
-            #print "coll is         [ %s ]" % coll
-            #print "type of coll is [ %s ]" % type(coll)
             allResults = coll.remove(recordJSON)
             return allResults
         finally :
