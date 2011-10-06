@@ -224,3 +224,24 @@ class Query(object):
         finally:
             if cur :
                 self._dbconnection.rollback() 
+
+    def execute_sql_string(self, sqlString):
+        """
+        Executes the sqlString as SQL commands.
+        Usefull to pass arguments to your sql.
+
+        SQL commands are expected to be delimited by a semi-colon (';').
+
+        For example:
+        delete from person_employee_table; delete from person_table
+
+        For example with an argument:
+        select from person where first_name = ${FIRSTNAME}
+        """
+        try:
+            cur = self._dbconnection.cursor()
+            cur.execute(sqlString)
+            self._dbconnection.commit()
+        finally:
+            if cur:
+                self._dbconnection.rollback()
