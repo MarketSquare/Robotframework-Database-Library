@@ -12,6 +12,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from robot.api import logger
+
 class Query(object):
     """
     Query handles all the querying done by the Database Library. 
@@ -50,7 +52,7 @@ class Query(object):
         cur = None
         try:
             cur = self._dbconnection.cursor()
-            cur.execute (selectStatement);
+            self.__execute_sql(cur, selectStatement)
             allRows = cur.fetchall()
             return allRows
         finally :
@@ -84,7 +86,7 @@ class Query(object):
         cur = None
         try:
             cur = self._dbconnection.cursor()
-            cur.execute (selectStatement);
+            self.__execute_sql(cur, selectStatement)
             rowCount = cur.rowcount
             return rowCount
         finally :
@@ -112,7 +114,7 @@ class Query(object):
         cur = None
         try:
             cur = self._dbconnection.cursor()
-            cur.execute (selectStatement);
+            self.__execute_sql(cur, selectStatement)
             description = cur.description
             return description
         finally :
@@ -138,9 +140,9 @@ class Query(object):
         selectStatement = ("delete from %s;" % tableName)
         try:
             cur = self._dbconnection.cursor()
-            result = cur.execute(selectStatement);
+            result = self.__execute_sql(cur, selectStatement)
             if result is not None:
-                return result.fetchall();
+                return result.fetchall()
             self._dbconnection.commit()
         finally :
             if cur :
@@ -204,23 +206,27 @@ class Query(object):
                 
                 sqlFragments = line.split(';')
                 if len(sqlFragments) == 1:
-                    sqlStatement += line + ' ';
+                    sqlStatement += line + ' '
                 else:
                     for sqlFragment in sqlFragments:
                         sqlFragment = sqlFragment.strip()
                         if len(sqlFragment) == 0:
                             continue
                     
-                        sqlStatement += sqlFragment + ' ';
+                        sqlStatement += sqlFragment + ' '
                         
-                        cur.execute(sqlStatement)
+                        self.__execute_sql(cur, sqlStatement)
                         sqlStatement = ''
 
             sqlStatement = sqlStatement.strip()    
             if len(sqlStatement) != 0:
-                cur.execute(sqlStatement)
+                self.__execute_sql(cur, sqlStatement)
                 
             self._dbconnection.commit()
         finally:
             if cur :
-                self._dbconnection.rollback() 
+                self._dbconnection.rollback()
+
+    def __execute_sql(self, cur, sqlStatement):
+        logger.debug("Executing : %s" % sqlStatement)
+        return cur.execute(sqlStatement)

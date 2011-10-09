@@ -13,6 +13,7 @@
 #  limitations under the License.
 
 import ConfigParser
+from robot.api import logger
 
 class ConnectionManager(object):
     """
@@ -42,7 +43,7 @@ class ConnectionManager(object):
         
         Example usage:
         | # explicitly specifies all db property values |
-        | Connect To Database | psycopg2 | my_db | postgres | s3cr3t | tiger.foobar.com | 5432
+        | Connect To Database | psycopg2 | my_db | postgres | s3cr3t | tiger.foobar.com | 5432 |
 
         | # loads all property values from default.cfg |
         | Connect To Database | dbConfigFile=default.cfg | 
@@ -64,13 +65,20 @@ class ConnectionManager(object):
         dbName = dbName or config.get('default', 'dbName')
         dbUsername = dbUsername or config.get('default', 'dbUsername')
         dbPassword = dbPassword or config.get('default', 'dbPassword')
-        dbHost = dbHost or config.get('default', 'dbHost')
+        dbHost = dbHost or config.get('default', 'dbHost') or 'localhost'
         dbPort = int(dbPort or config.get('default', 'dbPort'))
         
-        db_api_2 = __import__(dbapiModuleName);
-        if dbapiModuleName == "MySQLdb":
+        db_api_2 = __import__(dbapiModuleName)
+        if dbapiModuleName in ["MySQLdb", "pymysql"]:
+            dbPort = dbPort or 3306
+            logger.debug ('Connecting using : %s.connect(db=%s, user=%s, passwd=%s, host=%s, port=%s) ' % (dbapiModuleName, dbName, dbUsername, dbPassword, dbHost, dbPort))
             self._dbconnection = db_api_2.connect (db=dbName, user=dbUsername, passwd=dbPassword, host=dbHost, port=dbPort)
+        elif dbapiModuleName in ["psycopg2"]:
+            dbPort = dbPort or 5432            
+            logger.debug ('Connecting using : %s.connect(database=%s, user=%s, password=%s, host=%s, port=%s) ' % (dbapiModuleName, dbName, dbUsername, dbPassword, dbHost, dbPort))
+            self._dbconnection = db_api_2.connect (database=dbName, user=dbUsername, password=dbPassword, host=dbHost, port=dbPort)
         else:
+            logger.debug ('Connecting using : %s.connect(database=%s, user=%s, password=%s, host=%s, port=%s) ' % (dbapiModuleName, dbName, dbUsername, dbPassword, dbHost, dbPort))
             self._dbconnection = db_api_2.connect (database=dbName, user=dbUsername, password=dbPassword, host=dbHost, port=dbPort)
             
     def connect_to_database_using_custom_params(self, dbapiModuleName=None, db_connect_string=''):
@@ -85,7 +93,7 @@ class ConnectionManager(object):
         | # for JayDeBeApi | 
         | Connect To Database Using Custom Params | JayDeBeApi | 'oracle.jdbc.driver.OracleDriver', 'my_db_test', 'system', 's3cr3t' |
         """
-        db_api_2 = __import__(dbapiModuleName);
+        db_api_2 = __import__(dbapiModuleName)
         
         db_connect_string = 'db_api_2.connect(%s)' % db_connect_string
         
