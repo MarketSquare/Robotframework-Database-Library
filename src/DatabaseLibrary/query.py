@@ -153,8 +153,15 @@ class Query(object):
         Executes the content of the `sqlScriptFileName` as SQL commands. 
         Useful for setting the database to a known state before running 
         your tests, or clearing out your test data after running each a 
-        test. 
-        
+        test.
+
+        Sample usage :
+        | Execute Sql Script | ${EXECDIR}${/}resources${/}DDL-setup.sql |
+        | Execute Sql Script | ${EXECDIR}${/}resources${/}DML-setup.sql |
+        | #interesting stuff here |
+        | Execute Sql Script | ${EXECDIR}${/}resources${/}DML-teardown.sql |
+        | Execute Sql Script | ${EXECDIR}${/}resources${/}DDL-teardown.sql |
+
         SQL commands are expected to be delimited by a semi-colon (';').
         
         For example:
@@ -225,6 +232,27 @@ class Query(object):
             self._dbconnection.commit()
         finally:
             if cur :
+                self._dbconnection.rollback()
+                
+    def execute_sql_string(self, sqlString):
+        """
+        Executes the sqlString as SQL commands.
+        Useful to pass arguments to your sql.
+
+        SQL commands are expected to be delimited by a semi-colon (';').
+
+        For example:
+        | Execute Sql String | delete from person_employee_table; delete from person_table |
+
+        For example with an argument:
+        | Execute Sql String | select from person where first_name = ${FIRSTNAME} |
+        """
+        try:
+            cur = self._dbconnection.cursor()
+            self.__execute_sql(cur, sqlString)
+            self._dbconnection.commit()
+        finally:
+            if cur:
                 self._dbconnection.rollback()
 
     def __execute_sql(self, cur, sqlStatement):

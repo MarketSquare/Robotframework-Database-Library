@@ -11,6 +11,9 @@ body {
   font-family: sans-serif;
   padding: 0.1em 0.5em;
 }
+.libdoc {
+  white-space: pre-wrap;
+}
 a.name, span.name {
   font-style: italic;
 }
@@ -91,25 +94,25 @@ a {
 supported
 
 <h2 id="introduction">Introduction</h2>
-<p>Database Library contains utilities meant for Robot Framework's usage.<br />
-<br />
-This can allow you to query your database after an action has been made to verify the results.<br />
-<br />
-This is <span class="name">compatible*</span> with any Database API Specification 2.0 module.<br />
-<br />
-References:<br />
-<br />
-+ Database API Specification 2.0 - <a href="http://www.python.org/dev/peps/pep-0249/">http://www.python.org/dev/peps/pep-0249/</a><br />
-<br />
-+ Lists of DB API 2.0 - <a href="http://wiki.python.org/moin/DatabaseInterfaces">http://wiki.python.org/moin/DatabaseInterfaces</a><br />
-<br />
-+ Python Database Programming - <a href="http://wiki.python.org/moin/DatabaseProgramming/">http://wiki.python.org/moin/DatabaseProgramming/</a><br />
-<br />
-Notes:<br />
-<br />
-<span class="name">compatible* - or at least theoretically it should be compatible. Currently tested only with postgresql (using psycopg2).</span><br />
-<br />
-Example Usage:<br />
+<div class="libdoc">Database Library contains utilities meant for Robot Framework's usage.
+
+This can allow you to query your database after an action has been made to verify the results.
+
+This is <span class="name">compatible*</span> with any Database API Specification 2.0 module.
+
+References:
+
++ Database API Specification 2.0 - <a href="http://www.python.org/dev/peps/pep-0249/">http://www.python.org/dev/peps/pep-0249/</a>
+
++ Lists of DB API 2.0 - <a href="http://wiki.python.org/moin/DatabaseInterfaces">http://wiki.python.org/moin/DatabaseInterfaces</a>
+
++ Python Database Programming - <a href="http://wiki.python.org/moin/DatabaseProgramming/">http://wiki.python.org/moin/DatabaseProgramming/</a>
+
+Notes:
+
+<span class="name">compatible* - or at least theoretically it should be compatible. Currently tested only with postgresql (using psycopg2).</span>
+
+Example Usage:
 <table border="1" class="doc">
 <tr>
 <td># Setup</td>
@@ -207,8 +210,7 @@ Example Usage:<br />
 <td></td>
 <td></td>
 </tr>
-</table>
-</p>
+</table></div>
 
 
 <h2>Shortcuts</h2>
@@ -229,6 +231,8 @@ Example Usage:<br />
 &nbsp;&middot;&nbsp;
 <a href="#Execute Sql Script" title="Executes the content of the `sqlScriptFileName` as SQL commands. ">Execute&nbsp;Sql&nbsp;Script</a>
 &nbsp;&middot;&nbsp;
+<a href="#Execute Sql String" title="Executes the sqlString as SQL commands.">Execute&nbsp;Sql&nbsp;String</a>
+&nbsp;&middot;&nbsp;
 <a href="#Query" title="Uses the input `selectStatement` to query for the values that ">Query</a>
 &nbsp;&middot;&nbsp;
 <a href="#Row Count" title="Uses the input `selectStatement` to query the database and returns">Row&nbsp;Count</a>
@@ -245,7 +249,7 @@ Example Usage:<br />
 </div>
 
 <h2>Keywords</h2>
-<table border="1" class="keywords">
+<table border="1" class="keywords libdoc">
 <tr>
   <th class="kw">Keyword</th>
   <th class="arg">Arguments</th>
@@ -254,9 +258,9 @@ Example Usage:<br />
 <tr>
   <td class="kw"><a name="Check If Exists In Database"></a>Check If Exists In Database</td>
   <td class="arg">selectStatement</td>
-  <td class="doc">Check if any row would be returned by given the input <span class="name">selectStatement</span>. If there are no results, then this will throw an AssertionError.<br />
-<br />
-For example, given we have a table <span class="name">person</span> with the following data:<br />
+  <td class="doc">Check if any row would be returned by given the input <span class="name">selectStatement</span>. If there are no results, then this will throw an AssertionError.
+
+For example, given we have a table <span class="name">person</span> with the following data:
 <table border="1" class="doc">
 <tr>
 <td>id</td>
@@ -269,8 +273,7 @@ For example, given we have a table <span class="name">person</span> with the fol
 <td>See</td>
 </tr>
 </table>
-<br />
-When you have the following assertions in your robot<br />
+When you have the following assertions in your robot
 <table border="1" class="doc">
 <tr>
 <td>Check If Exists In Database</td>
@@ -281,8 +284,7 @@ When you have the following assertions in your robot<br />
 <td>select id from person where first_name = 'John'</td>
 </tr>
 </table>
-<br />
-Then you will get the following:<br />
+Then you will get the following:
 <table border="1" class="doc">
 <tr>
 <td>Check If Exists In Database</td>
@@ -294,17 +296,16 @@ Then you will get the following:<br />
 <td>select id from person where first_name = 'John'</td>
 <td># FAIL</td>
 </tr>
-</table>
-</td>
+</table></td>
 </tr>
 <tr>
   <td class="kw"><a name="Check If Not Exists In Database"></a>Check If Not Exists In Database</td>
   <td class="arg">selectStatement</td>
-  <td class="doc">This is the negation of <span class="name">check_if_exists_in_database</span>.<br />
-<br />
-Check if no rows would be returned by given the input <span class="name">selectStatement</span>. If there are any results, then this will throw an AssertionError.<br />
-<br />
-For example, given we have a table <span class="name">person</span> with the following data:<br />
+  <td class="doc">This is the negation of <span class="name">check_if_exists_in_database</span>.
+
+Check if no rows would be returned by given the input <span class="name">selectStatement</span>. If there are any results, then this will throw an AssertionError.
+
+For example, given we have a table <span class="name">person</span> with the following data:
 <table border="1" class="doc">
 <tr>
 <td>id</td>
@@ -317,8 +318,7 @@ For example, given we have a table <span class="name">person</span> with the fol
 <td>See</td>
 </tr>
 </table>
-<br />
-When you have the following assertions in your robot<br />
+When you have the following assertions in your robot
 <table border="1" class="doc">
 <tr>
 <td>Check If Not Exists In Database</td>
@@ -329,8 +329,7 @@ When you have the following assertions in your robot<br />
 <td>select id from person where first_name = 'Franz Allan'</td>
 </tr>
 </table>
-<br />
-Then you will get the following:<br />
+Then you will get the following:
 <table border="1" class="doc">
 <tr>
 <td>Check If Not Exists In Database</td>
@@ -342,26 +341,38 @@ Then you will get the following:<br />
 <td>select id from person where first_name = 'Franz Allan'</td>
 <td># FAIL</td>
 </tr>
-</table>
-</td>
+</table></td>
 </tr>
 <tr>
   <td class="kw"><a name="Connect To Database"></a>Connect To Database</td>
   <td class="arg">dbapiModuleName=None, dbName=None, dbUsername=None, dbPassword=None, dbHost=localhost, dbPort=5432, dbConfigFile=./resources/db.cfg</td>
-  <td class="doc">Loads the DB API 2.0 module given <span class="name">dbapiModuleName</span> then uses it to connect to the database using <span class="name">dbName</span>, <span class="name">dbUsername</span>, and <span class="name">dbPassword</span>.<br />
-<br />
-Optionally, you can specify a <span class="name">dbConfigFile</span> wherein it will load the default property values for <span class="name">dbapiModuleName</span>, <span class="name">dbName</span> <span class="name">dbUsername</span> and <span class="name">dbPassword</span> (note: specifying <span class="name">dbapiModuleName</span>, <span class="name">dbName</span> <span class="name">dbUsername</span> or <span class="name">dbPassword</span> directly will override the properties of the same key in <span class="name">dbConfigFile</span>). If no <span class="name">dbConfigFile</span> is specified, it defaults to <span class="name">./resources/db.cfg</span>.<br />
-<br />
-The <span class="name">dbConfigFile</span> is useful if you don't want to check into your SCM your database credentials.<br />
-<br />
-Example usage:<br />
+  <td class="doc">Loads the DB API 2.0 module given <span class="name">dbapiModuleName</span> then uses it to connect to the database using <span class="name">dbName</span>, <span class="name">dbUsername</span>, and <span class="name">dbPassword</span>.
+
+Optionally, you can specify a <span class="name">dbConfigFile</span> wherein it will load the default property values for <span class="name">dbapiModuleName</span>, <span class="name">dbName</span> <span class="name">dbUsername</span> and <span class="name">dbPassword</span> (note: specifying <span class="name">dbapiModuleName</span>, <span class="name">dbName</span> <span class="name">dbUsername</span> or <span class="name">dbPassword</span> directly will override the properties of the same key in <span class="name">dbConfigFile</span>). If no <span class="name">dbConfigFile</span> is specified, it defaults to <span class="name">./resources/db.cfg</span>.
+
+The <span class="name">dbConfigFile</span> is useful if you don't want to check into your SCM your database credentials.
+
+Example usage:
 <table border="1" class="doc">
 <tr>
 <td># explicitly specifies all db property values</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Connect To Database</td>
+<td>psycopg2</td>
+<td>my_db</td>
+<td>postgres</td>
+<td>s3cr3t</td>
+<td>tiger.foobar.com</td>
+<td>5432</td>
 </tr>
 </table>
-| Connect To Database | psycopg2 | my_db | postgres | s3cr3t | tiger.foobar.com | 5432<br />
-<br />
 <table border="1" class="doc">
 <tr>
 <td># loads all property values from default.cfg</td>
@@ -372,7 +383,6 @@ Example usage:<br />
 <td>dbConfigFile=default.cfg</td>
 </tr>
 </table>
-<br />
 <table border="1" class="doc">
 <tr>
 <td># loads all property values from ./resources/db.cfg</td>
@@ -381,7 +391,6 @@ Example usage:<br />
 <td>Connect To Database</td>
 </tr>
 </table>
-<br />
 <table border="1" class="doc">
 <tr>
 <td># uses explicit <span class="name">dbapiModuleName</span> and <span class="name">dbName</span> but uses the <span class="name">dbUsername</span> and <span class="name">dbPassword</span> in 'default.cfg'</td>
@@ -396,7 +405,6 @@ Example usage:<br />
 <td>dbConfigFile=default.cfg</td>
 </tr>
 </table>
-<br />
 <table border="1" class="doc">
 <tr>
 <td># uses explicit <span class="name">dbapiModuleName</span> and <span class="name">dbName</span> but uses the <span class="name">dbUsername</span> and <span class="name">dbPassword</span> in './resources/db.cfg'</td>
@@ -408,15 +416,14 @@ Example usage:<br />
 <td>psycopg2</td>
 <td>my_db_test</td>
 </tr>
-</table>
-</td>
+</table></td>
 </tr>
 <tr>
   <td class="kw"><a name="Connect To Database Using Custom Params"></a>Connect To Database Using Custom Params</td>
   <td class="arg">dbapiModuleName=None, db_connect_string=</td>
-  <td class="doc">Loads the DB API 2.0 module given <span class="name">dbapiModuleName</span> then uses it to connect to the database using the map string <span class="name">db_custom_param_string</span>.<br />
-<br />
-Example usage:<br />
+  <td class="doc">Loads the DB API 2.0 module given <span class="name">dbapiModuleName</span> then uses it to connect to the database using the map string <span class="name">db_custom_param_string</span>.
+
+Example usage:
 <table border="1" class="doc">
 <tr>
 <td># for psycopg2</td>
@@ -429,7 +436,6 @@ Example usage:<br />
 <td>database='my_db_test', user='postgres', password='s3cr3t', host='tiger.foobar.com', port=5432</td>
 </tr>
 </table>
-<br />
 <table border="1" class="doc">
 <tr>
 <td># for JayDeBeApi</td>
@@ -441,48 +447,44 @@ Example usage:<br />
 <td>JayDeBeApi</td>
 <td>'oracle.jdbc.driver.OracleDriver', 'my_db_test', 'system', 's3cr3t'</td>
 </tr>
-</table>
-</td>
+</table></td>
 </tr>
 <tr>
   <td class="kw"><a name="Delete All Rows From Table"></a>Delete All Rows From Table</td>
   <td class="arg">tableName</td>
-  <td class="doc">Delete all the rows within a given table.<br />
-<br />
-For example, given we have a table <span class="name">person</span> in a database<br />
-<br />
-When you do the following:<br />
+  <td class="doc">Delete all the rows within a given table.
+
+For example, given we have a table <span class="name">person</span> in a database
+
+When you do the following:
 <table border="1" class="doc">
 <tr>
 <td>Delete All Rows From Table</td>
 <td>person</td>
 </tr>
 </table>
-<br />
-If all the rows can be successfully deleted, then you will get:<br />
+If all the rows can be successfully deleted, then you will get:
 <table border="1" class="doc">
 <tr>
 <td>Delete All Rows From Table</td>
 <td>person</td>
 <td># PASS</td>
 </tr>
-</table>
-If the table doesn't exist or all the data can't be deleted, then you will get:<br />
+</table>If the table doesn't exist or all the data can't be deleted, then you will get:
 <table border="1" class="doc">
 <tr>
 <td>Delete All Rows From Table</td>
 <td>first_name</td>
 <td># FAIL</td>
 </tr>
-</table>
-</td>
+</table></td>
 </tr>
 <tr>
   <td class="kw"><a name="Description"></a>Description</td>
   <td class="arg">selectStatement</td>
-  <td class="doc">Uses the input <span class="name">selectStatement</span> to query a table in the db which will be used to determine the description.<br />
-<br />
-For example, given we have a table <span class="name">person</span> with the following data:<br />
+  <td class="doc">Uses the input <span class="name">selectStatement</span> to query a table in the db which will be used to determine the description.
+
+For example, given we have a table <span class="name">person</span> with the following data:
 <table border="1" class="doc">
 <tr>
 <td>id</td>
@@ -495,8 +497,7 @@ For example, given we have a table <span class="name">person</span> with the fol
 <td>See</td>
 </tr>
 </table>
-<br />
-When you do the following:<br />
+When you do the following:
 <table border="1" class="doc">
 <tr>
 <td>@{queryResults}</td>
@@ -509,52 +510,95 @@ When you do the following:<br />
 <td></td>
 </tr>
 </table>
-<br />
 You will get the following: [Column(name='id', type_code=1043, display_size=None, internal_size=255, precision=None, scale=None, null_ok=None)] [Column(name='first_name', type_code=1043, display_size=None, internal_size=255, precision=None, scale=None, null_ok=None)] [Column(name='last_name', type_code=1043, display_size=None, internal_size=255, precision=None, scale=None, null_ok=None)]</td>
 </tr>
 <tr>
   <td class="kw"><a name="Disconnect From Database"></a>Disconnect From Database</td>
   <td class="arg"></td>
-  <td class="doc">Disconnects from the database.<br />
-<br />
-For example:<br />
+  <td class="doc">Disconnects from the database.
+
+For example:
 <table border="1" class="doc">
 <tr>
 <td>Disconnect From Database</td>
 <td># disconnects from current connection to the database</td>
 </tr>
-</table>
-</td>
+</table></td>
 </tr>
 <tr>
   <td class="kw"><a name="Execute Sql Script"></a>Execute Sql Script</td>
   <td class="arg">sqlScriptFileName</td>
-  <td class="doc">Executes the content of the <span class="name">sqlScriptFileName</span> as SQL commands. Useful for setting the database to a known state before running your tests, or clearing out your test data after running each a test.<br />
-<br />
-SQL commands are expected to be delimited by a semi-colon (';').<br />
-<br />
-For example: delete from person_employee_table; delete from person_table; delete from employee_table;<br />
-<br />
-Also, the last SQL command can optionally omit its trailing semi-colon.<br />
-<br />
-For example: delete from person_employee_table; delete from person_table; delete from employee_table<br />
-<br />
-Given this, that means you can create spread your SQL commands in several lines.<br />
-<br />
-For example: delete from person_employee_table; delete from person_table; delete from employee_table<br />
-<br />
-However, lines that starts with a number sign (<span class="name">#</span>) are treated as a commented line. Thus, none of the contents of that line will be executed.<br />
-<br />
+  <td class="doc">Executes the content of the <span class="name">sqlScriptFileName</span> as SQL commands. Useful for setting the database to a known state before running your tests, or clearing out your test data after running each a test.
+
+Sample usage :
+<table border="1" class="doc">
+<tr>
+<td>Execute Sql Script</td>
+<td>${EXECDIR}${/}resources${/}DDL-setup.sql</td>
+</tr>
+<tr>
+<td>Execute Sql Script</td>
+<td>${EXECDIR}${/}resources${/}DML-setup.sql</td>
+</tr>
+<tr>
+<td>#interesting stuff here</td>
+<td></td>
+</tr>
+<tr>
+<td>Execute Sql Script</td>
+<td>${EXECDIR}${/}resources${/}DML-teardown.sql</td>
+</tr>
+<tr>
+<td>Execute Sql Script</td>
+<td>${EXECDIR}${/}resources${/}DDL-teardown.sql</td>
+</tr>
+</table>
+SQL commands are expected to be delimited by a semi-colon (';').
+
+For example: delete from person_employee_table; delete from person_table; delete from employee_table;
+
+Also, the last SQL command can optionally omit its trailing semi-colon.
+
+For example: delete from person_employee_table; delete from person_table; delete from employee_table
+
+Given this, that means you can create spread your SQL commands in several lines.
+
+For example: delete from person_employee_table; delete from person_table; delete from employee_table
+
+However, lines that starts with a number sign (<span class="name">#</span>) are treated as a commented line. Thus, none of the contents of that line will be executed.
+
 For example: # Delete the bridging table first... delete from person_employee_table; # ...and then the bridged tables. delete from person_table; delete from employee_table</td>
+</tr>
+<tr>
+  <td class="kw"><a name="Execute Sql String"></a>Execute Sql String</td>
+  <td class="arg">sqlString</td>
+  <td class="doc">Executes the sqlString as SQL commands. Useful to pass arguments to your sql.
+
+SQL commands are expected to be delimited by a semi-colon (';').
+
+For example:
+<table border="1" class="doc">
+<tr>
+<td>Execute Sql String</td>
+<td>delete from person_employee_table; delete from person_table</td>
+</tr>
+</table>
+For example with an argument:
+<table border="1" class="doc">
+<tr>
+<td>Execute Sql String</td>
+<td>select from person where first_name = ${FIRSTNAME}</td>
+</tr>
+</table></td>
 </tr>
 <tr>
   <td class="kw"><a name="Query"></a>Query</td>
   <td class="arg">selectStatement</td>
-  <td class="doc">Uses the input <span class="name">selectStatement</span> to query for the values that will be returned as a list of tuples.<br />
-<br />
-Tip: Unless you want to log all column values of the specified rows, try specifying the column names in your select statements as much as possible to prevent any unnecessary surprises with schema changes and to easily see what your [] indexing is trying to retrieve (i.e. instead of <span class="name">"select * from my_table"</span>, try <span class="name">"select id, col_1, col_2 from my_table"</span>).<br />
-<br />
-For example, given we have a table <span class="name">person</span> with the following data:<br />
+  <td class="doc">Uses the input <span class="name">selectStatement</span> to query for the values that will be returned as a list of tuples.
+
+Tip: Unless you want to log all column values of the specified rows, try specifying the column names in your select statements as much as possible to prevent any unnecessary surprises with schema changes and to easily see what your [] indexing is trying to retrieve (i.e. instead of <span class="name">"select * from my_table"</span>, try <span class="name">"select id, col_1, col_2 from my_table"</span>).
+
+For example, given we have a table <span class="name">person</span> with the following data:
 <table border="1" class="doc">
 <tr>
 <td>id</td>
@@ -567,8 +611,7 @@ For example, given we have a table <span class="name">person</span> with the fol
 <td>See</td>
 </tr>
 </table>
-<br />
-When you do the following:<br />
+When you do the following:
 <table border="1" class="doc">
 <tr>
 <td>@{queryResults}</td>
@@ -581,10 +624,9 @@ When you do the following:<br />
 <td></td>
 </tr>
 </table>
-<br />
-You will get the following: [1, 'Franz Allan', 'See']<br />
-<br />
-Also, you can do something like this:<br />
+You will get the following: [1, 'Franz Allan', 'See']
+
+Also, you can do something like this:
 <table border="1" class="doc">
 <tr>
 <td>${queryResults}</td>
@@ -597,15 +639,14 @@ Also, you can do something like this:<br />
 <td></td>
 </tr>
 </table>
-<br />
 And get the following See, Franz Allan</td>
 </tr>
 <tr>
   <td class="kw"><a name="Row Count"></a>Row Count</td>
   <td class="arg">selectStatement</td>
-  <td class="doc">Uses the input <span class="name">selectStatement</span> to query the database and returns the number of rows from the query.<br />
-<br />
-For example, given we have a table <span class="name">person</span> with the following data:<br />
+  <td class="doc">Uses the input <span class="name">selectStatement</span> to query the database and returns the number of rows from the query.
+
+For example, given we have a table <span class="name">person</span> with the following data:
 <table border="1" class="doc">
 <tr>
 <td>id</td>
@@ -623,8 +664,7 @@ For example, given we have a table <span class="name">person</span> with the fol
 <td>Schneider</td>
 </tr>
 </table>
-<br />
-When you do the following:<br />
+When you do the following:
 <table border="1" class="doc">
 <tr>
 <td>${rowCount}</td>
@@ -637,10 +677,9 @@ When you do the following:<br />
 <td></td>
 </tr>
 </table>
-<br />
-You will get the following: 2<br />
-<br />
-Also, you can do something like this:<br />
+You will get the following: 2
+
+Also, you can do something like this:
 <table border="1" class="doc">
 <tr>
 <td>${rowCount}</td>
@@ -653,15 +692,14 @@ Also, you can do something like this:<br />
 <td></td>
 </tr>
 </table>
-<br />
 And get the following 1</td>
 </tr>
 <tr>
   <td class="kw"><a name="Row Count Is 0"></a>Row Count Is 0</td>
   <td class="arg">selectStatement</td>
-  <td class="doc">Check if any rows are returned from the submitted <span class="name">selectStatement</span>. If there are, then this will throw an AssertionError.<br />
-<br />
-For example, given we have a table <span class="name">person</span> with the following data:<br />
+  <td class="doc">Check if any rows are returned from the submitted <span class="name">selectStatement</span>. If there are, then this will throw an AssertionError.
+
+For example, given we have a table <span class="name">person</span> with the following data:
 <table border="1" class="doc">
 <tr>
 <td>id</td>
@@ -674,8 +712,7 @@ For example, given we have a table <span class="name">person</span> with the fol
 <td>See</td>
 </tr>
 </table>
-<br />
-When you have the following assertions in your robot<br />
+When you have the following assertions in your robot
 <table border="1" class="doc">
 <tr>
 <td>Row Count is 0</td>
@@ -686,8 +723,7 @@ When you have the following assertions in your robot<br />
 <td>select id from person where first_name = 'John'</td>
 </tr>
 </table>
-<br />
-Then you will get the following:<br />
+Then you will get the following:
 <table border="1" class="doc">
 <tr>
 <td>Row Count is 0</td>
@@ -699,15 +735,14 @@ Then you will get the following:<br />
 <td>select id from person where first_name = 'John'</td>
 <td># PASS</td>
 </tr>
-</table>
-</td>
+</table></td>
 </tr>
 <tr>
   <td class="kw"><a name="Row Count Is Equal To X"></a>Row Count Is Equal To X</td>
   <td class="arg">selectStatement, numRows</td>
-  <td class="doc">Check if the number of rows returned from <span class="name">selectStatement</span> is equal to the value submitted. If not, then this will throw an AssertionError.<br />
-<br />
-For example, given we have a table <span class="name">person</span> with the following data:<br />
+  <td class="doc">Check if the number of rows returned from <span class="name">selectStatement</span> is equal to the value submitted. If not, then this will throw an AssertionError.
+
+For example, given we have a table <span class="name">person</span> with the following data:
 <table border="1" class="doc">
 <tr>
 <td>id</td>
@@ -725,8 +760,7 @@ For example, given we have a table <span class="name">person</span> with the fol
 <td>Schneider</td>
 </tr>
 </table>
-<br />
-When you have the following assertions in your robot<br />
+When you have the following assertions in your robot
 <table border="1" class="doc">
 <tr>
 <td>Row Count Is Equal To X</td>
@@ -739,8 +773,7 @@ When you have the following assertions in your robot<br />
 <td>0</td>
 </tr>
 </table>
-<br />
-Then you will get the following:<br />
+Then you will get the following:
 <table border="1" class="doc">
 <tr>
 <td>Row Count Is Equal To X</td>
@@ -754,15 +787,14 @@ Then you will get the following:<br />
 <td>0</td>
 <td># PASS</td>
 </tr>
-</table>
-</td>
+</table></td>
 </tr>
 <tr>
   <td class="kw"><a name="Row Count Is Greater Than X"></a>Row Count Is Greater Than X</td>
   <td class="arg">selectStatement, numRows</td>
-  <td class="doc">Check if the number of rows returned from <span class="name">selectStatement</span> is greater than the value submitted. If not, then this will throw an AssertionError.<br />
-<br />
-For example, given we have a table <span class="name">person</span> with the following data:<br />
+  <td class="doc">Check if the number of rows returned from <span class="name">selectStatement</span> is greater than the value submitted. If not, then this will throw an AssertionError.
+
+For example, given we have a table <span class="name">person</span> with the following data:
 <table border="1" class="doc">
 <tr>
 <td>id</td>
@@ -780,8 +812,7 @@ For example, given we have a table <span class="name">person</span> with the fol
 <td>Schneider</td>
 </tr>
 </table>
-<br />
-When you have the following assertions in your robot<br />
+When you have the following assertions in your robot
 <table border="1" class="doc">
 <tr>
 <td>Row Count Is Greater Than X</td>
@@ -794,8 +825,7 @@ When you have the following assertions in your robot<br />
 <td>0</td>
 </tr>
 </table>
-<br />
-Then you will get the following:<br />
+Then you will get the following:
 <table border="1" class="doc">
 <tr>
 <td>Row Count Is Greater Than X</td>
@@ -809,15 +839,14 @@ Then you will get the following:<br />
 <td>0</td>
 <td># FAIL</td>
 </tr>
-</table>
-</td>
+</table></td>
 </tr>
 <tr>
   <td class="kw"><a name="Row Count Is Less Than X"></a>Row Count Is Less Than X</td>
   <td class="arg">selectStatement, numRows</td>
-  <td class="doc">Check if the number of rows returned from <span class="name">selectStatement</span> is less than the value submitted. If not, then this will throw an AssertionError.<br />
-<br />
-For example, given we have a table <span class="name">person</span> with the following data:<br />
+  <td class="doc">Check if the number of rows returned from <span class="name">selectStatement</span> is less than the value submitted. If not, then this will throw an AssertionError.
+
+For example, given we have a table <span class="name">person</span> with the following data:
 <table border="1" class="doc">
 <tr>
 <td>id</td>
@@ -835,8 +864,7 @@ For example, given we have a table <span class="name">person</span> with the fol
 <td>Schneider</td>
 </tr>
 </table>
-<br />
-When you have the following assertions in your robot<br />
+When you have the following assertions in your robot
 <table border="1" class="doc">
 <tr>
 <td>Row Count Is Less Than X</td>
@@ -849,8 +877,7 @@ When you have the following assertions in your robot<br />
 <td>1</td>
 </tr>
 </table>
-<br />
-Then you will get the following:<br />
+Then you will get the following:
 <table border="1" class="doc">
 <tr>
 <td>Row Count Is Less Than X</td>
@@ -864,25 +891,23 @@ Then you will get the following:<br />
 <td>1</td>
 <td># FAIL</td>
 </tr>
-</table>
-</td>
+</table></td>
 </tr>
 <tr>
   <td class="kw"><a name="Table Must Exist"></a>Table Must Exist</td>
   <td class="arg">tableName</td>
-  <td class="doc">Check if the table given exists in the database.<br />
-<br />
-For example, given we have a table <span class="name">person</span> in a database<br />
-<br />
-When you do the following:<br />
+  <td class="doc">Check if the table given exists in the database.
+
+For example, given we have a table <span class="name">person</span> in a database
+
+When you do the following:
 <table border="1" class="doc">
 <tr>
 <td>Table Must Exist</td>
 <td>person</td>
 </tr>
 </table>
-<br />
-Then you will get the following:<br />
+Then you will get the following:
 <table border="1" class="doc">
 <tr>
 <td>Table Must Exist</td>
@@ -894,14 +919,13 @@ Then you will get the following:<br />
 <td>first_name</td>
 <td># FAIL</td>
 </tr>
-</table>
-</td>
+</table></td>
 </tr>
 </table>
 <p id="footer">
-Altogether 15 keywords.<br />
+Altogether 16 keywords.<br />
 Generated by <a href="http://code.google.com/p/robotframework/wiki/LibraryDocumentationTool">libdoc.py</a>
-on 2011-04-19 00:45:51.
+on 2011-10-10 00:31:11.
 </p>
 </body>
 </html>
