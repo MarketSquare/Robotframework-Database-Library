@@ -69,8 +69,12 @@ class ConnectionManager(object):
         
         db_api_2 = __import__(dbapiModuleName);
         if dbapiModuleName == "MySQLdb":
+            print "| Connect To Database | dbName | dbUserName | dbPassword | dbHost | dbPort |"
+            print "| Connect To Database | %s | %s | %s | %s | %s |" % (dbName,dbUsername,dbPassword,dbHost,dbPort)
             self._dbconnection = db_api_2.connect (db=dbName, user=dbUsername, passwd=dbPassword, host=dbHost, port=dbPort)
         else:
+            print "| Connect To Database | dbName | dbUserName | dbPassword | dbHost | dbPort |"
+            print "| Connect To Database | %s | %s | %s | %s | %s |" % (dbName,dbUsername,dbPassword,dbHost,dbPort)
             self._dbconnection = db_api_2.connect (database=dbName, user=dbUsername, password=dbPassword, host=dbHost, port=dbPort)
             
     def connect_to_database_using_custom_params(self, dbapiModuleName=None, db_connect_string=''):
@@ -89,6 +93,8 @@ class ConnectionManager(object):
         
         db_connect_string = 'db_api_2.connect(%s)' % db_connect_string
         
+        print "| Connect To Database Using Custom Params | db_connect_string |"
+        print "| Connect To Database Using Custom Params | %s |" % (db_connect_string)
         self._dbconnection = eval(db_connect_string)
         
     def connect_to_mongodb(self, dbHost='localhost', dbPort=27017, dbPoolSize=None, dbAutoStart=None, dbTimeout=None, dbSlaveOkay=False, dbNetworkTimeout=None, dbDocClass=dict, dbTZAware=False):
@@ -112,7 +118,9 @@ class ConnectionManager(object):
         #print "slave_okay is         [ %s ]" % dbSlaveOkay
         #print "document_class is     [ %s ]" % dbDocClass
         #print "tz_aware is           [ %s ]" % dbTZAware
-        
+        print "| Connect To MondoDB | dbHost | dbPort | dbPoolSize | dbAutoStart | dbTimeout | dbSlaveOkay | dbDocClass | dbTZAware |"
+        print "| Connect To MondoDB | %s | %s | %s | %s | %s | %s | %s | %s |" % (dbHost,dbPort,dbPoolSize,dbAutoStart,dbTimeout,dbSlaveOkay,dbDocClass,dbTZAware)
+
         self._dbconnection = db_api_2.connection.Connection (host=dbHost, port=dbPort, pool_size=dbPoolSize, auto_start_request=dbAutoStart, timeout=dbTimeout, slave_okay=dbSlaveOkay, network_timeout=dbNetworkTimeout, document_class=dbDocClass, tz_aware=dbTZAware);
         
     def disconnect_from_database(self):
@@ -122,6 +130,7 @@ class ConnectionManager(object):
         For example:
         | Disconnect From Database | # disconnects from current connection to the database | 
         """
+        print "| Disconnect From Database |"
         self._dbconnection.close()
         
     def disconnect_from_mongodb(self):
@@ -131,5 +140,6 @@ class ConnectionManager(object):
         For example:
         | Disconnect From MongoDB | # disconnects from current connection to the MongoDB server | 
         """
+        print "| Disconnect From MongoDB |"
         self._dbconnection.disconnect()
         

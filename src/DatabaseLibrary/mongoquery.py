@@ -33,6 +33,7 @@ class MongoQuery(object):
         cur = None
         try:
             allDBs = self._dbconnection.database_names()
+            print "| @{allDBs} | Get Mongodb Databases |"
             return allDBs
         finally :
             if cur :
@@ -53,6 +54,7 @@ class MongoQuery(object):
             dbName = str(dbName)
             db = self._dbconnection['%s' % (dbName,)]
             allCollections = db.collection_names()
+            print "| @{allCollections} | Get MongoDB Collections | %s |" % (dbName)
             return allCollections
         finally :
             if db :
@@ -71,6 +73,7 @@ class MongoQuery(object):
         cur = None
         try:
             dbDelName = str(dbDelName)
+            print "| Drop MongoDB Database | %s |" % (dbDelName)
             self._dbconnection.drop_database('%s' % (dbDelName))
         finally :
             if cur :
@@ -91,6 +94,7 @@ class MongoQuery(object):
             dbName = str(dbName)
             db = self._dbconnection['%s' % (dbName,)]
             db.drop_collection('%s' % (dbCollName))
+            print "| Drop MongoDB Collection | %s | %s |" % (dbName,dbCollName)
         finally :
             if db :
                 self._dbconnection.end_request() 
@@ -110,6 +114,7 @@ class MongoQuery(object):
             dbCollName = str(dbCollName)
             db = self._dbconnection['%s' % (dbName,)]
             allResults = db.validate_collection('%s' % dbCollName)
+            print "| ${allResults} | Validate MongoDB Collection | %s | %s |" % (dbName,dbCollName)
             return allResults
         finally :
             if db :
@@ -130,6 +135,7 @@ class MongoQuery(object):
             db = self._dbconnection['%s' % (dbName,)]
             coll = db['%s' % (dbCollName)]
             count = coll.count()
+            print "| ${allResults} | Get MongoDB Collection Count | %s | %s |" % (dbName,dbCollName)
             return count
         finally :
             if db :
@@ -163,6 +169,7 @@ class MongoQuery(object):
             db = self._dbconnection['%s' % (dbName,)]
             coll = db['%s' % (dbCollName)]
             allResults = coll.save(recordJSON)
+            print "| ${allResults} | Save MongoDB Records | %s | %s | %s |" % (dbName,dbCollName,recordJSON)
             return allResults
         finally :
             if db :
@@ -188,6 +195,7 @@ class MongoQuery(object):
             coll = db['%s' % (dbCollName)]
             for d in coll.find():
                 results = '%s%s' % (results, d.items())
+            print "| ${allResults} | Retrieve All MongoDB Records | %s | %s |" % (dbName,dbCollName)
             return results
         finally :
             if db :
@@ -215,6 +223,7 @@ class MongoQuery(object):
             coll = db['%s' % (dbCollName)]
             for d in coll.find(recordJSON):
                 results = '%s%s' % (results, d.items())
+            print "| ${allResults} | Retrieve Some MongoDB Records | %s | %s | %s |" % (dbName,dbCollName,recordJSON)
             return results
         finally :
             if db :
@@ -249,6 +258,7 @@ class MongoQuery(object):
             db = self._dbconnection['%s' % (dbName,)]
             coll = db['%s' % (dbCollName)]
             allResults = coll.remove(recordJSON)
+            print "| ${allResults} | Remove MongoDB Records | %s | %s | %s |" % (dbName,dbCollName,recordJSON)
             return allResults
         finally :
             if db :
