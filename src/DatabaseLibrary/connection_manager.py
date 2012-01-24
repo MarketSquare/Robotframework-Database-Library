@@ -107,7 +107,7 @@ class ConnectionManager(object):
         print "| Connect To Database Using Custom Params | %s |" % (db_connect_string)
         self._dbconnection = eval(db_connect_string)
         
-    def connect_to_mongodb(self, dbHost='localhost', dbPort=27017, dbPoolSize=None, dbAutoStart=None, dbTimeout=None, dbSlaveOkay=False, dbNetworkTimeout=None, dbDocClass=dict, dbTZAware=False):
+    def connect_to_mongodb(self, dbHost='localhost', dbPort=27017, dbMaxPoolSize=10, dbNetworkTimeout=None, dbDocClass=dict, dbTZAware=False):
         """
         Loads pymongo and connects to the MongoDB host using parameters submitted.
         
@@ -123,15 +123,14 @@ class ConnectionManager(object):
         #print "host is               [ %s ]" % dbHost
         #print "port is               [ %s ]" % dbPort
         #print "pool_size is          [ %s ]" % dbPoolSize
-        #print "auto_start_request is [ %s ]" % dbAutoStart
         #print "timeout is            [ %s ]" % dbTimeout
         #print "slave_okay is         [ %s ]" % dbSlaveOkay
         #print "document_class is     [ %s ]" % dbDocClass
         #print "tz_aware is           [ %s ]" % dbTZAware
-        print "| Connect To MondoDB | dbHost | dbPort | dbPoolSize | dbAutoStart | dbTimeout | dbSlaveOkay | dbDocClass | dbTZAware |"
-        print "| Connect To MondoDB | %s | %s | %s | %s | %s | %s | %s | %s |" % (dbHost,dbPort,dbPoolSize,dbAutoStart,dbTimeout,dbSlaveOkay,dbDocClass,dbTZAware)
+        print "| Connect To MondoDB | dbHost | dbPort | dbMaxPoolSize | dbNetworktimeout | dbDocClass | dbTZAware |"
+        print "| Connect To MondoDB | %s | %s | %s | %s | %s | %s |" % (dbHost,dbPort,dbMaxPoolSize,dbNetworkTimeout,dbDocClass,dbTZAware)
 
-        self._dbconnection = db_api_2.connection.Connection (host=dbHost, port=dbPort, pool_size=dbPoolSize, auto_start_request=dbAutoStart, timeout=dbTimeout, slave_okay=dbSlaveOkay, network_timeout=dbNetworkTimeout, document_class=dbDocClass, tz_aware=dbTZAware);
+        self._dbconnection = db_api_2.connection.Connection (host=dbHost, port=dbPort, max_pool_size=dbMaxPoolSize, network_timeout=dbNetworkTimeout, document_class=dbDocClass, tz_aware=dbTZAware);
         
     def disconnect_from_database(self):
         """
