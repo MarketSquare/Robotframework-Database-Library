@@ -22,11 +22,11 @@ from distutils.core import setup
 import sys, os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
 
-from DatabaseLibrary import __version__
+version = '0.6'
 
 def main():
     setup(name         = 'robotframework-databaselibrary',
-          version      = __version__,
+          version      = version,
           description  = 'Database utility library for Robot Framework',
           author       = 'Franz Allan Valencia See',
           author_email = 'franz.see@gmail.com',
