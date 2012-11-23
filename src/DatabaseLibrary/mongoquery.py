@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 import json
-from pymongo.objectid import ObjectId
+from bson.objectid import ObjectId
 
 class MongoQuery(object):
     """
