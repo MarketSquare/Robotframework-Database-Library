@@ -175,7 +175,7 @@ class MongoQuery(object):
             if db :
                 self._dbconnection.end_request() 
 
-    def retrieve_all_mongodb_records(self, dbName, dbCollName):
+    def retrieve_all_mongodb_records(self, dbName, dbCollName, returnDocuments=False):
         """
         Retrieve ALL of the records in a give MongoDB database collection.
         Returned value must be single quoted for comparison, otherwise you will
@@ -186,22 +186,9 @@ class MongoQuery(object):
         | Log | ${allResults} |
         | Should Contain X Times | ${allResults} | '${recordNo1}' | 1 |
         """
-        db = None
-        results = ''
-        try:
-            dbName = str(dbName)
-            dbCollName = str(dbCollName)
-            db = self._dbconnection['%s' % (dbName,)]
-            coll = db['%s' % (dbCollName)]
-            for d in coll.find():
-                results = '%s%s' % (results, d.items())
-            print "| ${allResults} | Retrieve All MongoDB Records | %s | %s |" % (dbName,dbCollName)
-            return results
-        finally :
-            if db :
-                self._dbconnection.end_request() 
+        return self.retrieve_mongodb_records(dbName, dbCollName, {}, returnDocuments)
 
-    def retrieve_some_mongodb_records(self, dbName, dbCollName, recordJSON):
+    def retrieve_some_mongodb_records(self, dbName, dbCollName, recordJSON, returnDocuments=False):
         """
         Retrieve some of the records from a given MongoDB database collection
         based on the JSON entered.
@@ -213,18 +200,25 @@ class MongoQuery(object):
         | Log | ${allResults} |
         | Should Contain X Times | ${allResults} | '${recordNo1}' | 1 |
         """
+        print "| ${allResults} | Retrieve Some MongoDB Records | %s | %s | %s |" % (dbName,dbCollName,recordJSON)
+        return self.retrieve_mongodb_records(dbName, dbCollName, recordJSON, returnDocuments)
+
+    def retrieve_mongodb_records(self, dbName, dbCollName, recordJSON, returnDocuments=False):
         db = None
-        results = ''
         try:
             dbName = str(dbName)
             dbCollName = str(dbCollName)
-            recordJSON = dict(json.loads(recordJSON))
+            criteria = dict(json.loads(recordJSON))
             db = self._dbconnection['%s' % (dbName,)]
             coll = db['%s' % (dbCollName)]
-            for d in coll.find(recordJSON):
-                results = '%s%s' % (results, d.items())
-            print "| ${allResults} | Retrieve Some MongoDB Records | %s | %s | %s |" % (dbName,dbCollName,recordJSON)
-            return results
+            results = coll.find(criteria)
+            if returnDocuments:
+                return list(results)
+            else:
+                response = ''
+                for d in results:
+                    response = '%s%s' % (response, d.items())
+                return response
         finally :
             if db :
                 self._dbconnection.end_request() 
