@@ -17,7 +17,7 @@ from query import Query
 from assertion import Assertion
 from mongoquery import MongoQuery
 
-__version__ = '0.6'
+__version__ = '0.7.0a1'
 
 class DatabaseLibrary(ConnectionManager, Query, Assertion, MongoQuery):
     """
