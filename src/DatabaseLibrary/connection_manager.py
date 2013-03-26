@@ -127,8 +127,8 @@ class ConnectionManager(object):
         #print "slave_okay is         [ %s ]" % dbSlaveOkay
         #print "document_class is     [ %s ]" % dbDocClass
         #print "tz_aware is           [ %s ]" % dbTZAware
-        print "| Connect To MondoDB | dbHost | dbPort | dbMaxPoolSize | dbNetworktimeout | dbDocClass | dbTZAware |"
-        print "| Connect To MondoDB | %s | %s | %s | %s | %s | %s |" % (dbHost,dbPort,dbMaxPoolSize,dbNetworkTimeout,dbDocClass,dbTZAware)
+        print "| Connect To MongoDB | dbHost | dbPort | dbMaxPoolSize | dbNetworktimeout | dbDocClass | dbTZAware |"
+        print "| Connect To MongoDB | %s | %s | %s | %s | %s | %s |" % (dbHost,dbPort,dbMaxPoolSize,dbNetworkTimeout,dbDocClass,dbTZAware)
 
         self._dbconnection = db_api_2.connection.Connection (host=dbHost, port=dbPort, max_pool_size=dbMaxPoolSize, network_timeout=dbNetworkTimeout, document_class=dbDocClass, tz_aware=dbTZAware);
         
