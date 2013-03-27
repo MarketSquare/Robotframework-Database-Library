@@ -13,7 +13,6 @@
 #  limitations under the License.
 
 import json
-from bson.objectid import ObjectId
 
 class MongoQuery(object):
     """
@@ -159,6 +158,7 @@ class MongoQuery(object):
         | ${allResults} | Save MongoDB Records | foo | bar | {"timestamp":1, "msg":"Hello 1"} |
         | Log | ${allResults} |
         """
+        from bson.objectid import ObjectId
         db = None
         try:
             dbName = str(dbName)
@@ -242,6 +242,7 @@ class MongoQuery(object):
         | ${output} | Retrieve All MongoDB Records | ${MDBDB} | ${MDBColl} |
         | Should Not Contain | ${output} | 'timestamp', 1 |
         """
+        from bson.objectid import ObjectId
         db = None
         try:
             dbName = str(dbName)
