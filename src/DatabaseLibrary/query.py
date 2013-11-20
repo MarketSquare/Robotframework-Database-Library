@@ -210,6 +210,8 @@ class Query(object):
                 line = line.strip()
                 if line.startswith('#'):
                     continue
+                elif line.startswith('--'):
+                    continue
                 
                 sqlFragments = line.split(';')
                 if len(sqlFragments) == 1:
