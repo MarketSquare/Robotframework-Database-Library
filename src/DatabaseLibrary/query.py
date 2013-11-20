@@ -87,6 +87,7 @@ class Query(object):
         try:
             cur = self._dbconnection.cursor()
             self.__execute_sql(cur, selectStatement)
+            cur.fetchall()
             rowCount = cur.rowcount
             return rowCount
         finally :
