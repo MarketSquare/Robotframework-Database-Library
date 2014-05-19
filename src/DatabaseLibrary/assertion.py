@@ -64,9 +64,9 @@ class Assertion(object):
             raise AssertionError("Expected to have have no rows from '%s' "
                                  "but got some rows : %s." % (selectStatement, queryResults))
 
-    def row_count_is_0(self,selectStatement):
+    def row_count_is_0(self,fromClause,whereClause=None):
         """
-        Check if any rows are returned from the submitted `selectStatement`.
+        Check if any rows are returned from the submitted `fromClause` and `whereclause`.
         If there are, then this will throw an AssertionError.
         
         For example, given we have a table `person` with the following data:
@@ -74,21 +74,20 @@ class Assertion(object):
         |  1 | Franz Allan | See       |
         
         When you have the following assertions in your robot
-        | Row Count is 0 | select id from person where first_name = 'Franz Allan' |
-        | Row Count is 0 | select id from person where first_name = 'John' |
+        | Row Count is 0 | person | first_name = 'Franz Allan' |
+        | Row Count is 0 | person | first_name = 'John' |
         
         Then you will get the following:
-        | Row Count is 0 | select id from person where first_name = 'Franz Allan' | # FAIL |
-        | Row Count is 0 | select id from person where first_name = 'John' | # PASS |          
+        | Row Count is 0 | select count(1) from person where first_name = 'Franz Allan' | # FAIL |
+        | Row Count is 0 | select count(1) from person where first_name = 'John' | # PASS |          
         """
-        num_rows = self.row_count(selectStatement)
+        num_rows = self.row_count(fromClause,whereClause)
         if (num_rows > 0):
-            raise AssertionError("Expected zero rows to be returned from '%s' "
-                                 "but got rows back. Number of rows returned was %s" % (selectStatement, num_rows))
+            raise AssertionError("Expected zero rows to be returned but got %s rows back." % (num_rows))
 
-    def row_count_is_equal_to_x(self,selectStatement,numRows):
+    def row_count_is_equal_to_x(self,numRows,fromClause,whereClause=None):
         """
-        Check if the number of rows returned from `selectStatement` is equal to
+        Check if the number of rows returned from `fromClause` and `whereclause` is equal to
         the value submitted. If not, then this will throw an AssertionError.
         
         For example, given we have a table `person` with the following data:
@@ -97,21 +96,20 @@ class Assertion(object):
         |  2 | Jerry       | Schneider |
         
         When you have the following assertions in your robot
-        | Row Count Is Equal To X | select id from person | 1 |
-        | Row Count Is Equal To X | select id from person where first_name = 'John' | 0 |
+        | Row Count Is Equal To X | 1 | person |
+        | Row Count Is Equal To X | 0 | person | first_name = 'John' |
         
         Then you will get the following:
-        | Row Count Is Equal To X | select id from person | 1 | # FAIL |
-        | Row Count Is Equal To X | select id from person where first_name = 'John' | 0 | # PASS |          
+        | Row Count Is Equal To X | 1 | select count(1) from person | # FAIL |
+        | Row Count Is Equal To X | 0 | select count(1) from person where first_name = 'John' | # PASS |
         """
-        num_rows = self.row_count(selectStatement)
+        num_rows = self.row_count(fromClause,whereClause)
         if (num_rows != int(numRows.encode('ascii'))):
-            raise AssertionError("Expected same number of rows to be returned from '%s' "
-                                 "than the returned rows of %s" % (selectStatement, num_rows))
+            raise AssertionError("Expected %s row(s) to be returned but got %s row(s) back" % (numRows, num_rows))
 
-    def row_count_is_greater_than_x(self,selectStatement,numRows):
+    def row_count_is_greater_than_x(self,numRows,fromClause,whereClause=None):
         """
-        Check if the number of rows returned from `selectStatement` is greater
+        Check if the number of rows returned from `fromClause` and `whereclause` is greater
         than the value submitted. If not, then this will throw an AssertionError.
         
         For example, given we have a table `person` with the following data:
@@ -120,21 +118,20 @@ class Assertion(object):
         |  2 | Jerry       | Schneider |
         
         When you have the following assertions in your robot
-        | Row Count Is Greater Than X | select id from person | 1 |
-        | Row Count Is Greater Than X | select id from person where first_name = 'John' | 0 |
+        | Row Count Is Greater Than X | 1 | person |
+        | Row Count Is Greater Than X | 0 | person | first_name = 'John' |
         
         Then you will get the following:
-        | Row Count Is Greater Than X | select id from person | 1 | # PASS |
-        | Row Count Is Greater Than X | select id from person where first_name = 'John' | 0 | # FAIL |          
+        | Row Count Is Greater Than X | 1 | select count(1) from person | # PASS |
+        | Row Count Is Greater Than X | 0 | select count(1) from person where first_name = 'John' | # FAIL |          
         """
-        num_rows = self.row_count(selectStatement)
+        num_rows = self.row_count(fromClause,whereClause)
         if (num_rows <= int(numRows.encode('ascii'))):
-            raise AssertionError("Expected more rows to be returned from '%s' "
-                                 "than the returned rows of %s" % (selectStatement, num_rows))
+            raise AssertionError("Expected more than %s row(s) to be returned but got %s row(s) back" % (numRows, num_rows))
 
-    def row_count_is_less_than_x(self,selectStatement,numRows):
+    def row_count_is_less_than_x(self,numRows,fromClause,whereClause=None):
         """
-        Check if the number of rows returned from `selectStatement` is less
+        Check if the number of rows returned from `fromClause` and `whereclause` is less
         than the value submitted. If not, then this will throw an AssertionError.
         
         For example, given we have a table `person` with the following data:
@@ -143,17 +140,16 @@ class Assertion(object):
         |  2 | Jerry       | Schneider |
         
         When you have the following assertions in your robot
-        | Row Count Is Less Than X | select id from person | 3 |
-        | Row Count Is Less Than X | select id from person where first_name = 'John' | 1 |
+        | Row Count Is Less Than X | 3 | person |
+        | Row Count Is Less Than X | 1 | person | first_name = 'John' |
         
         Then you will get the following:
-        | Row Count Is Less Than X | select id from person | 3 | # PASS |
-        | Row Count Is Less Than X | select id from person where first_name = 'John' | 1 | # FAIL |          
+        | Row Count Is Less Than X | 3 | select count(1) from person | # PASS |
+        | Row Count Is Less Than X | 1 | select count(1) from person where first_name = 'John' | # FAIL |          
         """
-        num_rows = self.row_count(selectStatement)
+        num_rows = self.row_count(fromClause,whereClause)
         if (num_rows >= int(numRows.encode('ascii'))):
-            raise AssertionError("Expected less rows to be returned from '%s' "
-                                 "than the returned rows of %s" % (selectStatement, num_rows))
+            raise AssertionError("Expected less than %s row(s) to be returned but got %s row(s) back" % (numRows, num_rows))
                                  
     def table_must_exist(self,tableName):
         """
