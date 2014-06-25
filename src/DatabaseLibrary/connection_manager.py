@@ -26,7 +26,7 @@ class ConnectionManager(object):
         """
         self._dbconnection = None
         
-    def connect_to_database(self, dbapiModuleName=None, dbName=None, dbUsername=None, dbPassword=None, dbHost='localhost', dbPort="5432", dbConfigFile="./resources/db.cfg"):
+    def connect_to_database(self, dbapiModuleName=None, dbName=None, dbUsername=None, dbPassword=None, dbHost=None, dbPort=None, dbConfigFile="./resources/db.cfg"):
         """
         Loads the DB API 2.0 module given `dbapiModuleName` then uses it to 
         connect to the database using `dbName`, `dbUsername`, and `dbPassword`.
@@ -66,7 +66,7 @@ class ConnectionManager(object):
         dbUsername = dbUsername or config.get('default', 'dbUsername')
         dbPassword = dbPassword or config.get('default', 'dbPassword')
         dbHost = dbHost or config.get('default', 'dbHost') or 'localhost'
-        dbPort = int(dbPort or config.get('default', 'dbPort'))
+        dbPort = int(dbPort or config.get('default', 'dbPort') or 5432)
         
         db_api_2 = __import__(dbapiModuleName)
         if dbapiModuleName in ["MySQLdb", "pymysql"]:
