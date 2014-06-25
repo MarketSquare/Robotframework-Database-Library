@@ -168,7 +168,11 @@ class Assertion(object):
         | Table Must Exist | person | # PASS |
         | Table Must Exist | first_name | # FAIL |
         """
-        selectStatement = ("select * from information_schema.tables where table_name='%s'" % tableName)
+        dbapiModuleName = self._db_api_2.__name__
+        if dbapiModuleName in ["cx_Oracle"]:
+            selectStatement = ("select * from all_objects where object_type in ('TABLE','VIEW') and owner = SYS_CONTEXT('USERENV', 'SESSION_USER') and object_name = upper('%s')" % tableName)
+        else:
+            selectStatement = ("select * from information_schema.tables where table_name='%s'" % tableName)
         num_rows = self.row_count(selectStatement)
         if (num_rows == 0):
             raise AssertionError("Table '%s' does not exist in the db" % tableName)
