@@ -71,10 +71,14 @@ class ConnectionManager(object):
         db_api_2 = __import__(dbapiModuleName)
         if dbapiModuleName in ["MySQLdb", "pymysql"]:
             dbPort = dbPort or 3306
+            print "| Connect To Database | dbName | dbUserName | dbPassword | dbHost | dbPort |"
+            print "| Connect To Database | %s | %s | %s | %s | %s |" % (dbName,dbUsername,dbPassword,dbHost,dbPort)
             logger.debug ('Connecting using : %s.connect(db=%s, user=%s, passwd=%s, host=%s, port=%s) ' % (dbapiModuleName, dbName, dbUsername, dbPassword, dbHost, dbPort))
             self._dbconnection = db_api_2.connect (db=dbName, user=dbUsername, passwd=dbPassword, host=dbHost, port=dbPort)
         elif dbapiModuleName in ["psycopg2"]:
             dbPort = dbPort or 5432            
+            print "| Connect To Database | dbName | dbUserName | dbPassword | dbHost | dbPort |"
+            print "| Connect To Database | %s | %s | %s | %s | %s |" % (dbName,dbUsername,dbPassword,dbHost,dbPort)
             logger.debug ('Connecting using : %s.connect(database=%s, user=%s, password=%s, host=%s, port=%s) ' % (dbapiModuleName, dbName, dbUsername, dbPassword, dbHost, dbPort))
             self._dbconnection = db_api_2.connect (database=dbName, user=dbUsername, password=dbPassword, host=dbHost, port=dbPort)
         elif dbapiModuleName in ["pyodbc"]:
@@ -82,6 +86,8 @@ class ConnectionManager(object):
             logger.debug ('Connecting using : %s.connect(DRIVER={SQL Server};SERVER=%s,%s;DATABASE=%s;UID=%s;PWD=%s)' % (dbapiModuleName,dbHost,dbPort,dbName,dbPort,dbUsername, dbPassword))
             self._dbconnection = db_api_2.connect('DRIVER={SQL Server};SERVER=%s,%s;DATABASE=%s;UID=%s;PWD=%s'%(dbHost,dbPort,dbName,dbUsername,dbPassword))
         else:
+            print "| Connect To Database | dbName | dbUserName | dbPassword | dbHost | dbPort |"
+            print "| Connect To Database | %s | %s | %s | %s | %s |" % (dbName,dbUsername,dbPassword,dbHost,dbPort)
             logger.debug ('Connecting using : %s.connect(database=%s, user=%s, password=%s, host=%s, port=%s) ' % (dbapiModuleName, dbName, dbUsername, dbPassword, dbHost, dbPort))
             self._dbconnection = db_api_2.connect (database=dbName, user=dbUsername, password=dbPassword, host=dbHost, port=dbPort)
             
@@ -101,7 +107,34 @@ class ConnectionManager(object):
         
         db_connect_string = 'db_api_2.connect(%s)' % db_connect_string
         
+        print "| Connect To Database Using Custom Params | db_connect_string |"
+        print "| Connect To Database Using Custom Params | %s |" % (db_connect_string)
         self._dbconnection = eval(db_connect_string)
+        
+    def connect_to_mongodb(self, dbHost='localhost', dbPort=27017, dbMaxPoolSize=10, dbNetworkTimeout=None, dbDocClass=dict, dbTZAware=False):
+        """
+        Loads pymongo and connects to the MongoDB host using parameters submitted.
+        
+        Example usage:
+        | # To connect to foo.bar.org's MongoDB service on port 27017 |
+        | Connect To MongoDB | foo.bar.org | ${27017} |
+        
+        """
+        dbapiModuleName = 'pymongo'
+        db_api_2 = __import__(dbapiModuleName);
+        
+        dbPort = int(dbPort)
+        #print "host is               [ %s ]" % dbHost
+        #print "port is               [ %s ]" % dbPort
+        #print "pool_size is          [ %s ]" % dbPoolSize
+        #print "timeout is            [ %s ]" % dbTimeout
+        #print "slave_okay is         [ %s ]" % dbSlaveOkay
+        #print "document_class is     [ %s ]" % dbDocClass
+        #print "tz_aware is           [ %s ]" % dbTZAware
+        print "| Connect To MongoDB | dbHost | dbPort | dbMaxPoolSize | dbNetworktimeout | dbDocClass | dbTZAware |"
+        print "| Connect To MongoDB | %s | %s | %s | %s | %s | %s |" % (dbHost,dbPort,dbMaxPoolSize,dbNetworkTimeout,dbDocClass,dbTZAware)
+
+        self._dbconnection = db_api_2.connection.Connection (host=dbHost, port=dbPort, max_pool_size=dbMaxPoolSize, network_timeout=dbNetworkTimeout, document_class=dbDocClass, tz_aware=dbTZAware);
         
     def disconnect_from_database(self):
         """
@@ -110,5 +143,16 @@ class ConnectionManager(object):
         For example:
         | Disconnect From Database | # disconnects from current connection to the database | 
         """
+        print "| Disconnect From Database |"
         self._dbconnection.close()
+        
+    def disconnect_from_mongodb(self):
+        """
+        Disconnects from the MongoDB server.
+        
+        For example:
+        | Disconnect From MongoDB | # disconnects from current connection to the MongoDB server | 
+        """
+        print "| Disconnect From MongoDB |"
+        self._dbconnection.disconnect()
         

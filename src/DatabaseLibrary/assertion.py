@@ -35,6 +35,7 @@ class Assertion(object):
         | Check If Exists In Database | select id from person where first_name = 'Franz Allan' | # PASS |
         | Check If Exists In Database | select id from person where first_name = 'John' | # FAIL |          
         """
+        print "| Check If Exists In Database | %s |" % (selectStatement)
         if not self.query(selectStatement):
             raise AssertionError("Expected to have have at least one row from '%s' "
                                  "but got 0 rows." % selectStatement)
@@ -60,6 +61,7 @@ class Assertion(object):
         | Check If Not Exists In Database | select id from person where first_name = 'Franz Allan' | # FAIL |
         """
         queryResults = self.query(selectStatement) 
+        print "| Check If Not Exists In Database | %s |" % (selectStatement)
         if queryResults:
             raise AssertionError("Expected to have have no rows from '%s' "
                                  "but got some rows : %s." % (selectStatement, queryResults))
@@ -82,6 +84,7 @@ class Assertion(object):
         | Row Count is 0 | select id from person where first_name = 'John' | # PASS |          
         """
         num_rows = self.row_count(selectStatement)
+        print "| Row Count is 0 | %s |" % (selectStatement)
         if (num_rows > 0):
             raise AssertionError("Expected zero rows to be returned from '%s' "
                                  "but got rows back. Number of rows returned was %s" % (selectStatement, num_rows))
@@ -105,6 +108,7 @@ class Assertion(object):
         | Row Count Is Equal To X | select id from person where first_name = 'John' | 0 | # PASS |          
         """
         num_rows = self.row_count(selectStatement)
+        print "| Row Count Is Equal To X | %s | %s |" % (selectStatement,numRows)
         if (num_rows != int(numRows.encode('ascii'))):
             raise AssertionError("Expected same number of rows to be returned from '%s' "
                                  "than the returned rows of %s" % (selectStatement, num_rows))
@@ -128,6 +132,7 @@ class Assertion(object):
         | Row Count Is Greater Than X | select id from person where first_name = 'John' | 0 | # FAIL |          
         """
         num_rows = self.row_count(selectStatement)
+        print "| Row Count Is Greater Than X | %s | %s |" % (selectStatement,numRows)
         if (num_rows <= int(numRows.encode('ascii'))):
             raise AssertionError("Expected more rows to be returned from '%s' "
                                  "than the returned rows of %s" % (selectStatement, num_rows))
@@ -151,6 +156,7 @@ class Assertion(object):
         | Row Count Is Less Than X | select id from person where first_name = 'John' | 1 | # FAIL |          
         """
         num_rows = self.row_count(selectStatement)
+        print "| Row Count Is Less Than X | %s | %s |" % (selectStatement,numRows)
         if (num_rows >= int(numRows.encode('ascii'))):
             raise AssertionError("Expected less rows to be returned from '%s' "
                                  "than the returned rows of %s" % (selectStatement, num_rows))
@@ -174,6 +180,7 @@ class Assertion(object):
         else:
             selectStatement = ("select * from information_schema.tables where table_name='%s'" % tableName)
         num_rows = self.row_count(selectStatement)
+        print "| Table Must Exist | %s |" % (tableName)
         if (num_rows == 0):
             raise AssertionError("Table '%s' does not exist in the db" % tableName)
 

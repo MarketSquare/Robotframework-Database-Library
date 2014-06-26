@@ -19,10 +19,16 @@
 
 from distutils.core import setup
 
-import sys, os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
-
-from DatabaseLibrary import __version__
+# http://stackoverflow.com/questions/458550/standard-way-to-embed-version-into-python-package/7071358#7071358
+import re
+VERSIONFILE="src/DatabaseLibrary/__init__.py"
+verstrline = open(VERSIONFILE, "rt").read()
+VSRE = r"^__version__ = ['\"]([^'\"]*)['\"]"
+matches = re.search(VSRE, verstrline, re.M)
+if matches:
+    __version__ = matches.group(1)
+else:
+    raise RuntimeError("Unable to find version string in %s." % (VERSIONFILE,))
 
 def main():
     setup(name         = 'robotframework-databaselibrary',

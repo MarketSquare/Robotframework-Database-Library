@@ -15,10 +15,11 @@
 from connection_manager import ConnectionManager
 from query import Query
 from assertion import Assertion
+from mongoquery import MongoQuery
 
-__version__ = '0.6'
+__version__ = '0.7.0a3'
 
-class DatabaseLibrary(ConnectionManager, Query, Assertion):
+class DatabaseLibrary(ConnectionManager, Query, Assertion, MongoQuery):
     """
     Database Library contains utilities meant for Robot Framework's usage.
     

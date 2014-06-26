@@ -54,6 +54,7 @@ class Query(object):
             cur = self._dbconnection.cursor()
             self.__execute_sql(cur, selectStatement)
             allRows = cur.fetchall()
+            print "| @{queryResults} | Query | %s |" % (selectStatement)
             return allRows
         finally :
             if cur :
@@ -89,6 +90,7 @@ class Query(object):
             self.__execute_sql(cur, selectStatement)
             cur.fetchall()
             rowCount = cur.rowcount
+            print "| ${rowCount} | Row Count | %s |" % (selectStatement)
             return rowCount
         finally :
             if cur :
@@ -117,6 +119,7 @@ class Query(object):
             cur = self._dbconnection.cursor()
             self.__execute_sql(cur, selectStatement)
             description = cur.description
+            print "| @{queryResults} | Description | %s |" % (selectStatement)
             return description
         finally :
             if cur :
@@ -144,6 +147,7 @@ class Query(object):
             result = self.__execute_sql(cur, selectStatement)
             if result is not None:
                 return result.fetchall()
+            print "| Delete All Rows From Table | %s |" % (tableName)
             self._dbconnection.commit()
         finally :
             if cur :
