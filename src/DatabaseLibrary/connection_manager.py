@@ -66,7 +66,7 @@ class ConnectionManager(object):
         dbUsername = dbUsername or config.get('default', 'dbUsername')
         dbPassword = dbPassword or config.get('default', 'dbPassword')
         dbHost = dbHost or config.get('default', 'dbHost') or 'localhost'
-        dbPort = int(dbPort or config.get('default', 'dbPort') or 5432)
+        dbPort = int(dbPort or config.get('default', 'dbPort'))
         
         db_api_2 = __import__(dbapiModuleName)
         if dbapiModuleName in ["MySQLdb", "pymysql"]:
