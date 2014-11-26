@@ -59,9 +59,9 @@ class Query(object):
             if cur :
                 self._dbconnection.rollback() 
 
-    def row_count(self, selectStatement):
+    def row_count(self, fromClause, whereClause=None):
         """
-        Uses the input `selectStatement` to query the database and returns
+        Uses the input `fromClause` and `whereclause` to query the database and returns
         the number of rows from the query.
         
         For example, given we have a table `person` with the following data:
@@ -70,25 +70,29 @@ class Query(object):
         |  2 | Jerry       | Schneider |
         
         When you do the following:
-        | ${rowCount} | Row Count | select * from person |
+        | ${rowCount} | Row Count | person |
         | Log | ${rowCount} |
         
         You will get the following:
         2
         
         Also, you can do something like this:
-        | ${rowCount} | Row Count | select * from person where id = 2 |
+        | ${rowCount} | Row Count | person | id = 2 |
         | Log | ${rowCount} |
         
         And get the following
         1
         """
+        selectStatement = ""
+        if (whereClause == None):
+            selectStatement = ("select count(1) from %s" % fromClause)
+        else:
+            selectStatement = ("select count(1) from %s where %s" % (fromClause, whereClause))
         cur = None
         try:
             cur = self._dbconnection.cursor()
             self.__execute_sql(cur, selectStatement)
-            cur.fetchall()
-            rowCount = cur.rowcount
+            rowCount = cur.fetchone()[0]
             return rowCount
         finally :
             if cur :
