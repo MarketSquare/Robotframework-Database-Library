@@ -25,6 +25,7 @@ class ConnectionManager(object):
         Initializes _dbconnection to None.
         """
         self._dbconnection = None
+        self.db_api_module_name = None
 
     def connect_to_database(self, dbapiModuleName=None, dbName=None, dbUsername=None, dbPassword=None, dbHost=None, dbPort=None, dbConfigFile="./resources/db.cfg"):
         """
@@ -67,6 +68,8 @@ class ConnectionManager(object):
         dbPassword = dbPassword or config.get('default', 'dbPassword')
         dbHost = dbHost or config.get('default', 'dbHost') or 'localhost'
         dbPort = int(dbPort or config.get('default', 'dbPort'))
+
+        self.db_api_module_name = dbapiModuleName
 
         db_api_2 = __import__(dbapiModuleName)
         if dbapiModuleName in ["MySQLdb", "pymysql"]:
