@@ -170,6 +170,8 @@ class Assertion(object):
         """
         if self.db_api_module_name in ["cx_Oracle"]:
             selectStatement = ("select * from all_objects where object_type in ('TABLE','VIEW') and owner = SYS_CONTEXT('USERENV', 'SESSION_USER') and object_name = upper('%s')" % tableName)
+        elif self.db_api_module_name in ["sqlite3"]:
+            selectStatement = ("SELECT name FROM sqlite_master WHERE type='table' AND name='%s' COLLATE NOCASE" % tableName)
         else:
             selectStatement = ("select * from information_schema.tables where table_name='%s'" % tableName)
         num_rows = self.row_count(selectStatement)
