@@ -104,6 +104,7 @@ class ConnectionManager(object):
 
         db_connect_string = 'db_api_2.connect(%s)' % db_connect_string
 
+        self.db_api_module_name = dbapiModuleName
         self._dbconnection = eval(db_connect_string)
 
     def disconnect_from_database(self):
