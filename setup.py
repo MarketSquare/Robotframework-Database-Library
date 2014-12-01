@@ -32,7 +32,8 @@ def main():
           author_email = 'franz.see@gmail.com',
           url          = 'https://github.com/franz-see/Robotframework-Database-Library',
           package_dir  = { '' : 'src'},
-          packages     = ['DatabaseLibrary']
+          packages     = ['DatabaseLibrary'],
+          requires     = ['robotframework']
           )
         
 
