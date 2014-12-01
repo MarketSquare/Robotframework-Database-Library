@@ -1,36 +1,30 @@
 *** Settings ***
+Suite Setup       Connect To Database    pymysql    ${DBName}    ${DBUser}    ${DBPass}    ${DBHost}    ${DBPort}
+Suite Teardown    Disconnect From Database
 Library           DatabaseLibrary
 Library           OperatingSystem
 
 *** Variables ***
+${DBHost}         hostname.domainname.com
 ${DBName}         my_db_test
+${DBPass}         Password
+${DBPort}         3306
+${DBUser}         testUser
 
 *** Test Cases ***
-Remove old DB if exists
-    Comment    ${Status}    ${value} =    Run Keyword And Ignore Error    File Should Not Exist    /Users/jerry/Desktop/TestCases/TestSQLite3.db
-    ${Status}    ${value} =    Run Keyword And Ignore Error    File Should Not Exist    ./${DBName}.db
-    Comment    Run Keyword If    "${Status}" == "FAIL"    Run Keyword And Ignore Error    Run    rm -rf $HOME/Desktop/TestCases/TestSQLite3.db
-    Run Keyword If    "${Status}" == "FAIL"    Run Keyword And Ignore Error    Run    rm -rf ./${DBName}.db
-    Comment    File Should Not Exist    /Users/jerry/Desktop/TestCases/TestSQLite3.db
-    File Should Not Exist    ./${DBName}.db
-    Comment    Sleep    1s
-
-Connect to SQLiteDB
-    Comment    Connect To Database Using Custom Params sqlite3 database='path_to_dbfile\dbname.db'
-    Connect To Database Using Custom Params    sqlite3    database="./${DBName}.db"
-
 Create person table
-    ${output} =    Execute SQL String    CREATE TABLE person (id integer unique,first_name varchar,last_name varchar);
+    ${output} =    Execute SQL String    CREATE TABLE person (id integer unique,first_name varchar(20),last_name varchar(20));
     Log    ${output}
     Should Be Equal As Strings    ${output}    None
 
 Execute SQL Script - Insert Data person table
-    ${output} =    Execute SQL Script    ./${DBName}_insertData.sql
+    Comment    ${output} =    Execute SQL Script    ./${DBName}_insertData.sql
+    ${output} =    Execute SQL Script    ./my_db_test_insertData.sql
     Log    ${output}
     Should Be Equal As Strings    ${output}    None
 
 Execute SQL String - Create Table
-    ${output} =    Execute SQL String    create table foobar (id integer primary key, firstname varchar unique)
+    ${output} =    Execute SQL String    create table foobar (id integer primary key, firstname varchar(20) unique)
     Log    ${output}
     Should Be Equal As Strings    ${output}    None
 
@@ -71,11 +65,11 @@ Verify person Description
     @{queryResults} =    Description    SELECT * FROM person LIMIT 1;
     Log Many    @{queryResults}
     ${output} =    Set Variable    ${queryResults[0]}
-    Should Be Equal As Strings    ${output}    ('id', None, None, None, None, None, None)
+    Should Be Equal As Strings    ${output}    (u'id', 3, None, 11, 11, 0, 1)
     ${output} =    Set Variable    ${queryResults[1]}
-    Should Be Equal As Strings    ${output}    ('first_name', None, None, None, None, None, None)
+    Should Be Equal As Strings    ${output}    (u'first_name', 253, None, 20, 20, 0, 1)
     ${output} =    Set Variable    ${queryResults[2]}
-    Should Be Equal As Strings    ${output}    ('last_name', None, None, None, None, None, None)
+    Should Be Equal As Strings    ${output}    (u'last_name', 253, None, 20, 20, 0, 1)
     ${NumColumns} =    Get Length    ${queryResults}
     Should Be Equal As Integers    ${NumColumns}    3
 
@@ -85,21 +79,21 @@ Verify foobar Description
     @{queryResults} =    Description    SELECT * FROM foobar LIMIT 1;
     Log Many    @{queryResults}
     ${output} =    Set Variable    ${queryResults[0]}
-    Should Be Equal As Strings    ${output}    ('id', None, None, None, None, None, None)
+    Should Be Equal As Strings    ${output}    (u'id', 3, None, 11, 11, 0, 0)
     ${output} =    Set Variable    ${queryResults[1]}
-    Should Be Equal As Strings    ${output}    ('firstname', None, None, None, None, None, None)
+    Should Be Equal As Strings    ${output}    (u'firstname', 253, None, 20, 20, 0, 1)
     ${NumColumns} =    Get Length    ${queryResults}
     Should Be Equal As Integers    ${NumColumns}    2
 
 Verify Query - Row Count person table
     ${output} =    Query    SELECT COUNT(*) FROM person;
     Log    ${output}
-    Should Be Equal As Strings    ${output}    [(2,)]
+    Should Be Equal As Strings    ${output}    ((2,),)
 
 Verify Query - Row Count foobar table
     ${output} =    Query    SELECT COUNT(*) FROM foobar;
     Log    ${output}
-    Should Be Equal As Strings    ${output}    [(0,)]
+    Should Be Equal As Strings    ${output}    ((0,),)
 
 Verify Execute SQL String - Row Count person table
     ${output} =    Execute SQL String    SELECT COUNT(*) FROM person;
@@ -119,7 +113,7 @@ Insert Data Into Table foobar
 Verify Query - Row Count foobar table 1 row
     ${output} =    Query    SELECT COUNT(*) FROM foobar;
     Log    ${output}
-    Should Be Equal As Strings    ${output}    [(1,)]
+    Should Be Equal As Strings    ${output}    ((1,),)
 
 Verify Delete All Rows From Table - foobar
     Delete All Rows From Table    foobar
@@ -132,9 +126,6 @@ Verify Query - Row Count foobar table 0 row
     Comment    Should Be Equal As Strings    ${output}    [(0,)]
 
 Drop person and foobar tables
-    ${output} =    Execute SQL String    DROP TABLE IF EXISTS person;
-    Log    ${output}
-    Should Be Equal As Strings    ${output}    None
-    ${output} =    Execute SQL String    DROP TABLE IF EXISTS foobar;
+    ${output} =    Execute SQL String    DROP TABLE person,foobar;
     Log    ${output}
     Should Be Equal As Strings    ${output}    None
