@@ -126,6 +126,6 @@ Verify Query - Row Count foobar table 0 row
     Comment    Should Be Equal As Strings    ${output}    [(0,)]
 
 Drop person and foobar tables
-    ${output} =    Execute SQL String    DROP TABLE person,foobar;
+    ${output} =    Execute SQL String    DROP TABLE IF EXISTS person,foobar;
     Log    ${output}
     Should Be Equal As Strings    ${output}    None
