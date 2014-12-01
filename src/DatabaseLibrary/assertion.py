@@ -28,12 +28,12 @@ class Assertion(object):
         |  1 | Franz Allan | See       |
 
         When you have the following assertions in your robot
-        | Check If Exists In Database | select id from person where first_name = 'Franz Allan' |
-        | Check If Exists In Database | select id from person where first_name = 'John' |
+        | Check If Exists In Database | SELECT id FROM person WHERE first_name = 'Franz Allan' |
+        | Check If Exists In Database | SELECT id FROM person WHERE first_name = 'John' |
 
         Then you will get the following:
-        | Check If Exists In Database | select id from person where first_name = 'Franz Allan' | # PASS |
-        | Check If Exists In Database | select id from person where first_name = 'John' | # FAIL |
+        | Check If Exists In Database | SELECT id FROM person WHERE first_name = 'Franz Allan' | # PASS |
+        | Check If Exists In Database | SELECT id FROM person WHERE first_name = 'John' | # FAIL |
         """
         if not self.query(selectStatement):
             raise AssertionError("Expected to have have at least one row from '%s' "
@@ -52,12 +52,12 @@ class Assertion(object):
         |  1 | Franz Allan | See       |
 
         When you have the following assertions in your robot
-        | Check If Not Exists In Database | select id from person where first_name = 'John' |
-        | Check If Not Exists In Database | select id from person where first_name = 'Franz Allan' |
+        | Check If Not Exists In Database | SELECT id FROM person WHERE first_name = 'John' |
+        | Check If Not Exists In Database | SELECT id FROM person WHERE first_name = 'Franz Allan' |
 
         Then you will get the following:
-        | Check If Not Exists In Database | select id from person where first_name = 'John' | # PASS |
-        | Check If Not Exists In Database | select id from person where first_name = 'Franz Allan' | # FAIL |
+        | Check If Not Exists In Database | SELECT id FROM person WHERE first_name = 'John' | # PASS |
+        | Check If Not Exists In Database | SELECT id FROM person WHERE first_name = 'Franz Allan' | # FAIL |
         """
         queryResults = self.query(selectStatement)
         if queryResults:
@@ -74,12 +74,12 @@ class Assertion(object):
         |  1 | Franz Allan | See       |
 
         When you have the following assertions in your robot
-        | Row Count is 0 | select id from person where first_name = 'Franz Allan' |
-        | Row Count is 0 | select id from person where first_name = 'John' |
+        | Row Count is 0 | SELECT id FROM person WHERE first_name = 'Franz Allan' |
+        | Row Count is 0 | SELECT id FROM person WHERE first_name = 'John' |
 
         Then you will get the following:
-        | Row Count is 0 | select id from person where first_name = 'Franz Allan' | # FAIL |
-        | Row Count is 0 | select id from person where first_name = 'John' | # PASS |
+        | Row Count is 0 | SELECT id FROM person WHERE first_name = 'Franz Allan' | # FAIL |
+        | Row Count is 0 | SELECT id FROM person WHERE first_name = 'John' | # PASS |
         """
         num_rows = self.row_count(selectStatement)
         if (num_rows > 0):
@@ -97,12 +97,12 @@ class Assertion(object):
         |  2 | Jerry       | Schneider |
 
         When you have the following assertions in your robot
-        | Row Count Is Equal To X | select id from person | 1 |
-        | Row Count Is Equal To X | select id from person where first_name = 'John' | 0 |
+        | Row Count Is Equal To X | SELECT id FROM person | 1 |
+        | Row Count Is Equal To X | SELECT id FROM person WHERE first_name = 'John' | 0 |
 
         Then you will get the following:
-        | Row Count Is Equal To X | select id from person | 1 | # FAIL |
-        | Row Count Is Equal To X | select id from person where first_name = 'John' | 0 | # PASS |
+        | Row Count Is Equal To X | SELECT id FROM person | 1 | # FAIL |
+        | Row Count Is Equal To X | SELECT id FROM person WHERE first_name = 'John' | 0 | # PASS |
         """
         num_rows = self.row_count(selectStatement)
         if (num_rows != int(numRows.encode('ascii'))):
@@ -120,12 +120,12 @@ class Assertion(object):
         |  2 | Jerry       | Schneider |
 
         When you have the following assertions in your robot
-        | Row Count Is Greater Than X | select id from person | 1 |
-        | Row Count Is Greater Than X | select id from person where first_name = 'John' | 0 |
+        | Row Count Is Greater Than X | SELECT id FROM person | 1 |
+        | Row Count Is Greater Than X | SELECT id FROM person WHERE first_name = 'John' | 0 |
 
         Then you will get the following:
-        | Row Count Is Greater Than X | select id from person | 1 | # PASS |
-        | Row Count Is Greater Than X | select id from person where first_name = 'John' | 0 | # FAIL |
+        | Row Count Is Greater Than X | SELECT id FROM person | 1 | # PASS |
+        | Row Count Is Greater Than X | SELECT id FROM person WHERE first_name = 'John' | 0 | # FAIL |
         """
         num_rows = self.row_count(selectStatement)
         if (num_rows <= int(numRows.encode('ascii'))):
@@ -143,12 +143,12 @@ class Assertion(object):
         |  2 | Jerry       | Schneider |
 
         When you have the following assertions in your robot
-        | Row Count Is Less Than X | select id from person | 3 |
-        | Row Count Is Less Than X | select id from person where first_name = 'John' | 1 |
+        | Row Count Is Less Than X | SELECT id FROM person | 3 |
+        | Row Count Is Less Than X | SELECT id FROM person WHERE first_name = 'John' | 1 |
 
         Then you will get the following:
-        | Row Count Is Less Than X | select id from person | 3 | # PASS |
-        | Row Count Is Less Than X | select id from person where first_name = 'John' | 1 | # FAIL |
+        | Row Count Is Less Than X | SELECT id FROM person | 3 | # PASS |
+        | Row Count Is Less Than X | SELECT id FROM person WHERE first_name = 'John' | 1 | # FAIL |
         """
         num_rows = self.row_count(selectStatement)
         if (num_rows >= int(numRows.encode('ascii'))):
@@ -169,11 +169,11 @@ class Assertion(object):
         | Table Must Exist | first_name | # FAIL |
         """
         if self.db_api_module_name in ["cx_Oracle"]:
-            selectStatement = ("select * from all_objects where object_type in ('TABLE','VIEW') and owner = SYS_CONTEXT('USERENV', 'SESSION_USER') and object_name = upper('%s')" % tableName)
+            selectStatement = ("SELECT * FROM all_objects WHERE object_type IN ('TABLE','VIEW') AND owner = SYS_CONTEXT('USERENV', 'SESSION_USER') AND object_name = UPPER('%s')" % tableName)
         elif self.db_api_module_name in ["sqlite3"]:
             selectStatement = ("SELECT name FROM sqlite_master WHERE type='table' AND name='%s' COLLATE NOCASE" % tableName)
         else:
-            selectStatement = ("select * from information_schema.tables where table_name='%s'" % tableName)
+            selectStatement = ("SELECT * FROM information_schema.tables WHERE table_name='%s'" % tableName)
         num_rows = self.row_count(selectStatement)
         if (num_rows == 0):
             raise AssertionError("Table '%s' does not exist in the db" % tableName)
