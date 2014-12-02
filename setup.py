@@ -17,24 +17,25 @@
 
 """Setup script for Robot's DatabaseLibrary distributions"""
 
-from distutils.core import setup
+from setuptools import setup
 
 import sys, os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
 
-from DatabaseLibrary import __version__
+version = '0.6-schminitz'
 
 def main():
     setup(name         = 'robotframework-databaselibrary',
-          version      = __version__,
+          version      = version,
           description  = 'Database utility library for Robot Framework',
           author       = 'Franz Allan Valencia See',
           author_email = 'franz.see@gmail.com',
           url          = 'https://github.com/franz-see/Robotframework-Database-Library',
           package_dir  = { '' : 'src'},
-          packages     = ['DatabaseLibrary']
+          packages     = ['DatabaseLibrary'],
+          install_requires = ['robotframework']
           )
-        
+
 
 if __name__ == "__main__":
     main()
