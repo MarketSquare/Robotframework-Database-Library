@@ -36,14 +36,14 @@ class Query(object):
         |  1 | Franz Allan | See       |
 
         When you do the following:
-        | @{queryResults} | Query | select * from person |
+        | @{queryResults} | Query | SELECT * FROM person |
         | Log Many | @{queryResults} |
 
         You will get the following:
         [1, 'Franz Allan', 'See']
 
         Also, you can do something like this:
-        | ${queryResults} | Query | select first_name, last_name from person |
+        | ${queryResults} | Query | SELECT first_name, last_name FROM person |
         | Log | ${queryResults[0][1]}, ${queryResults[0][0]} |
 
         And get the following
@@ -70,14 +70,14 @@ class Query(object):
         |  2 | Jerry       | Schneider |
 
         When you do the following:
-        | ${rowCount} | Row Count | select * from person |
+        | ${rowCount} | Row Count | SELECT * FROM person |
         | Log | ${rowCount} |
 
         You will get the following:
         2
 
         Also, you can do something like this:
-        | ${rowCount} | Row Count | select * from person where id = 2 |
+        | ${rowCount} | Row Count | SELECT * FROM person WHERE id = 2 |
         | Log | ${rowCount} |
 
         And get the following
@@ -107,7 +107,7 @@ class Query(object):
         |  1 | Franz Allan | See       |
 
         When you do the following:
-        | @{queryResults} | Description | select * from person |
+        | @{queryResults} | Description | SELECT * FROM person |
         | Log Many | @{queryResults} |
 
         You will get the following:
@@ -141,12 +141,13 @@ class Query(object):
         | Delete All Rows From Table | first_name | # FAIL |
         """
         cur = None
-        selectStatement = ("delete from %s;" % tableName)
+        selectStatement = ("DELETE FROM %s;" % tableName)
         try:
             cur = self._dbconnection.cursor()
             result = self.__execute_sql(cur, selectStatement)
             if result is not None:
-                return result.fetchall()
+                self._dbconnection.commit()
+                return result
             self._dbconnection.commit()
         finally :
             if cur :
@@ -169,40 +170,40 @@ class Query(object):
         SQL commands are expected to be delimited by a semi-colon (';').
 
         For example:
-        delete from person_employee_table;
-        delete from person_table;
-        delete from employee_table;
+        DELETE FROM person_employee_table;
+        DELETE FROM person_table;
+        DELETE FROM employee_table;
 
         Also, the last SQL command can optionally omit its trailing semi-colon.
 
         For example:
-        delete from person_employee_table;
-        delete from person_table;
-        delete from employee_table
+        DELETE FROM person_employee_table;
+        DELETE FROM person_table;
+        DELETE FROM employee_table
 
         Given this, that means you can create spread your SQL commands in several
         lines.
 
         For example:
-        delete
-          from person_employee_table;
-        delete
-          from person_table;
-        delete
-          from employee_table
+        DELETE
+          FROM person_employee_table;
+        DELETE
+          FROM person_table;
+        DELETE
+          FROM employee_table
 
         However, lines that starts with a number sign (`#`) are treated as a
         commented line. Thus, none of the contents of that line will be executed.
 
         For example:
         # Delete the bridging table first...
-        delete
-          from person_employee_table;
+        DELETE
+          FROM person_employee_table;
           # ...and then the bridged tables.
-        delete
-          from person_table;
-        delete
-          from employee_table
+        DELETE
+          FROM person_table;
+        DELETE
+          FROM employee_table
         """
         sqlScriptFile = open(sqlScriptFileName)
 
@@ -248,10 +249,10 @@ class Query(object):
         SQL commands are expected to be delimited by a semi-colon (';').
 
         For example:
-        | Execute Sql String | delete from person_employee_table; delete from person_table |
+        | Execute Sql String | DELETE FROM person_employee_table; DELETE FROM person_table |
 
         For example with an argument:
-        | Execute Sql String | select from person where first_name = ${FIRSTNAME} |
+        | Execute Sql String | SELECT * FROM person WHERE first_name = ${FIRSTNAME} |
         """
         try:
             cur = self._dbconnection.cursor()
