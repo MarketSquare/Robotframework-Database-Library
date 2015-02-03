@@ -20,9 +20,11 @@
 from distutils.core import setup
 
 import sys, os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
+src_path = os.path.join(os.path.dirname(__file__), 'src')
+sys.path.insert(0, src_path)
 
-from DatabaseLibrary import __version__
+__version_file_path__ = os.path.join(src_path, 'DatabaseLibrary', 'VERSION')
+__version__ = open(__version_file_path__, 'r').read().strip()
 
 def main():
     setup(name         = 'robotframework-databaselibrary',
