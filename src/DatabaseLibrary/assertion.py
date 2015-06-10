@@ -172,6 +172,8 @@ class Assertion(object):
             selectStatement = ("SELECT * FROM all_objects WHERE object_type IN ('TABLE','VIEW') AND owner = SYS_CONTEXT('USERENV', 'SESSION_USER') AND object_name = UPPER('%s')" % tableName)
         elif self.db_api_module_name in ["sqlite3"]:
             selectStatement = ("SELECT name FROM sqlite_master WHERE type='table' AND name='%s' COLLATE NOCASE" % tableName)
+        elif self.db_api_module_name in ["ibm_db", "ibm_db_dbi"]:
+            selectStatement = ("SELECT name FROM SYSIBM.SYSTABLES WHERE type='T' AND name=UPPER('%s')" % tableName)
         else:
             selectStatement = ("SELECT * FROM information_schema.tables WHERE table_name='%s'" % tableName)
         num_rows = self.row_count(selectStatement)
