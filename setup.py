@@ -17,7 +17,10 @@
 
 """Setup script for Robot's DatabaseLibrary distributions"""
 
-from distutils.core import setup
+try:
+    from setuptools import setup
+except ImportError:
+    from distutils.core import setup
 
 import sys, os
 src_path = os.path.join(os.path.dirname(__file__), 'src')
