@@ -1,5 +1,5 @@
 *** Settings ***
-Library           DatabaseLibrary
+Library           SQLAlchemyLibrary
 Library           OperatingSystem
 
 *** Variables ***
@@ -7,17 +7,15 @@ ${DBName}         my_db_test
 
 *** Test Cases ***
 Remove old DB if exists
-    Comment    ${Status}    ${value} =    Run Keyword And Ignore Error    File Should Not Exist    /Users/jerry/Desktop/TestCases/TestSQLite3.db
     ${Status}    ${value} =    Run Keyword And Ignore Error    File Should Not Exist    ./${DBName}.db
     Comment    Run Keyword If    "${Status}" == "FAIL"    Run Keyword And Ignore Error    Run    rm -rf $HOME/Desktop/TestCases/TestSQLite3.db
     Run Keyword If    "${Status}" == "FAIL"    Run Keyword And Ignore Error    Run    rm -rf ./${DBName}.db
-    Comment    File Should Not Exist    /Users/jerry/Desktop/TestCases/TestSQLite3.db
     File Should Not Exist    ./${DBName}.db
     Comment    Sleep    1s
 
 Connect to SQLiteDB
     Comment    Connect To Database Using Custom Params sqlite3 database='path_to_dbfile\dbname.db'
-    Connect To Database Using Custom Params    sqlite3    database="./${DBName}.db"
+    Connect To Database    sqlite:///${dbName}.db
 
 Create person table
     ${output} =    Execute SQL String    CREATE TABLE person (id integer unique,first_name varchar,last_name varchar);

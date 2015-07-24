@@ -19,7 +19,7 @@ class Query(object):
     Query handles all the querying done by the Database Library.
     """
 
-    def query(self, selectStatement):
+    def query(self, selectStatement, **named_args):
         """
         Uses the input `selectStatement` to query for the values that
         will be returned as a list of tuples.
@@ -49,17 +49,10 @@ class Query(object):
         And get the following
         See, Franz Allan
         """
-        cur = None
-        try:
-            cur = self._dbconnection.cursor()
-            self.__execute_sql(cur, selectStatement)
-            allRows = cur.fetchall()
-            return allRows
-        finally :
-            if cur :
-                self._dbconnection.rollback()
+        with self._dbconnection.begin():
+            return self._dbconnection.execute(selectStatement, **named_args).fetchall()
 
-    def row_count(self, selectStatement):
+    def row_count(self, selectStatement, **named_args):
         """
         Uses the input `selectStatement` to query the database and returns
         the number of rows from the query.
@@ -83,21 +76,9 @@ class Query(object):
         And get the following
         1
         """
-        cur = None
-        try:
-            cur = self._dbconnection.cursor()
-            self.__execute_sql(cur, selectStatement)
-            data = cur.fetchall()
-            if self.db_api_module_name in ["sqlite3"]:
-                rowCount = len(data)
-            else:
-                rowCount = cur.rowcount
-            return rowCount
-        finally :
-            if cur :
-                self._dbconnection.rollback()
+        return len(self.query(selectStatement, **named_args))
 
-    def description(self, selectStatement):
+    def description(self, selectStatement, **named_args):
         """
         Uses the input `selectStatement` to query a table in the db which
         will be used to determine the description.
@@ -115,15 +96,8 @@ class Query(object):
         [Column(name='first_name', type_code=1043, display_size=None, internal_size=255, precision=None, scale=None, null_ok=None)]
         [Column(name='last_name', type_code=1043, display_size=None, internal_size=255, precision=None, scale=None, null_ok=None)]
         """
-        cur = None
-        try:
-            cur = self._dbconnection.cursor()
-            self.__execute_sql(cur, selectStatement)
-            description = cur.description
-            return description
-        finally :
-            if cur :
-                self._dbconnection.rollback()
+        with self._dbconnection.begin():
+            return self._dbconnection.execute(selectStatement, **named_args)._cursor_description()
 
     def delete_all_rows_from_table(self, tableName):
         """
@@ -140,20 +114,40 @@ class Query(object):
         will get:
         | Delete All Rows From Table | first_name | # FAIL |
         """
-        cur = None
         selectStatement = ("DELETE FROM %s;" % tableName)
-        try:
-            cur = self._dbconnection.cursor()
-            result = self.__execute_sql(cur, selectStatement)
-            if result is not None:
-                self._dbconnection.commit()
-                return result
-            self._dbconnection.commit()
-        finally :
-            if cur :
-                self._dbconnection.rollback()
+        self.execute_sql_string(selectStatement)
 
-    def execute_sql_script(self, sqlScriptFileName):
+    def is_comment(self, sql_line):
+        sql_line = sql_line.strip()
+        return sql_line.startswith('--') or sql_line.startswith('#')
+
+    def _remove_comments(self, sql):
+        lines = [line for line in sql.split('\n') if not self.is_comment(line)]
+        lines = [line.strip() for line in lines if not len(line.strip()) == 0]
+        return '\n'.join(lines)
+
+    def _split_sql_script(self, sql):
+        """
+        Splits an SQL script into semicolon (';')-separated queries,
+        ignoring any line that starts wih '--' or '#'.
+
+        >>> Query()._split_sql_script('select name;')
+        ['select name']
+        >>> Query()._split_sql_script('''select name;
+        ... select lname;''')
+        ['select name', 'select lname']
+        >>> Query()._split_sql_script('''select name;
+        ... -- This is a comment
+        ... # This is also a comment
+        ... select lname;''')
+        ['select name', 'select lname']
+        """
+        lines = list()
+        queries = sql.split(';')
+        queries = [self._remove_comments(q) for q in queries if len(q.strip()) > 0]
+        return queries
+
+    def execute_sql_script(self, sqlScriptFileName, **named_args):
         """
         Executes the content of the `sqlScriptFileName` as SQL commands.
         Useful for setting the database to a known state before running
@@ -205,43 +199,11 @@ class Query(object):
         DELETE
           FROM employee_table
         """
-        sqlScriptFile = open(sqlScriptFileName)
+        with open(sqlScriptFileName) as sqlScriptFile:
+            queries = self._split_sql_script(sqlScriptFile.read())
+            self._run_query_list(queries, **named_args)
 
-        cur = None
-        try:
-            cur = self._dbconnection.cursor()
-            sqlStatement = ''
-            for line in sqlScriptFile:
-                line = line.strip()
-                if line.startswith('#'):
-                    continue
-                elif line.startswith('--'):
-                    continue
-
-                sqlFragments = line.split(';')
-                if len(sqlFragments) == 1:
-                    sqlStatement += line + ' '
-                else:
-                    for sqlFragment in sqlFragments:
-                        sqlFragment = sqlFragment.strip()
-                        if len(sqlFragment) == 0:
-                            continue
-
-                        sqlStatement += sqlFragment + ' '
-
-                        self.__execute_sql(cur, sqlStatement)
-                        sqlStatement = ''
-
-            sqlStatement = sqlStatement.strip()
-            if len(sqlStatement) != 0:
-                self.__execute_sql(cur, sqlStatement)
-
-            self._dbconnection.commit()
-        finally:
-            if cur :
-                self._dbconnection.rollback()
-
-    def execute_sql_string(self, sqlString):
+    def execute_sql_string(self, sqlString, **named_args):
         """
         Executes the sqlString as SQL commands.
         Useful to pass arguments to your sql.
@@ -253,15 +215,19 @@ class Query(object):
 
         For example with an argument:
         | Execute Sql String | SELECT * FROM person WHERE first_name = ${FIRSTNAME} |
-        """
-        try:
-            cur = self._dbconnection.cursor()
-            self.__execute_sql(cur, sqlString)
-            self._dbconnection.commit()
-        finally:
-            if cur:
-                self._dbconnection.rollback()
 
-    def __execute_sql(self, cur, sqlStatement):
-        logger.debug("Executing : %s" % sqlStatement)
-        return cur.execute(sqlStatement)
+        You can also use :bind variables in your query:
+        | Execute Sql String | SELECT * FROM person WHERE first_name = :fname | fname=${FIRSTNAME} |
+
+        NOTE: This keyword makes no effort to distinguish between semi-colons
+        inside String literals and those separating queries.
+
+        This will break (use the 'Query' keyword instead):
+        | Execute Sql String | SELECT * FROM person WHERE full_name_semicolon = 'john;doe' |
+        """
+        self._run_query_list(sqlString.split(';'), **named_args)
+
+    def _run_query_list(self, queries, **named_args):
+        with self._dbconnection.begin():
+            for query in queries:
+                self._dbconnection.execute(query, **named_args)

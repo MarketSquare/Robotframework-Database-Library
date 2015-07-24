@@ -169,11 +169,11 @@ class Assertion(object):
         | Table Must Exist | first_name | # FAIL |
         """
         if self.db_api_module_name in ["cx_Oracle"]:
-            selectStatement = ("SELECT * FROM all_objects WHERE object_type IN ('TABLE','VIEW') AND owner = SYS_CONTEXT('USERENV', 'SESSION_USER') AND object_name = UPPER('%s')" % tableName)
-        elif self.db_api_module_name in ["sqlite3"]:
-            selectStatement = ("SELECT name FROM sqlite_master WHERE type='table' AND name='%s' COLLATE NOCASE" % tableName)
+            selectStatement = "SELECT * FROM all_objects WHERE object_type IN ('TABLE','VIEW') AND owner = SYS_CONTEXT('USERENV', 'SESSION_USER') AND object_name = UPPER(:name)"
+        elif self.db_api_module_name in ["sqlite3", 'pysqlite']:
+            selectStatement = "SELECT name FROM sqlite_master WHERE type='table' AND name=:name COLLATE NOCASE"
         else:
-            selectStatement = ("SELECT * FROM information_schema.tables WHERE table_name='%s'" % tableName)
-        num_rows = self.row_count(selectStatement)
+            selectStatement = "SELECT * FROM information_schema.tables WHERE table_name=:name"
+        num_rows = self.row_count(selectStatement, name=tableName)
         if (num_rows == 0):
             raise AssertionError("Table '%s' does not exist in the db" % tableName)
