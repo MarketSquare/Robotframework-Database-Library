@@ -215,7 +215,7 @@ class Query(object):
             if cur :
                 self._dbconnection.rollback()
 
-    def execute_sql_string(self, sqlString):
+    def execute_sql_string(self, sqlString, **named_args):
         """
         Executes the sqlString as SQL commands.
         Useful to pass arguments to your sql.
@@ -227,14 +227,20 @@ class Query(object):
 
         For example with an argument:
         | Execute Sql String | SELECT * FROM person WHERE first_name = ${FIRSTNAME} |
+
+        You can also use :bind variables in your query:
+        | Execute Sql String | SELECT * FROM person WHERE first_name = :fname | fname=${FIRSTNAME} |
+
+        NOTE: This keyword makes no effort to distinguish between semi-colons
+        inside String literals and those separating queries.
+
+        This will break (use the 'Query' keyword instead):
+        | Execute Sql String | SELECT * FROM person WHERE full_name_semicolon = 'john;doe' |
         """
-        try:
-            cur = self._dbconnection.cursor()
-            self.__execute_sql(cur, sqlString)
-            self._dbconnection.commit()
-        finally:
-            if cur:
-                self._dbconnection.rollback()
+
+        with self._dbconnection.begin():
+            for query in sqlString.split(';'):
+                self._dbconnection.execute(query, **named_args)
 
     def __execute_sql(self, cur, sqlStatement):
         logger.debug("Executing : %s" % sqlStatement)
