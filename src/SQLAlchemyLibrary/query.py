@@ -78,7 +78,7 @@ class Query(object):
         """
         return len(self.query(selectStatement, **named_args))
 
-    def description(self, selectStatement):
+    def description(self, selectStatement, **named_args):
         """
         Uses the input `selectStatement` to query a table in the db which
         will be used to determine the description.
