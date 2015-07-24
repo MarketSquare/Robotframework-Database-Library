@@ -19,7 +19,7 @@ class Query(object):
     Query handles all the querying done by the Database Library.
     """
 
-    def query(self, selectStatement):
+    def query(self, selectStatement, **named_args):
         """
         Uses the input `selectStatement` to query for the values that
         will be returned as a list of tuples.
@@ -49,17 +49,10 @@ class Query(object):
         And get the following
         See, Franz Allan
         """
-        cur = None
-        try:
-            cur = self._dbconnection.cursor()
-            self.__execute_sql(cur, selectStatement)
-            allRows = cur.fetchall()
-            return allRows
-        finally :
-            if cur :
-                self._dbconnection.rollback()
+        with self._dbconnection.begin():
+            return self._dbconnection.execute(selectStatement, **named_args).fetchall()
 
-    def row_count(self, selectStatement):
+    def row_count(self, selectStatement, **named_args):
         """
         Uses the input `selectStatement` to query the database and returns
         the number of rows from the query.
@@ -83,19 +76,7 @@ class Query(object):
         And get the following
         1
         """
-        cur = None
-        try:
-            cur = self._dbconnection.cursor()
-            self.__execute_sql(cur, selectStatement)
-            data = cur.fetchall()
-            if self.db_api_module_name in ["sqlite3"]:
-                rowCount = len(data)
-            else:
-                rowCount = cur.rowcount
-            return rowCount
-        finally :
-            if cur :
-                self._dbconnection.rollback()
+        return len(self.query(selectStatement, **named_args))
 
     def description(self, selectStatement):
         """
@@ -115,15 +96,8 @@ class Query(object):
         [Column(name='first_name', type_code=1043, display_size=None, internal_size=255, precision=None, scale=None, null_ok=None)]
         [Column(name='last_name', type_code=1043, display_size=None, internal_size=255, precision=None, scale=None, null_ok=None)]
         """
-        cur = None
-        try:
-            cur = self._dbconnection.cursor()
-            self.__execute_sql(cur, selectStatement)
-            description = cur.description
-            return description
-        finally :
-            if cur :
-                self._dbconnection.rollback()
+        with self._dbconnection.begin():
+            return self._dbconnection.execute(selectStatement, **named_args)._cursor_description()
 
     def delete_all_rows_from_table(self, tableName):
         """

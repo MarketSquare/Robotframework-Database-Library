@@ -13,7 +13,10 @@
 #  limitations under the License.
 
 import ConfigParser
+
 from robot.api import logger
+import sqlalchemy
+
 
 class ConnectionManager(object):
     """
@@ -24,10 +27,11 @@ class ConnectionManager(object):
         """
         Initializes _dbconnection to None.
         """
-        self._dbconnection = None
+        self._engine = None
         self.db_api_module_name = None
+        self._dbconnection = None
 
-    def connect_to_database(self, dbapiModuleName=None, dbName=None, dbUsername=None, dbPassword=None, dbHost=None, dbPort=None, dbConfigFile="./resources/db.cfg"):
+    def connect_to_database(self, url, echo=False, **kwargs):
         """
         Loads the DB API 2.0 module given `dbapiModuleName` then uses it to
         connect to the database using `dbName`, `dbUsername`, and `dbPassword`.
@@ -42,10 +46,18 @@ class ConnectionManager(object):
         The `dbConfigFile` is useful if you don't want to check into your SCM
         your database credentials.
 
-        Example usage:
-        | # explicitly specifies all db property values |
-        | Connect To Database | psycopg2 | my_db | postgres | s3cr3t | tiger.foobar.com | 5432 |
+        See also http://docs.sqlalchemy.org/en/rel_1_0/core/engines.html#sqlalchemy.create_engine
 
+        Example usage:
+        | # Connect to an in-memory SQLite database |
+        | Create Engine | sqlite:///:memory: |
+
+        """
+        self._engine = sqlalchemy.create_engine(url, echo=echo, **kwargs)
+        self._dbconnection = self._engine.connect()
+
+    def connect_to_database_from_config_file(self, config_file="sqlalchemy.ini"):
+        """
         | # loads all property values from default.cfg |
         | Connect To Database | dbConfigFile=default.cfg |
 
@@ -58,54 +70,14 @@ class ConnectionManager(object):
         | # uses explicit `dbapiModuleName` and `dbName` but uses the `dbUsername` and `dbPassword` in './resources/db.cfg' |
         | Connect To Database | psycopg2 | my_db_test |
         """
-
         config = ConfigParser.ConfigParser()
         config.read([dbConfigFile])
+        # TODO
+        self._dbconnection.engine.connect()
 
-        dbapiModuleName = dbapiModuleName or config.get('default', 'dbapiModuleName')
-        dbName = dbName or config.get('default', 'dbName')
-        dbUsername = dbUsername or config.get('default', 'dbUsername')
-        dbPassword = dbPassword or config.get('default', 'dbPassword')
-        dbHost = dbHost or config.get('default', 'dbHost') or 'localhost'
-        dbPort = int(dbPort or config.get('default', 'dbPort'))
-
-        self.db_api_module_name = dbapiModuleName
-
-        db_api_2 = __import__(dbapiModuleName)
-        if dbapiModuleName in ["MySQLdb", "pymysql"]:
-            dbPort = dbPort or 3306
-            logger.debug ('Connecting using : %s.connect(db=%s, user=%s, passwd=%s, host=%s, port=%s) ' % (dbapiModuleName, dbName, dbUsername, dbPassword, dbHost, dbPort))
-            self._dbconnection = db_api_2.connect (db=dbName, user=dbUsername, passwd=dbPassword, host=dbHost, port=dbPort)
-        elif dbapiModuleName in ["psycopg2"]:
-            dbPort = dbPort or 5432
-            logger.debug ('Connecting using : %s.connect(database=%s, user=%s, password=%s, host=%s, port=%s) ' % (dbapiModuleName, dbName, dbUsername, dbPassword, dbHost, dbPort))
-            self._dbconnection = db_api_2.connect (database=dbName, user=dbUsername, password=dbPassword, host=dbHost, port=dbPort)
-        elif dbapiModuleName in ["pyodbc"]:
-            dbPort = dbPort or 1433
-            logger.debug ('Connecting using : %s.connect(DRIVER={SQL Server};SERVER=%s,%s;DATABASE=%s;UID=%s;PWD=%s)' % (dbapiModuleName,dbHost,dbPort,dbName,dbPort,dbUsername, dbPassword))
-            self._dbconnection = db_api_2.connect('DRIVER={SQL Server};SERVER=%s,%s;DATABASE=%s;UID=%s;PWD=%s'%(dbHost,dbPort,dbName,dbUsername,dbPassword))
-        else:
-            logger.debug ('Connecting using : %s.connect(database=%s, user=%s, password=%s, host=%s, port=%s) ' % (dbapiModuleName, dbName, dbUsername, dbPassword, dbHost, dbPort))
-            self._dbconnection = db_api_2.connect (database=dbName, user=dbUsername, password=dbPassword, host=dbHost, port=dbPort)
-
-    def connect_to_database_using_custom_params(self, dbapiModuleName=None, db_connect_string=''):
-        """
-        Loads the DB API 2.0 module given `dbapiModuleName` then uses it to
-        connect to the database using the map string `db_custom_param_string`.
-
-        Example usage:
-        | # for psycopg2 |
-        | Connect To Database Using Custom Params | psycopg2 | database='my_db_test', user='postgres', password='s3cr3t', host='tiger.foobar.com', port=5432 |
-
-        | # for JayDeBeApi |
-        | Connect To Database Using Custom Params | JayDeBeApi | 'oracle.jdbc.driver.OracleDriver', 'my_db_test', 'system', 's3cr3t' |
-        """
-        db_api_2 = __import__(dbapiModuleName)
-
-        db_connect_string = 'db_api_2.connect(%s)' % db_connect_string
-
-        self.db_api_module_name = dbapiModuleName
-        self._dbconnection = eval(db_connect_string)
+    def connect_to_database_from_config(self, config_dict, prefix="sqlalchemy.", **kwargs):
+        self._engine = sqlalchemy.engine_from_config(config_dict, prefix, **kwargs)
+        self._dbconnection = self._engine.connect()
 
     def disconnect_from_database(self):
         """
