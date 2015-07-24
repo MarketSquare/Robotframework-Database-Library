@@ -114,18 +114,8 @@ class Query(object):
         will get:
         | Delete All Rows From Table | first_name | # FAIL |
         """
-        cur = None
         selectStatement = ("DELETE FROM %s;" % tableName)
-        try:
-            cur = self._dbconnection.cursor()
-            result = self.__execute_sql(cur, selectStatement)
-            if result is not None:
-                self._dbconnection.commit()
-                return result
-            self._dbconnection.commit()
-        finally :
-            if cur :
-                self._dbconnection.rollback()
+        self.execute_sql_string(selectStatement)
 
     def is_comment(self, sql_line):
         sql_line = sql_line.strip()
