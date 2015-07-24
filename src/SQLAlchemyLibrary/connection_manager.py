@@ -28,7 +28,6 @@ class ConnectionManager(object):
         Initializes _dbconnection to None.
         """
         self._engine = None
-        self.db_api_module_name = None
         self._dbconnection = None
 
     def connect_to_database(self, url, echo=False, **kwargs):
@@ -78,6 +77,13 @@ class ConnectionManager(object):
     def connect_to_database_from_config(self, config_dict, prefix="sqlalchemy.", **kwargs):
         self._engine = sqlalchemy.engine_from_config(config_dict, prefix, **kwargs)
         self._dbconnection = self._engine.connect()
+
+    @property
+    def db_api_module_name(self):
+        try:
+            return self._engine.driver
+        except:
+            return None
 
     def disconnect_from_database(self):
         """
