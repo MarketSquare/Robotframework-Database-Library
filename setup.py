@@ -35,7 +35,7 @@ def main():
           url          = 'https://github.com/franz-see/Robotframework-Database-Library',
           package_dir  = { '' : 'src'},
           packages     = ['DatabaseLibrary'],
-          requires     = ['robotframework']
+          install_requires = ['robotframework'],
           )
         
 
