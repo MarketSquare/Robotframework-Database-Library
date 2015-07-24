@@ -37,8 +37,9 @@ def main():
           author_email = 'edbrannin@gmail.com',
           url          = 'https://github.com/edbrannin/Robotframework-SQLAlchemy-Library',
           package_dir  = { '' : 'src'},
-          install_requires = ['robotframework'],
           packages     = ['SQLAlchemyLibrary'],
+          requires     = ['sqlalchemy'],
+          install_requires = ['robotframework', 'sqlalchemy'],
           )
         
 
