@@ -127,7 +127,37 @@ class Query(object):
             if cur :
                 self._dbconnection.rollback()
 
-    def execute_sql_script(self, sqlScriptFileName):
+    def is_comment(self, sql_line):
+        sql_line = sql_line.strip()
+        return sql_line.startswith('--') or sql_line.startswith('#')
+
+    def _remove_comments(self, sql):
+        lines = [line for line in sql.split('\n') if not self.is_comment(line)]
+        lines = [line.strip() for line in lines if not len(line.strip()) == 0]
+        return '\n'.join(lines)
+
+    def _split_sql_script(self, sql):
+        """
+        Splits an SQL script into semicolon (';')-separated queries,
+        ignoring any line that starts wih '--' or '#'.
+
+        >>> Query()._split_sql_script('select name;')
+        ['select name']
+        >>> Query()._split_sql_script('''select name;
+        ... select lname;''')
+        ['select name', 'select lname']
+        >>> Query()._split_sql_script('''select name;
+        ... -- This is a comment
+        ... # This is also a comment
+        ... select lname;''')
+        ['select name', 'select lname']
+        """
+        lines = list()
+        queries = sql.split(';')
+        queries = [self._remove_comments(q) for q in queries if len(q.strip()) > 0]
+        return queries
+
+    def execute_sql_script(self, sqlScriptFileName, **named_args):
         """
         Executes the content of the `sqlScriptFileName` as SQL commands.
         Useful for setting the database to a known state before running
@@ -179,41 +209,9 @@ class Query(object):
         DELETE
           FROM employee_table
         """
-        sqlScriptFile = open(sqlScriptFileName)
-
-        cur = None
-        try:
-            cur = self._dbconnection.cursor()
-            sqlStatement = ''
-            for line in sqlScriptFile:
-                line = line.strip()
-                if line.startswith('#'):
-                    continue
-                elif line.startswith('--'):
-                    continue
-
-                sqlFragments = line.split(';')
-                if len(sqlFragments) == 1:
-                    sqlStatement += line + ' '
-                else:
-                    for sqlFragment in sqlFragments:
-                        sqlFragment = sqlFragment.strip()
-                        if len(sqlFragment) == 0:
-                            continue
-
-                        sqlStatement += sqlFragment + ' '
-
-                        self.__execute_sql(cur, sqlStatement)
-                        sqlStatement = ''
-
-            sqlStatement = sqlStatement.strip()
-            if len(sqlStatement) != 0:
-                self.__execute_sql(cur, sqlStatement)
-
-            self._dbconnection.commit()
-        finally:
-            if cur :
-                self._dbconnection.rollback()
+        with open(sqlScriptFileName) as sqlScriptFile:
+            queries = self._split_sql_script(sqlScriptFile.read())
+            self._run_query_list(queries, **named_args)
 
     def execute_sql_string(self, sqlString, **named_args):
         """
@@ -237,9 +235,11 @@ class Query(object):
         This will break (use the 'Query' keyword instead):
         | Execute Sql String | SELECT * FROM person WHERE full_name_semicolon = 'john;doe' |
         """
+        self._run_query_list(sqlString.split(';'), **named_args)
 
+    def _run_query_list(self, queries, **named_args):
         with self._dbconnection.begin():
-            for query in sqlString.split(';'):
+            for query in queries:
                 self._dbconnection.execute(query, **named_args)
 
     def __execute_sql(self, cur, sqlStatement):
