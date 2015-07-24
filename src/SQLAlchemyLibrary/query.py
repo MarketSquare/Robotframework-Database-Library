@@ -231,7 +231,3 @@ class Query(object):
         with self._dbconnection.begin():
             for query in queries:
                 self._dbconnection.execute(query, **named_args)
-
-    def __execute_sql(self, cur, sqlStatement):
-        logger.debug("Executing : %s" % sqlStatement)
-        return cur.execute(sqlStatement)
