@@ -65,7 +65,7 @@ class ConnectionManager(object):
         dbapiModuleName = dbapiModuleName or config.get('default', 'dbapiModuleName')
         dbName = dbName or config.get('default', 'dbName')
         dbUsername = dbUsername or config.get('default', 'dbUsername')
-        dbPassword = dbPassword or config.get('default', 'dbPassword')
+        dbPassword = dbPassword if dbPassword is not None else config.get('default', 'dbPassword')
         dbHost = dbHost or config.get('default', 'dbHost') or 'localhost'
         dbPort = int(dbPort or config.get('default', 'dbPort'))
 
