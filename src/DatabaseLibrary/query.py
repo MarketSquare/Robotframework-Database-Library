@@ -88,7 +88,7 @@ class Query(object):
             cur = self._dbconnection.cursor()
             self.__execute_sql(cur, selectStatement)
             data = cur.fetchall()
-            if self.db_api_module_name in ["sqlite3"]:
+            if self.db_api_module_name in ["sqlite3", "ibm_db", "ibm_db_dbi"]:
                 rowCount = len(data)
             else:
                 rowCount = cur.rowcount

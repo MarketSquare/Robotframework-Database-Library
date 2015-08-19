@@ -1,0 +1,6 @@
+*** Variables ***
+${DBName}         dbname
+${DBUser}         user
+${DBPass}         password
+${DBHost}         host
+${DBPort}         port
