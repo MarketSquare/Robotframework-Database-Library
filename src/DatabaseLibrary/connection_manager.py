@@ -12,6 +12,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import importlib
+
 import ConfigParser
 from robot.api import logger
 
@@ -71,7 +73,7 @@ class ConnectionManager(object):
 
         self.db_api_module_name = dbapiModuleName
 
-        db_api_2 = __import__(dbapiModuleName)
+        db_api_2 = importlib.import_module(dbapiModuleName)
         if dbapiModuleName in ["MySQLdb", "pymysql"]:
             dbPort = dbPort or 3306
             logger.debug ('Connecting using : %s.connect(db=%s, user=%s, passwd=%s, host=%s, port=%s) ' % (dbapiModuleName, dbName, dbUsername, dbPassword, dbHost, dbPort))
@@ -104,7 +106,7 @@ class ConnectionManager(object):
         | # for JayDeBeApi |
         | Connect To Database Using Custom Params | JayDeBeApi | 'oracle.jdbc.driver.OracleDriver', 'my_db_test', 'system', 's3cr3t' |
         """
-        db_api_2 = __import__(dbapiModuleName)
+        db_api_2 = importlib.import_module(dbapiModuleName)
 
         db_connect_string = 'db_api_2.connect(%s)' % db_connect_string
 
