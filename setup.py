@@ -19,7 +19,10 @@
 
 from distutils.core import setup
 
-import sys, os
+import setuptools
+import sys
+import os
+
 src_path = os.path.join(os.path.dirname(__file__), 'src')
 sys.path.insert(0, src_path)
 
@@ -38,7 +41,7 @@ def main():
           package_data={'DatabaseLibrary': ['VERSION']},
           requires     = ['robotframework']
           )
-        
+
 
 if __name__ == "__main__":
     main()

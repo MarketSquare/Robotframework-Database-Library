@@ -5,11 +5,11 @@ Library           DatabaseLibrary
 Library           OperatingSystem
 
 *** Variables ***
-${DBHost}         hostname.domainname.com
+${DBHost}         127.0.0.1
 ${DBName}         my_db_test
-${DBPass}         Password
+${DBPass}         ""
 ${DBPort}         3306
-${DBUser}         testUser
+${DBUser}         root
 
 *** Test Cases ***
 Create person table
