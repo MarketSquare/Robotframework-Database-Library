@@ -3,13 +3,14 @@ Suite Setup       Connect To Database    psycopg2    ${DBName}    ${DBUser}    $
 Suite Teardown    Disconnect From Database
 Library           DatabaseLibrary
 Library           OperatingSystem
+Library           Collections
 
 *** Variables ***
-${DBHost}         hostname.domainname.com
-${DBName}         my_db_test
-${DBPass}         Password
+${DBHost}         localhost
+${DBName}         travis_ci_test
+${DBPass}         ""
 ${DBPort}         5432
-${DBUser}         testUser
+${DBUser}         postgres
 
 *** Test Cases ***
 Create person table
@@ -88,12 +89,18 @@ Verify foobar Description
 Verify Query - Row Count person table
     ${output} =    Query    SELECT COUNT(*) FROM person;
     Log    ${output}
-    Should Be Equal As Strings    ${output}    [(2L,)]
+    ${val}=    Get from list    ${output}    0
+    ${val}=    Convert to list    ${val}
+    ${val}=    Get from list    ${val}    0
+    Should be equal as Integers    ${val}    2
 
 Verify Query - Row Count foobar table
     ${output} =    Query    SELECT COUNT(*) FROM foobar;
     Log    ${output}
-    Should Be Equal As Strings    ${output}    [(0L,)]
+    ${val}=    Get from list    ${output}    0
+    ${val}=    Convert to list    ${val}
+    ${val}=    Get from list    ${val}    0
+    Should be equal as Integers    ${val}    0
 
 Verify Execute SQL String - Row Count person table
     ${output} =    Execute SQL String    SELECT COUNT(*) FROM person;
@@ -113,7 +120,10 @@ Insert Data Into Table foobar
 Verify Query - Row Count foobar table 1 row
     ${output} =    Query    SELECT COUNT(*) FROM foobar;
     Log    ${output}
-    Should Be Equal As Strings    ${output}    [(1L,)]
+    ${val}=    Get from list    ${output}    0
+    ${val}=    Convert to list    ${val}
+    ${val}=    Get from list    ${val}    0
+    Should be equal as Integers    ${val}    1
 
 Verify Delete All Rows From Table - foobar
     Delete All Rows From Table    foobar
