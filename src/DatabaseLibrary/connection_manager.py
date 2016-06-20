@@ -90,7 +90,7 @@ class ConnectionManager(object):
         elif dbapiModuleName in ["pyodbc"]:
             dbPort = dbPort or 1433
             logger.debug ('Connecting using : %s.connect(DRIVER={SQL Server};SERVER=%s,%s;DATABASE=%s;UID=%s;PWD=%s)' % (dbapiModuleName,dbHost,dbPort,dbName,dbUsername, dbPassword))
-            self._dbconnection = db_api_2.connect('DRIVER={SQL Server};SERVER=%s,%s;DATABASE=%s;UID=%s;PWD=%s'%(dbHost,dbPort,dbName,dbUsername,dbPassword))
+            self._dbconnection = db_api_2.connect('DRIVER={SQL Server};SERVER=%s,%s;DATABASE=%s;UID=%s;PWD=%s' % (dbHost,dbPort,dbName,dbUsername,dbPassword))
         elif dbapiModuleName in ["ibm_db", "ibm_db_dbi"]:
             dbPort = dbPort or 50000
             logger.debug ('Connecting using : %s.connect(DATABASE=%s;HOSTNAME=%s;PORT=%s;PROTOCOL=TCPIP;UID=%s;PWD=%s;) ' % (dbapiModuleName, dbName, dbHost, dbPort, dbUsername, dbPassword))
