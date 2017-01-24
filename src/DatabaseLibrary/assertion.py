@@ -12,6 +12,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from robot.api import logger
+
 class Assertion(object):
     """
     Assertion handles all the assertions of Database Library.
@@ -35,7 +37,7 @@ class Assertion(object):
         | Check If Exists In Database | SELECT id FROM person WHERE first_name = 'Franz Allan' | # PASS |
         | Check If Exists In Database | SELECT id FROM person WHERE first_name = 'John' | # FAIL |
         """
-        logger.info('Executing : Check If Exists In Database  |  %s ' % (selectStatement))
+        logger.info ('Executing : Check If Exists In Database  |  %s ' % (selectStatement))
         if not self.query(selectStatement):
             raise AssertionError("Expected to have have at least one row from '%s' "
                                  "but got 0 rows." % selectStatement)
