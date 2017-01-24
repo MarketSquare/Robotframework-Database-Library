@@ -52,6 +52,7 @@ class Query(object):
         cur = None
         try:
             cur = self._dbconnection.cursor()
+            logger.info ('Executing : Query  |  %s ' % (selectStatement))
             self.__execute_sql(cur, selectStatement)
             allRows = cur.fetchall()
             return allRows
@@ -86,6 +87,7 @@ class Query(object):
         cur = None
         try:
             cur = self._dbconnection.cursor()
+            logger.info ('Executing : Row Count  |  %s ' % (selectStatement))
             self.__execute_sql(cur, selectStatement)
             data = cur.fetchall()
             if self.db_api_module_name in ["sqlite3", "ibm_db", "ibm_db_dbi"]:
@@ -118,6 +120,7 @@ class Query(object):
         cur = None
         try:
             cur = self._dbconnection.cursor()
+            logger.info ('Executing : Description  |  %s ' % (selectStatement))
             self.__execute_sql(cur, selectStatement)
             description = cur.description
             return description
@@ -144,6 +147,7 @@ class Query(object):
         selectStatement = ("DELETE FROM %s;" % tableName)
         try:
             cur = self._dbconnection.cursor()
+            logger.info ('Executing : Delete All Rows From Table  |  %s ' % (selectStatement))
             result = self.__execute_sql(cur, selectStatement)
             if result is not None:
                 self._dbconnection.commit()
@@ -210,6 +214,7 @@ class Query(object):
         cur = None
         try:
             cur = self._dbconnection.cursor()
+            logger.info('Executing : Execute SQL Script  |  %s ' % (sqlScriptFileName))
             sqlStatement = ''
             for line in sqlScriptFile:
                 line = line.strip()
@@ -256,6 +261,7 @@ class Query(object):
         """
         try:
             cur = self._dbconnection.cursor()
+            logger.info('Executing : Execute SQL String  |  %s ' % (sqlString))
             self.__execute_sql(cur, sqlString)
             self._dbconnection.commit()
         finally:
@@ -263,5 +269,5 @@ class Query(object):
                 self._dbconnection.rollback()
 
     def __execute_sql(self, cur, sqlStatement):
-        logger.debug("Executing : %s" % sqlStatement)
+        #logger.info("Executing : %s" % sqlStatement)
         return cur.execute(sqlStatement)
