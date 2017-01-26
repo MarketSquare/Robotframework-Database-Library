@@ -268,6 +268,22 @@ class Query(object):
             if cur:
                 self._dbconnection.rollback()
 
+    def call_stored_procedure(self, spName, spParams):
+        """
+        Uses the inputs of `spName` and 'spParams' to call a stored procedure
+        """
+        cur = None
+        try:
+            cur = self._dbconnection.cursor()
+            spName = spName.encode('ascii', 'ignore')
+            logger.info ('Executing : Query  |  %s  |  %s ' % (spName, spParams))
+            allRows = cur.callproc(spName, (spParams))
+            self._dbconnection.commit()
+            return allRows
+        finally :
+            if cur :
+                self._dbconnection.rollback()
+
     def __execute_sql(self, cur, sqlStatement):
         #logger.info("Executing : %s" % sqlStatement)
         return cur.execute(sqlStatement)
