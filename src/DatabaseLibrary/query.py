@@ -271,6 +271,17 @@ class Query(object):
     def call_stored_procedure(self, spName, spParams):
         """
         Uses the inputs of `spName` and 'spParams' to call a stored procedure
+
+        spName should be the stored procedure name itself
+        spParams should be a List of the parameters being sent in.
+
+        |  @{ParamList} =  |  Create List  |  FirstParam  |  SecondParam  |  ThirdParam
+        |  @{QueryResults} =  |  Call Stored Procedure  |  DBName.SchemaName.StoredProcName  |  List of Parameters
+
+        |  @{ParamList} =  |  Create List  |  Testing  |  ${56789}  |  LastName
+        |  Set Test Variable  |  ${SPName} =   |  DBTest.DBSchema.MyStoredProc
+        |  @{QueryResults} =  |  Call Stored Procedure  |  ${SPName}  |  ${ParamList}
+        |  Log Many  |  ${QueryResults}
         """
         cur = None
         try:
