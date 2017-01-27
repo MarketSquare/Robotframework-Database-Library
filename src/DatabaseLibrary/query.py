@@ -287,9 +287,11 @@ class Query(object):
         try:
             cur = self._dbconnection.cursor(as_dict=True)
             spName = spName.encode('ascii', 'ignore')
-            logger.info ('Executing : Query  |  %s  |  %s ' % (spName, spParams))
+            logger.info ('Executing : Call Stored Procedure  |  %s  |  %s ' % (spName, spParams))
+            #retVal = cur.callproc(spName, (spParams))
             cur.callproc(spName, (spParams))
-            retVal = self._dbconnection.commit()
+            retVal = cur.nextset()
+            self._dbconnection.commit()
             return retVal
         finally :
             if cur :
