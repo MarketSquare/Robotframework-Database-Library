@@ -285,12 +285,12 @@ class Query(object):
         """
         cur = None
         try:
-            cur = self._dbconnection.cursor()
+            cur = self._dbconnection.cursor(as_dict=True)
             spName = spName.encode('ascii', 'ignore')
             logger.info ('Executing : Query  |  %s  |  %s ' % (spName, spParams))
-            allRows = cur.callproc(spName, (spParams))
-            self._dbconnection.commit()
-            return allRows
+            cur.callproc(spName, (spParams))
+            retVal = self._dbconnection.commit()
+            return retVal
         finally :
             if cur :
                 self._dbconnection.rollback()
