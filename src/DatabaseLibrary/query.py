@@ -268,7 +268,7 @@ class Query(object):
             if cur:
                 self._dbconnection.rollback()
 
-    def call_stored_procedure(self, spName, spParams):
+    def call_stored_procedure_dead(self, spName, spParams):
         """
         Uses the inputs of `spName` and 'spParams' to call a stored procedure
 
@@ -297,7 +297,7 @@ class Query(object):
             if cur :
                 self._dbconnection.rollback()
 
-    def call_stored_procedure_with_return(self, spName, spParams):
+    def call_stored_procedure(self, spName, spParams):
         """
         Uses the inputs of `spName` and 'spParams' to call a stored procedure
 
@@ -305,27 +305,28 @@ class Query(object):
         spParams should be a List of the parameters being sent in.
 
         |  @{ParamList} =  |  Create List  |  FirstParam  |  SecondParam  |  ThirdParam
-        |  @{QueryResults} =  |  Call Stored Procedure With Return  |  DBName.SchemaName.StoredProcName  |  List of Parameters
+        |  @{QueryResults} =  |  Call Stored Procedure  |  DBName.SchemaName.StoredProcName  |  List of Parameters
 
         |  @{ParamList} =  |  Create List  |  Testing  |  ${56789}  |  LastName
         |  Set Test Variable  |  ${SPName} =   |  DBTest.DBSchema.MyStoredProc
-        |  @{QueryResults} =  |  Call Stored Procedure With Return  |  ${SPName}  |  ${ParamList}
+        |  @{QueryResults} =  |  Call Stored Procedure  |  ${SPName}  |  ${ParamList}
         |  Log Many  |  ${QueryResults}
         """
         cur = None
         try:
             cur = self._dbconnection.cursor(as_dict=False)
             spName = spName.encode('ascii', 'ignore')
-            logger.info ('Executing : Call Stored Procedure With Return  |  %s  |  %s ' % (spName, spParams))
+            logger.info ('Executing : Call Stored Procedure  |  %s  |  %s ' % (spName, spParams))
             #retVal = cur.callproc(spName, (spParams))
             cur.callproc(spName, (spParams))
-            #cur.nextset()
+            cur.nextset()
             #self._dbconnection.commit()
             #logger.info ('retVal is  %s ' % (retVal))
             retVal=list()
             for row in cur:
                 #logger.info ( ' %s ' % (row))
                 retVal.append(row)
+            self._dbconnection.commit()
             return retVal
         finally :
             if cur :
