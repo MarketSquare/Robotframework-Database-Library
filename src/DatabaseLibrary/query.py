@@ -268,35 +268,6 @@ class Query(object):
             if cur:
                 self._dbconnection.rollback()
 
-    def call_stored_procedure_dead(self, spName, spParams):
-        """
-        Uses the inputs of `spName` and 'spParams' to call a stored procedure
-
-        spName should be the stored procedure name itself
-        spParams should be a List of the parameters being sent in.
-
-        |  @{ParamList} =  |  Create List  |  FirstParam  |  SecondParam  |  ThirdParam
-        |  @{QueryResults} =  |  Call Stored Procedure  |  DBName.SchemaName.StoredProcName  |  List of Parameters
-
-        |  @{ParamList} =  |  Create List  |  Testing  |  ${56789}  |  LastName
-        |  Set Test Variable  |  ${SPName} =   |  DBTest.DBSchema.MyStoredProc
-        |  @{QueryResults} =  |  Call Stored Procedure  |  ${SPName}  |  ${ParamList}
-        |  Log Many  |  ${QueryResults}
-        """
-        cur = None
-        try:
-            cur = self._dbconnection.cursor(as_dict=True)
-            spName = spName.encode('ascii', 'ignore')
-            logger.info ('Executing : Call Stored Procedure  |  %s  |  %s ' % (spName, spParams))
-            #retVal = cur.callproc(spName, (spParams))
-            cur.callproc(spName, (spParams))
-            retVal = cur.nextset()
-            self._dbconnection.commit()
-            return retVal
-        finally :
-            if cur :
-                self._dbconnection.rollback()
-
     def call_stored_procedure(self, spName, spParams):
         """
         Uses the inputs of `spName` and 'spParams' to call a stored procedure
@@ -310,18 +281,15 @@ class Query(object):
         |  @{ParamList} =  |  Create List  |  Testing  |  ${56789}  |  LastName
         |  Set Test Variable  |  ${SPName} =   |  DBTest.DBSchema.MyStoredProc
         |  @{QueryResults} =  |  Call Stored Procedure  |  ${SPName}  |  ${ParamList}
-        |  Log Many  |  ${QueryResults}
+        |  Log List  |  @{QueryResults}
         """
         cur = None
         try:
             cur = self._dbconnection.cursor(as_dict=False)
             spName = spName.encode('ascii', 'ignore')
             logger.info ('Executing : Call Stored Procedure  |  %s  |  %s ' % (spName, spParams))
-            #retVal = cur.callproc(spName, (spParams))
             cur.callproc(spName, (spParams))
             cur.nextset()
-            #self._dbconnection.commit()
-            #logger.info ('retVal is  %s ' % (retVal))
             retVal=list()
             for row in cur:
                 #logger.info ( ' %s ' % (row))
