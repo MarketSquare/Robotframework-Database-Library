@@ -268,6 +268,42 @@ class Query(object):
             if cur:
                 self._dbconnection.rollback()
 
+    def call_stored_procedure(self, spName, spParams=None):
+        """
+        Uses the inputs of `spName` and 'spParams' to call a stored procedure
+
+        spName should be the stored procedure name itself
+        spParams [Optional] should be a List of the parameters being sent in.  The list can be one or multiple items.
+
+        The return from this keyword will always be a list.
+
+        |  @{ParamList} =  |  Create List  |  FirstParam  |  SecondParam  |  ThirdParam
+        |  @{QueryResults} =  |  Call Stored Procedure  |  DBName.SchemaName.StoredProcName  |  List of Parameters
+
+        |  @{ParamList} =  |  Create List  |  Testing  |  LastName
+        |  Set Test Variable  |  ${SPName} =   |  DBTest.DBSchema.MyStoredProc
+        |  @{QueryResults} =  |  Call Stored Procedure  |  ${SPName}  |  ${ParamList}
+        |  Log List  |  @{QueryResults}
+
+        """
+        if spParams is None:
+            spParams = []
+        cur = None
+        try:
+            cur = self._dbconnection.cursor(as_dict=False)
+            spName = spName.encode('ascii', 'ignore')
+            logger.info ('Executing : Call Stored Procedure  |  %s  |  %s ' % (spName, spParams))
+            cur.callproc(spName, (spParams))
+            cur.nextset()
+            retVal=list()
+            for row in cur:
+                #logger.info ( ' %s ' % (row))
+                retVal.append(row)
+            self._dbconnection.commit()
+            return retVal
+        finally :
+            if cur :
+                self._dbconnection.rollback()
+
     def __execute_sql(self, cur, sqlStatement):
-        #logger.info("Executing : %s" % sqlStatement)
         return cur.execute(sqlStatement)
