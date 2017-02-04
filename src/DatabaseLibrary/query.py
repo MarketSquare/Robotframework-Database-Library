@@ -268,7 +268,7 @@ class Query(object):
             if cur:
                 self._dbconnection.rollback()
 
-    def call_stored_procedure(self, spName, spParams=[]):
+    def call_stored_procedure(self, spName, spParams=None):
         """
         Uses the inputs of `spName` and 'spParams' to call a stored procedure
 
@@ -286,6 +286,8 @@ class Query(object):
         |  Log List  |  @{QueryResults}
 
         """
+        if spParams is None:
+            spParams = []
         cur = None
         try:
             cur = self._dbconnection.cursor(as_dict=False)
