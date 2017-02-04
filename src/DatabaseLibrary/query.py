@@ -282,6 +282,14 @@ class Query(object):
         |  Set Test Variable  |  ${SPName} =   |  DBTest.DBSchema.MyStoredProc
         |  @{QueryResults} =  |  Call Stored Procedure  |  ${SPName}  |  ${ParamList}
         |  Log List  |  @{QueryResults}
+
+        Note: that the spParams is required to be passed in right now, even if it just an empty list.  In the following
+        example, the Stored Procedure does not accept any parameters.
+
+        |  @{ParamList} =  |  Create List
+        |  @{QueryResults} =  |  Call Stored Procedure  |  DBTest.DBSchema.NoParamsStoredProc  |  ${ParamList}
+        |  Log List  |  @{QueryResults}
+
         """
         cur = None
         try:
