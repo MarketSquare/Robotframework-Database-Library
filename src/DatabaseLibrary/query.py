@@ -268,26 +268,21 @@ class Query(object):
             if cur:
                 self._dbconnection.rollback()
 
-    def call_stored_procedure(self, spName, spParams):
+    def call_stored_procedure(self, spName, spParams=[]):
         """
         Uses the inputs of `spName` and 'spParams' to call a stored procedure
 
         spName should be the stored procedure name itself
-        spParams should be a List of the parameters being sent in.
+        spParams [Optional] should be a List of the parameters being sent in.  The list can be one or multiple items.
+
+        The return from this keyword will always be a list.
 
         |  @{ParamList} =  |  Create List  |  FirstParam  |  SecondParam  |  ThirdParam
         |  @{QueryResults} =  |  Call Stored Procedure  |  DBName.SchemaName.StoredProcName  |  List of Parameters
 
-        |  @{ParamList} =  |  Create List  |  Testing  |  ${56789}  |  LastName
+        |  @{ParamList} =  |  Create List  |  Testing  |  LastName
         |  Set Test Variable  |  ${SPName} =   |  DBTest.DBSchema.MyStoredProc
         |  @{QueryResults} =  |  Call Stored Procedure  |  ${SPName}  |  ${ParamList}
-        |  Log List  |  @{QueryResults}
-
-        Note: that the spParams is required to be passed in right now, even if it just an empty list.  In the following
-        example, the Stored Procedure does not accept any parameters.
-
-        |  @{ParamList} =  |  Create List
-        |  @{QueryResults} =  |  Call Stored Procedure  |  DBTest.DBSchema.NoParamsStoredProc  |  ${ParamList}
         |  Log List  |  @{QueryResults}
 
         """
