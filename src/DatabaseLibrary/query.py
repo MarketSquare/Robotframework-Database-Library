@@ -270,7 +270,7 @@ class Query(object):
 
     def call_stored_procedure(self, spName, spParams=None):
         """
-        Uses the inputs of `spName` and 'spParams' to call a stored procedure
+        Uses the inputs of `spName` and `spParams` to call a stored procedure
 
         spName should be the stored procedure name itself
         spParams [Optional] should be a List of the parameters being sent in.  The list can be one or multiple items.
