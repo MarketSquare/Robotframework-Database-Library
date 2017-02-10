@@ -56,6 +56,7 @@ class Query(object):
             self.__execute_sql(cur, selectStatement)
             allRows = cur.fetchall()
             return allRows
+            #self._dbconnection.commit()
         finally :
             if cur :
                 self._dbconnection.rollback()
@@ -270,20 +271,20 @@ class Query(object):
 
     def call_stored_procedure(self, spName, spParams=None):
         """
-        Uses the inputs of `spName` and `spParams` to call a stored procedure
+        Uses the inputs of spName and spParams to call a stored procedure
 
         spName should be the stored procedure name itself
         spParams [Optional] should be a List of the parameters being sent in.  The list can be one or multiple items.
 
-        The return from this keyword will always be a list.
+        The return from this keyword will always be a list:
 
-        |  @{ParamList} =  |  Create List  |  FirstParam  |  SecondParam  |  ThirdParam
-        |  @{QueryResults} =  |  Call Stored Procedure  |  DBName.SchemaName.StoredProcName  |  List of Parameters
+        |  @{ParamList} =  |  Create List  |  FirstParam  |  SecondParam  |  ThirdParam  |
+        |  @{QueryResults} =  |  Call Stored Procedure  |  DBName.SchemaName.StoredProcName  |  List of Parameters  |
 
-        |  @{ParamList} =  |  Create List  |  Testing  |  LastName
-        |  Set Test Variable  |  ${SPName} =   |  DBTest.DBSchema.MyStoredProc
-        |  @{QueryResults} =  |  Call Stored Procedure  |  ${SPName}  |  ${ParamList}
-        |  Log List  |  @{QueryResults}
+        |  @{ParamList} =  |  Create List  |  Testing  |  LastName  |
+        |  Set Test Variable  |  ${SPName} =   |  DBTest.DBSchema.MyStoredProc  |
+        |  @{QueryResults} =  |  Call Stored Procedure  |  ${SPName}  |  ${ParamList}  |
+        |  Log List  |  @{QueryResults}  |
 
         """
         if spParams is None:
