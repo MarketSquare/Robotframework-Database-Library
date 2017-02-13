@@ -87,7 +87,7 @@ class ConnectionManager(object):
             dbPort = dbPort or 5432
             logger.info ('Connecting using : %s.connect(database=%s, user=%s, password=%s, host=%s, port=%s) ' % (dbapiModuleName, dbName, dbUsername, dbPassword, dbHost, dbPort))
             self._dbconnection = db_api_2.connect (database=dbName, user=dbUsername, password=dbPassword, host=dbHost, port=dbPort)
-        elif dbapiModuleName in ["pyodbc"]:
+        elif dbapiModuleName in ["pyodbc", "pypyodbc"]:
             dbPort = dbPort or 1433
             logger.info ('Connecting using : %s.connect(DRIVER={SQL Server};SERVER=%s,%s;DATABASE=%s;UID=%s;PWD=%s)' % (dbapiModuleName,dbHost,dbPort,dbName,dbUsername, dbPassword))
             self._dbconnection = db_api_2.connect('DRIVER={SQL Server};SERVER=%s,%s;DATABASE=%s;UID=%s;PWD=%s' % (dbHost,dbPort,dbName,dbUsername,dbPassword))
