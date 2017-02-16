@@ -268,6 +268,24 @@ class Query(object):
             if cur:
                 self._dbconnection.rollback()
 
+    def execute_sql_string_sanstran(self, sqlString):
+        """
+        Executes the sqlString as SQL commands.
+        Useful to pass arguments to your sql.
+        Does not wrap execution in transaction!
+
+        SQL commands are expected to be delimited by a semi-colon (';').
+
+        For example:
+        | Execute Sql String Sanstran | DELETE FROM person_employee_table; DELETE FROM person_table |
+
+        For example with an argument:
+        | Execute Sql String Sanstran | SELECT * FROM person WHERE first_name = ${FIRSTNAME} |
+        """
+        cur = self._dbconnection.cursor()
+        logger.info('Executing : Execute SQL String Sanstran  |  %s ' % (sqlString))
+        self.__execute_sql(cur, sqlString)
+
     def call_stored_procedure(self, spName, spParams=None):
         """
         Uses the inputs of `spName` and 'spParams' to call a stored procedure
