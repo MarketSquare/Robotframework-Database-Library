@@ -277,10 +277,12 @@ class Query(object):
         SQL commands are expected to be delimited by a semi-colon (';').
 
         For example:
-        | Execute Sql String Sanstran | DELETE FROM person_employee_table; DELETE FROM person_table |
-
-        For example with an argument:
-        | Execute Sql String Sanstran | SELECT * FROM person WHERE first_name = ${FIRSTNAME} |
+        | Check If Exists In Database    SELECT * FROM dbo.ExampleTable WHERE Id = 1 AND ExampleFlag = 0
+        | Execute Sql String Sanstran    BEGIN TRAN
+        | Execute Sql String Sanstran    UPDATE dbo.ExampleTable SET ExampleFlag = 1 WHERE Id = 1 AND ExampleFlag = 0
+        | Check If Exists In Database    SELECT * FROM dbo.ExampleTable WHERE Id = 1 AND ExampleFlag = 1
+        | Execute Sql String Sanstran    ROLLBACK TRAN
+        | Check If Exists In Database    SELECT * FROM dbo.ExampleTable WHERE Id = 1 AND ExampleFlag = 0
         """
         cur = self._dbconnection.cursor()
         logger.info('Executing : Execute SQL String Sanstran  |  %s ' % (sqlString))
