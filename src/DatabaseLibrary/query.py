@@ -270,7 +270,7 @@ class Query(object):
         """
         try:
             cur = self._dbconnection.cursor()
-            logger.info('Executing : Execute SQL String  |  %s ' % (sqlString))
+            logger.info('Executing : Execute SQL String  |  %s ' % sqlString)
             self.__execute_sql(cur, sqlString)
             if sansTran == 0:
                 self._dbconnection.commit()
@@ -304,7 +304,7 @@ class Query(object):
             cur = self._dbconnection.cursor(as_dict=False)
             spName = spName.encode('ascii', 'ignore')
             logger.info ('Executing : Call Stored Procedure  |  %s  |  %s ' % (spName, spParams))
-            cur.callproc(spName, (spParams))
+            cur.callproc(spName, spParams)
             cur.nextset()
             retVal=list()
             for row in cur:
