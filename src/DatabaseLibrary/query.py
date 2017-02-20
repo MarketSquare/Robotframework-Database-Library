@@ -303,7 +303,7 @@ class Query(object):
         try:
             cur = self._dbconnection.cursor(as_dict=False)
             spName = spName.encode('ascii', 'ignore')
-            logger.info ('Executing : Call Stored Procedure  |  %s  |  %s ' % (spName, spParams))
+            logger.info('Executing : Call Stored Procedure  |  %s  |  %s ' % (spName, spParams))
             cur.callproc(spName, spParams)
             cur.nextset()
             retVal=list()
