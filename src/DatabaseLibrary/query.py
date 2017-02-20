@@ -22,8 +22,8 @@ class Query(object):
 
     def query(self, selectStatement, sansTran=False):
         """
-        Uses the input `selectStatement` to query for the values that
-        will be returned as a list of tuples.
+        Uses the input `selectStatement` to query for the values that will be returned as a list of tuples. Set optional
+        input `sansTran` to True to run command without an explicit transaction commit or rollback.
 
         Tip: Unless you want to log all column values of the specified rows,
         try specifying the column names in your select statements
@@ -49,6 +49,9 @@ class Query(object):
 
         And get the following
         See, Franz Allan
+
+        Using optional `sansTran` to run command without an explicit transaction commit or rollback:
+        | @{queryResults} | Query | SELECT * FROM person | True |
         """
         cur = None
         try:
@@ -64,8 +67,8 @@ class Query(object):
 
     def row_count(self, selectStatement, sansTran=False):
         """
-        Uses the input `selectStatement` to query the database and returns
-        the number of rows from the query.
+        Uses the input `selectStatement` to query the database and returns the number of rows from the query. Set
+        optional input `sansTran` to True to run command without an explicit transaction commit or rollback.
 
         For example, given we have a table `person` with the following data:
         | id | first_name  | last_name |
@@ -85,6 +88,9 @@ class Query(object):
 
         And get the following
         1
+
+        Using optional `sansTran` to run command without an explicit transaction commit or rollback:
+        | ${rowCount} | Row Count | SELECT * FROM person | True |
         """
         cur = None
         try:
@@ -104,8 +110,8 @@ class Query(object):
 
     def description(self, selectStatement, sansTran=False):
         """
-        Uses the input `selectStatement` to query a table in the db which
-        will be used to determine the description.
+        Uses the input `selectStatement` to query a table in the db which will be used to determine the description. Set
+        optional input `sansTran` to True to run command without an explicit transaction commit or rollback.
 
         For example, given we have a table `person` with the following data:
         | id | first_name  | last_name |
@@ -119,6 +125,9 @@ class Query(object):
         [Column(name='id', type_code=1043, display_size=None, internal_size=255, precision=None, scale=None, null_ok=None)]
         [Column(name='first_name', type_code=1043, display_size=None, internal_size=255, precision=None, scale=None, null_ok=None)]
         [Column(name='last_name', type_code=1043, display_size=None, internal_size=255, precision=None, scale=None, null_ok=None)]
+
+        Using optional `sansTran` to run command without an explicit transaction commit or rollback:
+        | @{queryResults} | Description | SELECT * FROM person | True |
         """
         cur = None
         try:
@@ -134,7 +143,8 @@ class Query(object):
 
     def delete_all_rows_from_table(self, tableName, sansTran=False):
         """
-        Delete all the rows within a given table.
+        Delete all the rows within a given table. Set optional input `sansTran` to True to run command without an
+        explicit transaction commit or rollback.
 
         For example, given we have a table `person` in a database
 
@@ -146,6 +156,9 @@ class Query(object):
         If the table doesn't exist or all the data can't be deleted, then you
         will get:
         | Delete All Rows From Table | first_name | # FAIL |
+
+        Using optional `sansTran` to run command without an explicit transaction commit or rollback:
+        | Delete All Rows From Table | person | True |
         """
         cur = None
         selectStatement = ("DELETE FROM %s;" % tableName)
@@ -166,10 +179,9 @@ class Query(object):
 
     def execute_sql_script(self, sqlScriptFileName, sansTran=False):
         """
-        Executes the content of the `sqlScriptFileName` as SQL commands.
-        Useful for setting the database to a known state before running
-        your tests, or clearing out your test data after running each a
-        test.
+        Executes the content of the `sqlScriptFileName` as SQL commands. Useful for setting the database to a known
+        state before running your tests, or clearing out your test data after running each a test. Set optional input
+        `sansTran` to True to run command without an explicit transaction commit or rollback.
 
         Sample usage :
         | Execute Sql Script | ${EXECDIR}${/}resources${/}DDL-setup.sql |
@@ -215,6 +227,9 @@ class Query(object):
           FROM person_table;
         DELETE
           FROM employee_table
+
+        Using optional `sansTran` to run command without an explicit transaction commit or rollback:
+        | Execute Sql Script | ${EXECDIR}${/}resources${/}DDL-setup.sql | True |
         """
         sqlScriptFile = open(sqlScriptFileName)
 
@@ -257,8 +272,8 @@ class Query(object):
 
     def execute_sql_string(self, sqlString, sansTran=False):
         """
-        Executes the sqlString as SQL commands.
-        Useful to pass arguments to your sql.
+        Executes the sqlString as SQL commands. Useful to pass arguments to your sql. Set optional input `sansTran` to
+        True to run command without an explicit transaction commit or rollback.
 
         SQL commands are expected to be delimited by a semi-colon (';').
 
@@ -267,6 +282,9 @@ class Query(object):
 
         For example with an argument:
         | Execute Sql String | SELECT * FROM person WHERE first_name = ${FIRSTNAME} |
+
+        Using optional `sansTran` to run command without an explicit transaction commit or rollback:
+        | Execute Sql String | DELETE FROM person_employee_table; DELETE FROM person_table | True |
         """
         try:
             cur = self._dbconnection.cursor()
@@ -281,21 +299,26 @@ class Query(object):
 
     def call_stored_procedure(self, spName, spParams=None, sansTran=False):
         """
-        Uses the inputs of `spName` and 'spParams' to call a stored procedure
+        Uses the inputs of `spName` and 'spParams' to call a stored procedure. Set optional input `sansTran` to
+        True to run command without an explicit transaction commit or rollback.
 
         spName should be the stored procedure name itself
         spParams [Optional] should be a List of the parameters being sent in.  The list can be one or multiple items.
 
         The return from this keyword will always be a list.
 
-        |  @{ParamList} =  |  Create List  |  FirstParam  |  SecondParam  |  ThirdParam
-        |  @{QueryResults} =  |  Call Stored Procedure  |  DBName.SchemaName.StoredProcName  |  List of Parameters
+        Example:
+        | @{ParamList} = | Create List | FirstParam | SecondParam | ThirdParam |
+        | @{QueryResults} = | Call Stored Procedure | DBName.SchemaName.StoredProcName | List of Parameters |
 
-        |  @{ParamList} =  |  Create List  |  Testing  |  LastName
-        |  Set Test Variable  |  ${SPName} =   |  DBTest.DBSchema.MyStoredProc
-        |  @{QueryResults} =  |  Call Stored Procedure  |  ${SPName}  |  ${ParamList}
-        |  Log List  |  @{QueryResults}
+        Example:
+        | @{ParamList} = | Create List | Testing | LastName |
+        | Set Test Variable | ${SPName} = | DBTest.DBSchema.MyStoredProc |
+        | @{QueryResults} = | Call Stored Procedure | ${SPName} | ${ParamList} |
+        | Log List | @{QueryResults} |
 
+        Using optional `sansTran` to run command without an explicit transaction commit or rollback:
+        | @{QueryResults} = | Call Stored Procedure | DBName.SchemaName.StoredProcName | List of Parameters | True |
         """
         if spParams is None:
             spParams = []

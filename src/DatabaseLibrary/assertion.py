@@ -22,9 +22,9 @@ class Assertion(object):
 
     def check_if_exists_in_database(self, selectStatement, sansTran=False):
         """
-        Check if any row would be returned by given the input
-        `selectStatement`. If there are no results, then this will
-        throw an AssertionError.
+        Check if any row would be returned by given the input `selectStatement`. If there are no results, then this will
+        throw an AssertionError. Set optional input `sansTran` to True to run command without an explicit transaction
+        commit or rollback.
 
         For example, given we have a table `person` with the following data:
         | id | first_name  | last_name |
@@ -37,6 +37,9 @@ class Assertion(object):
         Then you will get the following:
         | Check If Exists In Database | SELECT id FROM person WHERE first_name = 'Franz Allan' | # PASS |
         | Check If Exists In Database | SELECT id FROM person WHERE first_name = 'John' | # FAIL |
+
+        Using optional `sansTran` to run command without an explicit transaction commit or rollback:
+        | Check If Exists In Database | SELECT id FROM person WHERE first_name = 'John' | True |
         """
         logger.info ('Executing : Check If Exists In Database  |  %s ' % selectStatement)
         if not self.query(selectStatement, sansTran):
@@ -47,9 +50,9 @@ class Assertion(object):
         """
         This is the negation of `check_if_exists_in_database`.
 
-        Check if no rows would be returned by given the input
-        `selectStatement`. If there are any results, then this will
-        throw an AssertionError.
+        Check if no rows would be returned by given the input `selectStatement`. If there are any results, then this
+        will throw an AssertionError. Set optional input `sansTran` to True to run command without an explicit
+        transaction commit or rollback.
 
         For example, given we have a table `person` with the following data:
         | id | first_name  | last_name |
@@ -62,6 +65,9 @@ class Assertion(object):
         Then you will get the following:
         | Check If Not Exists In Database | SELECT id FROM person WHERE first_name = 'John' | # PASS |
         | Check If Not Exists In Database | SELECT id FROM person WHERE first_name = 'Franz Allan' | # FAIL |
+
+        Using optional `sansTran` to run command without an explicit transaction commit or rollback:
+        | Check If Not Exists In Database | SELECT id FROM person WHERE first_name = 'John' | True |
         """
         logger.info('Executing : Check If Not Exists In Database  |  %s ' % selectStatement)
         queryResults = self.query(selectStatement, sansTran)
@@ -71,8 +77,9 @@ class Assertion(object):
 
     def row_count_is_0(self, selectStatement, sansTran=False):
         """
-        Check if any rows are returned from the submitted `selectStatement`.
-        If there are, then this will throw an AssertionError.
+        Check if any rows are returned from the submitted `selectStatement`. If there are, then this will throw an
+        AssertionError. Set optional input `sansTran` to True to run command without an explicit transaction commit or
+        rollback.
 
         For example, given we have a table `person` with the following data:
         | id | first_name  | last_name |
@@ -85,6 +92,9 @@ class Assertion(object):
         Then you will get the following:
         | Row Count is 0 | SELECT id FROM person WHERE first_name = 'Franz Allan' | # FAIL |
         | Row Count is 0 | SELECT id FROM person WHERE first_name = 'John' | # PASS |
+
+        Using optional `sansTran` to run command without an explicit transaction commit or rollback:
+        | Row Count is 0 | SELECT id FROM person WHERE first_name = 'John' | True |
         """
         logger.info('Executing : Row Count Is 0  |  %s ' % selectStatement)
         num_rows = self.row_count(selectStatement, sansTran)
@@ -94,8 +104,9 @@ class Assertion(object):
 
     def row_count_is_equal_to_x(self, selectStatement, numRows, sansTran=False):
         """
-        Check if the number of rows returned from `selectStatement` is equal to
-        the value submitted. If not, then this will throw an AssertionError.
+        Check if the number of rows returned from `selectStatement` is equal to the value submitted. If not, then this
+        will throw an AssertionError. Set optional input `sansTran` to True to run command without an explicit
+        transaction commit or rollback.
 
         For example, given we have a table `person` with the following data:
         | id | first_name  | last_name |
@@ -109,6 +120,9 @@ class Assertion(object):
         Then you will get the following:
         | Row Count Is Equal To X | SELECT id FROM person | 1 | # FAIL |
         | Row Count Is Equal To X | SELECT id FROM person WHERE first_name = 'John' | 0 | # PASS |
+
+        Using optional `sansTran` to run command without an explicit transaction commit or rollback:
+        | Row Count Is Equal To X | SELECT id FROM person WHERE first_name = 'John' | 0 | True |
         """
         logger.info('Executing : Row Count Is Equal To X  |  %s  |  %s ' % (selectStatement, numRows))
         num_rows = self.row_count(selectStatement, sansTran)
@@ -118,8 +132,9 @@ class Assertion(object):
 
     def row_count_is_greater_than_x(self, selectStatement, numRows, sansTran=False):
         """
-        Check if the number of rows returned from `selectStatement` is greater
-        than the value submitted. If not, then this will throw an AssertionError.
+        Check if the number of rows returned from `selectStatement` is greater than the value submitted. If not, then
+        this will throw an AssertionError. Set optional input `sansTran` to True to run command without an explicit
+        transaction commit or rollback.
 
         For example, given we have a table `person` with the following data:
         | id | first_name  | last_name |
@@ -133,6 +148,9 @@ class Assertion(object):
         Then you will get the following:
         | Row Count Is Greater Than X | SELECT id FROM person | 1 | # PASS |
         | Row Count Is Greater Than X | SELECT id FROM person WHERE first_name = 'John' | 0 | # FAIL |
+
+        Using optional `sansTran` to run command without an explicit transaction commit or rollback:
+        | Row Count Is Greater Than X | SELECT id FROM person | 1 | True |
         """
         logger.info('Executing : Row Count Is Greater Than X  |  %s  |  %s ' % (selectStatement, numRows))
         num_rows = self.row_count(selectStatement, sansTran)
@@ -142,8 +160,9 @@ class Assertion(object):
 
     def row_count_is_less_than_x(self, selectStatement, numRows, sansTran=False):
         """
-        Check if the number of rows returned from `selectStatement` is less
-        than the value submitted. If not, then this will throw an AssertionError.
+        Check if the number of rows returned from `selectStatement` is less than the value submitted. If not, then this
+        will throw an AssertionError. Set optional input `sansTran` to True to run command without an explicit
+        transaction commit or rollback.
 
         For example, given we have a table `person` with the following data:
         | id | first_name  | last_name |
@@ -157,6 +176,9 @@ class Assertion(object):
         Then you will get the following:
         | Row Count Is Less Than X | SELECT id FROM person | 3 | # PASS |
         | Row Count Is Less Than X | SELECT id FROM person WHERE first_name = 'John' | 1 | # FAIL |
+
+        Using optional `sansTran` to run command without an explicit transaction commit or rollback:
+        | Row Count Is Less Than X | SELECT id FROM person | 3 | True |
         """
         logger.info('Executing : Row Count Is Less Than X  |  %s  |  %s ' % (selectStatement, numRows))
         num_rows = self.row_count(selectStatement, sansTran)
@@ -166,7 +188,8 @@ class Assertion(object):
 
     def table_must_exist(self, tableName, sansTran=False):
         """
-        Check if the table given exists in the database.
+        Check if the table given exists in the database. Set optional input `sansTran` to True to run command without an
+        explicit transaction commit or rollback.
 
         For example, given we have a table `person` in a database
 
@@ -176,6 +199,9 @@ class Assertion(object):
         Then you will get the following:
         | Table Must Exist | person | # PASS |
         | Table Must Exist | first_name | # FAIL |
+
+        Using optional `sansTran` to run command without an explicit transaction commit or rollback:
+        | Table Must Exist | person | True |
         """
         logger.info('Executing : Table Must Exist  |  %s ' % tableName)
         if self.db_api_module_name in ["cx_Oracle"]:
