@@ -14,12 +14,13 @@
 
 from robot.api import logger
 
+
 class Assertion(object):
     """
     Assertion handles all the assertions of Database Library.
     """
 
-    def check_if_exists_in_database(self,selectStatement):
+    def check_if_exists_in_database(self, selectStatement, sansTran=0):
         """
         Check if any row would be returned by given the input
         `selectStatement`. If there are no results, then this will
@@ -37,12 +38,12 @@ class Assertion(object):
         | Check If Exists In Database | SELECT id FROM person WHERE first_name = 'Franz Allan' | # PASS |
         | Check If Exists In Database | SELECT id FROM person WHERE first_name = 'John' | # FAIL |
         """
-        logger.info ('Executing : Check If Exists In Database  |  %s ' % (selectStatement))
-        if not self.query(selectStatement):
+        logger.info ('Executing : Check If Exists In Database  |  %s ' % selectStatement)
+        if not self.query(selectStatement, sansTran):
             raise AssertionError("Expected to have have at least one row from '%s' "
                                  "but got 0 rows." % selectStatement)
 
-    def check_if_not_exists_in_database(self,selectStatement):
+    def check_if_not_exists_in_database(self, selectStatement, sansTran=0):
         """
         This is the negation of `check_if_exists_in_database`.
 
@@ -62,13 +63,13 @@ class Assertion(object):
         | Check If Not Exists In Database | SELECT id FROM person WHERE first_name = 'John' | # PASS |
         | Check If Not Exists In Database | SELECT id FROM person WHERE first_name = 'Franz Allan' | # FAIL |
         """
-        logger.info('Executing : Check If Not Exists In Database  |  %s ' % (selectStatement))
-        queryResults = self.query(selectStatement)
+        logger.info('Executing : Check If Not Exists In Database  |  %s ' % selectStatement)
+        queryResults = self.query(selectStatement, sansTran)
         if queryResults:
             raise AssertionError("Expected to have have no rows from '%s' "
                                  "but got some rows : %s." % (selectStatement, queryResults))
 
-    def row_count_is_0(self,selectStatement):
+    def row_count_is_0(self, selectStatement, sansTran=0):
         """
         Check if any rows are returned from the submitted `selectStatement`.
         If there are, then this will throw an AssertionError.
@@ -85,13 +86,13 @@ class Assertion(object):
         | Row Count is 0 | SELECT id FROM person WHERE first_name = 'Franz Allan' | # FAIL |
         | Row Count is 0 | SELECT id FROM person WHERE first_name = 'John' | # PASS |
         """
-        logger.info('Executing : Row Count Is 0  |  %s ' % (selectStatement))
-        num_rows = self.row_count(selectStatement)
-        if (num_rows > 0):
+        logger.info('Executing : Row Count Is 0  |  %s ' % selectStatement)
+        num_rows = self.row_count(selectStatement, sansTran)
+        if num_rows > 0:
             raise AssertionError("Expected zero rows to be returned from '%s' "
                                  "but got rows back. Number of rows returned was %s" % (selectStatement, num_rows))
 
-    def row_count_is_equal_to_x(self,selectStatement,numRows):
+    def row_count_is_equal_to_x(self, selectStatement, numRows, sansTran=0):
         """
         Check if the number of rows returned from `selectStatement` is equal to
         the value submitted. If not, then this will throw an AssertionError.
@@ -110,12 +111,12 @@ class Assertion(object):
         | Row Count Is Equal To X | SELECT id FROM person WHERE first_name = 'John' | 0 | # PASS |
         """
         logger.info('Executing : Row Count Is Equal To X  |  %s  |  %s ' % (selectStatement, numRows))
-        num_rows = self.row_count(selectStatement)
-        if (num_rows != int(numRows.encode('ascii'))):
+        num_rows = self.row_count(selectStatement, sansTran)
+        if num_rows != int(numRows.encode('ascii')):
             raise AssertionError("Expected same number of rows to be returned from '%s' "
                                  "than the returned rows of %s" % (selectStatement, num_rows))
 
-    def row_count_is_greater_than_x(self,selectStatement,numRows):
+    def row_count_is_greater_than_x(self, selectStatement, numRows, sansTran=0):
         """
         Check if the number of rows returned from `selectStatement` is greater
         than the value submitted. If not, then this will throw an AssertionError.
@@ -134,12 +135,12 @@ class Assertion(object):
         | Row Count Is Greater Than X | SELECT id FROM person WHERE first_name = 'John' | 0 | # FAIL |
         """
         logger.info('Executing : Row Count Is Greater Than X  |  %s  |  %s ' % (selectStatement, numRows))
-        num_rows = self.row_count(selectStatement)
-        if (num_rows <= int(numRows.encode('ascii'))):
+        num_rows = self.row_count(selectStatement, sansTran)
+        if num_rows <= int(numRows.encode('ascii')):
             raise AssertionError("Expected more rows to be returned from '%s' "
                                  "than the returned rows of %s" % (selectStatement, num_rows))
 
-    def row_count_is_less_than_x(self,selectStatement,numRows):
+    def row_count_is_less_than_x(self, selectStatement, numRows, sansTran=0):
         """
         Check if the number of rows returned from `selectStatement` is less
         than the value submitted. If not, then this will throw an AssertionError.
@@ -158,12 +159,12 @@ class Assertion(object):
         | Row Count Is Less Than X | SELECT id FROM person WHERE first_name = 'John' | 1 | # FAIL |
         """
         logger.info('Executing : Row Count Is Less Than X  |  %s  |  %s ' % (selectStatement, numRows))
-        num_rows = self.row_count(selectStatement)
-        if (num_rows >= int(numRows.encode('ascii'))):
+        num_rows = self.row_count(selectStatement, sansTran)
+        if num_rows >= int(numRows.encode('ascii')):
             raise AssertionError("Expected less rows to be returned from '%s' "
                                  "than the returned rows of %s" % (selectStatement, num_rows))
 
-    def table_must_exist(self,tableName):
+    def table_must_exist(self, tableName, sansTran=0):
         """
         Check if the table given exists in the database.
 
@@ -176,7 +177,7 @@ class Assertion(object):
         | Table Must Exist | person | # PASS |
         | Table Must Exist | first_name | # FAIL |
         """
-        logger.info('Executing : Table Must Exist  |  %s ' % (tableName))
+        logger.info('Executing : Table Must Exist  |  %s ' % tableName)
         if self.db_api_module_name in ["cx_Oracle"]:
             selectStatement = ("SELECT * FROM all_objects WHERE object_type IN ('TABLE','VIEW') AND owner = SYS_CONTEXT('USERENV', 'SESSION_USER') AND object_name = UPPER('%s')" % tableName)
         elif self.db_api_module_name in ["sqlite3"]:
@@ -185,6 +186,6 @@ class Assertion(object):
             selectStatement = ("SELECT name FROM SYSIBM.SYSTABLES WHERE type='T' AND name=UPPER('%s')" % tableName)
         else:
             selectStatement = ("SELECT * FROM information_schema.tables WHERE table_name='%s'" % tableName)
-        num_rows = self.row_count(selectStatement)
-        if (num_rows == 0):
+        num_rows = self.row_count(selectStatement, sansTran)
+        if num_rows == 0:
             raise AssertionError("Table '%s' does not exist in the db" % tableName)

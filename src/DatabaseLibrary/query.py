@@ -14,12 +14,13 @@
 
 from robot.api import logger
 
+
 class Query(object):
     """
     Query handles all the querying done by the Database Library.
     """
 
-    def query(self, selectStatement):
+    def query(self, selectStatement, sansTran=0):
         """
         Uses the input `selectStatement` to query for the values that
         will be returned as a list of tuples.
@@ -52,15 +53,16 @@ class Query(object):
         cur = None
         try:
             cur = self._dbconnection.cursor()
-            logger.info ('Executing : Query  |  %s ' % (selectStatement))
+            logger.info('Executing : Query  |  %s ' % selectStatement)
             self.__execute_sql(cur, selectStatement)
             allRows = cur.fetchall()
             return allRows
-        finally :
-            if cur :
-                self._dbconnection.rollback()
+        finally:
+            if cur:
+                if sansTran == 0:
+                    self._dbconnection.rollback()
 
-    def row_count(self, selectStatement):
+    def row_count(self, selectStatement, sansTran=0):
         """
         Uses the input `selectStatement` to query the database and returns
         the number of rows from the query.
@@ -87,7 +89,7 @@ class Query(object):
         cur = None
         try:
             cur = self._dbconnection.cursor()
-            logger.info ('Executing : Row Count  |  %s ' % (selectStatement))
+            logger.info('Executing : Row Count  |  %s ' % selectStatement)
             self.__execute_sql(cur, selectStatement)
             data = cur.fetchall()
             if self.db_api_module_name in ["sqlite3", "ibm_db", "ibm_db_dbi"]:
@@ -95,11 +97,12 @@ class Query(object):
             else:
                 rowCount = cur.rowcount
             return rowCount
-        finally :
-            if cur :
-                self._dbconnection.rollback()
+        finally:
+            if cur:
+                if sansTran == 0:
+                    self._dbconnection.rollback()
 
-    def description(self, selectStatement):
+    def description(self, selectStatement, sansTran=0):
         """
         Uses the input `selectStatement` to query a table in the db which
         will be used to determine the description.
@@ -120,15 +123,16 @@ class Query(object):
         cur = None
         try:
             cur = self._dbconnection.cursor()
-            logger.info ('Executing : Description  |  %s ' % (selectStatement))
+            logger.info('Executing : Description  |  %s ' % selectStatement)
             self.__execute_sql(cur, selectStatement)
             description = cur.description
             return description
-        finally :
-            if cur :
-                self._dbconnection.rollback()
+        finally:
+            if cur:
+                if sansTran == 0:
+                    self._dbconnection.rollback()
 
-    def delete_all_rows_from_table(self, tableName):
+    def delete_all_rows_from_table(self, tableName, sansTran=0):
         """
         Delete all the rows within a given table.
 
@@ -147,17 +151,20 @@ class Query(object):
         selectStatement = ("DELETE FROM %s;" % tableName)
         try:
             cur = self._dbconnection.cursor()
-            logger.info ('Executing : Delete All Rows From Table  |  %s ' % (selectStatement))
+            logger.info('Executing : Delete All Rows From Table  |  %s ' % selectStatement)
             result = self.__execute_sql(cur, selectStatement)
             if result is not None:
-                self._dbconnection.commit()
+                if sansTran == 0:
+                    self._dbconnection.commit()
                 return result
-            self._dbconnection.commit()
-        finally :
-            if cur :
-                self._dbconnection.rollback()
+            if sansTran == 0:
+                self._dbconnection.commit()
+        finally:
+            if cur:
+                if sansTran == 0:
+                    self._dbconnection.rollback()
 
-    def execute_sql_script(self, sqlScriptFileName):
+    def execute_sql_script(self, sqlScriptFileName, sansTran=0):
         """
         Executes the content of the `sqlScriptFileName` as SQL commands.
         Useful for setting the database to a known state before running
@@ -214,7 +221,7 @@ class Query(object):
         cur = None
         try:
             cur = self._dbconnection.cursor()
-            logger.info('Executing : Execute SQL Script  |  %s ' % (sqlScriptFileName))
+            logger.info('Executing : Execute SQL Script  |  %s ' % sqlScriptFileName)
             sqlStatement = ''
             for line in sqlScriptFile:
                 line = line.strip()
@@ -241,12 +248,14 @@ class Query(object):
             if len(sqlStatement) != 0:
                 self.__execute_sql(cur, sqlStatement)
 
-            self._dbconnection.commit()
+            if sansTran == 0:
+                self._dbconnection.commit()
         finally:
-            if cur :
-                self._dbconnection.rollback()
+            if cur:
+                if sansTran == 0:
+                    self._dbconnection.rollback()
 
-    def execute_sql_string(self, sqlString):
+    def execute_sql_string(self, sqlString, sansTran=0):
         """
         Executes the sqlString as SQL commands.
         Useful to pass arguments to your sql.
@@ -263,32 +272,14 @@ class Query(object):
             cur = self._dbconnection.cursor()
             logger.info('Executing : Execute SQL String  |  %s ' % (sqlString))
             self.__execute_sql(cur, sqlString)
-            self._dbconnection.commit()
+            if sansTran == 0:
+                self._dbconnection.commit()
         finally:
             if cur:
-                self._dbconnection.rollback()
+                if sansTran == 0:
+                    self._dbconnection.rollback()
 
-    def execute_sql_string_sanstran(self, sqlString):
-        """
-        Executes the sqlString as SQL commands.
-        Useful to pass arguments to your sql.
-        Does not wrap execution in transaction!
-
-        SQL commands are expected to be delimited by a semi-colon (';').
-
-        For example:
-        | Check If Exists In Database    SELECT * FROM dbo.ExampleTable WHERE Id = 1 AND ExampleFlag = 0
-        | Execute Sql String Sanstran    BEGIN TRAN
-        | Execute Sql String Sanstran    UPDATE dbo.ExampleTable SET ExampleFlag = 1 WHERE Id = 1 AND ExampleFlag = 0
-        | Check If Exists In Database    SELECT * FROM dbo.ExampleTable WHERE Id = 1 AND ExampleFlag = 1
-        | Execute Sql String Sanstran    ROLLBACK TRAN
-        | Check If Exists In Database    SELECT * FROM dbo.ExampleTable WHERE Id = 1 AND ExampleFlag = 0
-        """
-        cur = self._dbconnection.cursor()
-        logger.info('Executing : Execute SQL String Sanstran  |  %s ' % (sqlString))
-        self.__execute_sql(cur, sqlString)
-
-    def call_stored_procedure(self, spName, spParams=None):
+    def call_stored_procedure(self, spName, spParams=None, sansTran=0):
         """
         Uses the inputs of `spName` and 'spParams' to call a stored procedure
 
@@ -319,11 +310,13 @@ class Query(object):
             for row in cur:
                 #logger.info ( ' %s ' % (row))
                 retVal.append(row)
-            self._dbconnection.commit()
+            if sansTran == 0:
+                self._dbconnection.commit()
             return retVal
-        finally :
-            if cur :
-                self._dbconnection.rollback()
+        finally:
+            if cur:
+                if sansTran == 0:
+                    self._dbconnection.rollback()
 
     def __execute_sql(self, cur, sqlStatement):
         return cur.execute(sqlStatement)
