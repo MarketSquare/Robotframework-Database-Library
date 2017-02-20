@@ -20,7 +20,7 @@ class Query(object):
     Query handles all the querying done by the Database Library.
     """
 
-    def query(self, selectStatement, sansTran=0):
+    def query(self, selectStatement, sansTran=False):
         """
         Uses the input `selectStatement` to query for the values that
         will be returned as a list of tuples.
@@ -59,10 +59,10 @@ class Query(object):
             return allRows
         finally:
             if cur:
-                if sansTran == 0:
+                if not sansTran:
                     self._dbconnection.rollback()
 
-    def row_count(self, selectStatement, sansTran=0):
+    def row_count(self, selectStatement, sansTran=False):
         """
         Uses the input `selectStatement` to query the database and returns
         the number of rows from the query.
@@ -99,10 +99,10 @@ class Query(object):
             return rowCount
         finally:
             if cur:
-                if sansTran == 0:
+                if not sansTran:
                     self._dbconnection.rollback()
 
-    def description(self, selectStatement, sansTran=0):
+    def description(self, selectStatement, sansTran=False):
         """
         Uses the input `selectStatement` to query a table in the db which
         will be used to determine the description.
@@ -129,10 +129,10 @@ class Query(object):
             return description
         finally:
             if cur:
-                if sansTran == 0:
+                if not sansTran:
                     self._dbconnection.rollback()
 
-    def delete_all_rows_from_table(self, tableName, sansTran=0):
+    def delete_all_rows_from_table(self, tableName, sansTran=False):
         """
         Delete all the rows within a given table.
 
@@ -154,17 +154,17 @@ class Query(object):
             logger.info('Executing : Delete All Rows From Table  |  %s ' % selectStatement)
             result = self.__execute_sql(cur, selectStatement)
             if result is not None:
-                if sansTran == 0:
+                if not sansTran:
                     self._dbconnection.commit()
                 return result
-            if sansTran == 0:
+            if not sansTran:
                 self._dbconnection.commit()
         finally:
             if cur:
-                if sansTran == 0:
+                if not sansTran:
                     self._dbconnection.rollback()
 
-    def execute_sql_script(self, sqlScriptFileName, sansTran=0):
+    def execute_sql_script(self, sqlScriptFileName, sansTran=False):
         """
         Executes the content of the `sqlScriptFileName` as SQL commands.
         Useful for setting the database to a known state before running
@@ -248,14 +248,14 @@ class Query(object):
             if len(sqlStatement) != 0:
                 self.__execute_sql(cur, sqlStatement)
 
-            if sansTran == 0:
+            if not sansTran:
                 self._dbconnection.commit()
         finally:
             if cur:
-                if sansTran == 0:
+                if not sansTran:
                     self._dbconnection.rollback()
 
-    def execute_sql_string(self, sqlString, sansTran=0):
+    def execute_sql_string(self, sqlString, sansTran=False):
         """
         Executes the sqlString as SQL commands.
         Useful to pass arguments to your sql.
@@ -272,14 +272,14 @@ class Query(object):
             cur = self._dbconnection.cursor()
             logger.info('Executing : Execute SQL String  |  %s ' % sqlString)
             self.__execute_sql(cur, sqlString)
-            if sansTran == 0:
+            if not sansTran:
                 self._dbconnection.commit()
         finally:
             if cur:
-                if sansTran == 0:
+                if not sansTran:
                     self._dbconnection.rollback()
 
-    def call_stored_procedure(self, spName, spParams=None, sansTran=0):
+    def call_stored_procedure(self, spName, spParams=None, sansTran=False):
         """
         Uses the inputs of `spName` and 'spParams' to call a stored procedure
 
@@ -310,12 +310,12 @@ class Query(object):
             for row in cur:
                 #logger.info ( ' %s ' % (row))
                 retVal.append(row)
-            if sansTran == 0:
+            if not sansTran:
                 self._dbconnection.commit()
             return retVal
         finally:
             if cur:
-                if sansTran == 0:
+                if not sansTran:
                     self._dbconnection.rollback()
 
     def __execute_sql(self, cur, sqlStatement):

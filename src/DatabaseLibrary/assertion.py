@@ -20,7 +20,7 @@ class Assertion(object):
     Assertion handles all the assertions of Database Library.
     """
 
-    def check_if_exists_in_database(self, selectStatement, sansTran=0):
+    def check_if_exists_in_database(self, selectStatement, sansTran=False):
         """
         Check if any row would be returned by given the input
         `selectStatement`. If there are no results, then this will
@@ -43,7 +43,7 @@ class Assertion(object):
             raise AssertionError("Expected to have have at least one row from '%s' "
                                  "but got 0 rows." % selectStatement)
 
-    def check_if_not_exists_in_database(self, selectStatement, sansTran=0):
+    def check_if_not_exists_in_database(self, selectStatement, sansTran=False):
         """
         This is the negation of `check_if_exists_in_database`.
 
@@ -69,7 +69,7 @@ class Assertion(object):
             raise AssertionError("Expected to have have no rows from '%s' "
                                  "but got some rows : %s." % (selectStatement, queryResults))
 
-    def row_count_is_0(self, selectStatement, sansTran=0):
+    def row_count_is_0(self, selectStatement, sansTran=False):
         """
         Check if any rows are returned from the submitted `selectStatement`.
         If there are, then this will throw an AssertionError.
@@ -92,7 +92,7 @@ class Assertion(object):
             raise AssertionError("Expected zero rows to be returned from '%s' "
                                  "but got rows back. Number of rows returned was %s" % (selectStatement, num_rows))
 
-    def row_count_is_equal_to_x(self, selectStatement, numRows, sansTran=0):
+    def row_count_is_equal_to_x(self, selectStatement, numRows, sansTran=False):
         """
         Check if the number of rows returned from `selectStatement` is equal to
         the value submitted. If not, then this will throw an AssertionError.
@@ -116,7 +116,7 @@ class Assertion(object):
             raise AssertionError("Expected same number of rows to be returned from '%s' "
                                  "than the returned rows of %s" % (selectStatement, num_rows))
 
-    def row_count_is_greater_than_x(self, selectStatement, numRows, sansTran=0):
+    def row_count_is_greater_than_x(self, selectStatement, numRows, sansTran=False):
         """
         Check if the number of rows returned from `selectStatement` is greater
         than the value submitted. If not, then this will throw an AssertionError.
@@ -140,7 +140,7 @@ class Assertion(object):
             raise AssertionError("Expected more rows to be returned from '%s' "
                                  "than the returned rows of %s" % (selectStatement, num_rows))
 
-    def row_count_is_less_than_x(self, selectStatement, numRows, sansTran=0):
+    def row_count_is_less_than_x(self, selectStatement, numRows, sansTran=False):
         """
         Check if the number of rows returned from `selectStatement` is less
         than the value submitted. If not, then this will throw an AssertionError.
@@ -164,7 +164,7 @@ class Assertion(object):
             raise AssertionError("Expected less rows to be returned from '%s' "
                                  "than the returned rows of %s" % (selectStatement, num_rows))
 
-    def table_must_exist(self, tableName, sansTran=0):
+    def table_must_exist(self, tableName, sansTran=False):
         """
         Check if the table given exists in the database.
 
