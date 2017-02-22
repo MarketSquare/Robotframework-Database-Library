@@ -7,11 +7,8 @@ ${DBName}         my_db_test
 
 *** Test Cases ***
 Remove old DB if exists
-    Comment    ${Status}    ${value} =    Run Keyword And Ignore Error    File Should Not Exist    /Users/jerry/Desktop/TestCases/TestSQLite3.db
     ${Status}    ${value} =    Run Keyword And Ignore Error    File Should Not Exist    ./${DBName}.db
-    Comment    Run Keyword If    "${Status}" == "FAIL"    Run Keyword And Ignore Error    Run    rm -rf $HOME/Desktop/TestCases/TestSQLite3.db
-    Run Keyword If    "${Status}" == "FAIL"    Run Keyword And Ignore Error    Run    rm -rf ./${DBName}.db
-    Comment    File Should Not Exist    /Users/jerry/Desktop/TestCases/TestSQLite3.db
+    Run Keyword If    "${Status}" == "FAIL"    Run Keyword And Ignore Error    Remove File    ./${DBName}.db
     File Should Not Exist    ./${DBName}.db
     Comment    Sleep    1s
 
