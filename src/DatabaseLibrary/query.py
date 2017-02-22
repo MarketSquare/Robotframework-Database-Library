@@ -299,47 +299,14 @@ class Query(object):
 
     def call_stored_procedure(self, spName, spParams=None, sansTran=False):
         """
-<<<<<<< HEAD
-        Executes the sqlString as SQL commands.
-        Useful to pass arguments to your sql.
-        Does not wrap execution in transaction!
-
-        SQL commands are expected to be delimited by a semi-colon (';').
-
-        For example:
-        | Check If Exists In Database    SELECT * FROM dbo.ExampleTable WHERE Id = 1 AND ExampleFlag = 0
-        | Execute Sql String Sanstran    BEGIN TRAN
-        | Execute Sql String Sanstran    UPDATE dbo.ExampleTable SET ExampleFlag = 1 WHERE Id = 1 AND ExampleFlag = 0
-        | Check If Exists In Database    SELECT * FROM dbo.ExampleTable WHERE Id = 1 AND ExampleFlag = 1
-        | Execute Sql String Sanstran    ROLLBACK TRAN
-        | Check If Exists In Database    SELECT * FROM dbo.ExampleTable WHERE Id = 1 AND ExampleFlag = 0
-        """
-        cur = self._dbconnection.cursor()
-        logger.info('Executing : Execute SQL String Sanstran  |  %s ' % (sqlString))
-        self.__execute_sql(cur, sqlString)
-
-    def call_stored_procedure(self, spName, spParams=None):
-        """
-        Uses the inputs of spName and spParams to call a stored procedure
-=======
         Uses the inputs of `spName` and 'spParams' to call a stored procedure. Set optional input `sansTran` to
         True to run command without an explicit transaction commit or rollback.
->>>>>>> upstream/master
 
         spName should be the stored procedure name itself
         spParams [Optional] should be a List of the parameters being sent in.  The list can be one or multiple items.
 
-        The return from this keyword will always be a list:
+        The return from this keyword will always be a list.
 
-<<<<<<< HEAD
-        |  @{ParamList} =  |  Create List  |  FirstParam  |  SecondParam  |  ThirdParam  |
-        |  @{QueryResults} =  |  Call Stored Procedure  |  DBName.SchemaName.StoredProcName  |  List of Parameters  |
-
-        |  @{ParamList} =  |  Create List  |  Testing  |  LastName  |
-        |  Set Test Variable  |  ${SPName} =   |  DBTest.DBSchema.MyStoredProc  |
-        |  @{QueryResults} =  |  Call Stored Procedure  |  ${SPName}  |  ${ParamList}  |
-        |  Log List  |  @{QueryResults}  |
-=======
         Example:
         | @{ParamList} = | Create List | FirstParam | SecondParam | ThirdParam |
         | @{QueryResults} = | Call Stored Procedure | DBName.SchemaName.StoredProcName | List of Parameters |
@@ -349,7 +316,6 @@ class Query(object):
         | Set Test Variable | ${SPName} = | DBTest.DBSchema.MyStoredProc |
         | @{QueryResults} = | Call Stored Procedure | ${SPName} | ${ParamList} |
         | Log List | @{QueryResults} |
->>>>>>> upstream/master
 
         Using optional `sansTran` to run command without an explicit transaction commit or rollback:
         | @{QueryResults} = | Call Stored Procedure | DBName.SchemaName.StoredProcName | List of Parameters | True |
