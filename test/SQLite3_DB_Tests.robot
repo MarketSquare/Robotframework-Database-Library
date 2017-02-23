@@ -14,7 +14,7 @@ Remove old DB if exists
 
 Connect to SQLiteDB
     Comment    Connect To Database Using Custom Params sqlite3 database='path_to_dbfile\dbname.db'
-    Connect To Database Using Custom Params    sqlite3    database="./${DBName}.db"
+    Connect To Database Using Custom Params    sqlite3    database="./${DBName}.db", isolation_level=None
 
 Create person table
     ${output} =    Execute SQL String    CREATE TABLE person (id integer unique,first_name varchar,last_name varchar);
@@ -124,9 +124,48 @@ Verify Delete All Rows From Table - foobar
 
 Verify Query - Row Count foobar table 0 row
     Row Count Is 0    SELECT * FROM foobar;
-    Comment    ${output} =    Query    SELECT COUNT(*) FROM foobar;
-    Comment    Log    ${output}
-    Comment    Should Be Equal As Strings    ${output}    [(0,)]
+
+Begin first transaction
+    ${output} =    Execute SQL String    SAVEPOINT first    True
+    Log    ${output}
+    Should Be Equal As Strings    ${output}    None
+
+Add person in first transaction
+    ${output} =    Execute SQL String    INSERT INTO person VALUES(101,'Bilbo','Baggins');    True
+    Log    ${output}
+    Should Be Equal As Strings    ${output}    None
+
+Verify person in first transaction
+    Row Count is Equal to X    SELECT * FROM person WHERE last_name = 'Baggins';    1    True
+
+Begin second transaction
+    ${output} =    Execute SQL String    SAVEPOINT second    True
+    Log    ${output}
+    Should Be Equal As Strings    ${output}    None
+
+Add person in second transaction
+    ${output} =    Execute SQL String    INSERT INTO person VALUES(102,'Frodo','Baggins');    True
+    Log    ${output}
+    Should Be Equal As Strings    ${output}    None
+
+Verify persons in first and second transactions
+    Row Count is Equal to X    SELECT * FROM person WHERE last_name = 'Baggins';    2    True
+
+Rollback second transaction
+    ${output} =    Execute SQL String    ROLLBACK TO SAVEPOINT second    True
+    Log    ${output}
+    Should Be Equal As Strings    ${output}    None
+
+Verify second transaction rollback
+    Row Count is Equal to X    SELECT * FROM person WHERE last_name = 'Baggins';    1    True
+
+Rollback first transaction
+    ${output} =    Execute SQL String    ROLLBACK TO SAVEPOINT first    True
+    Log    ${output}
+    Should Be Equal As Strings    ${output}    None
+
+Verify first transaction rollback
+    Row Count is 0    SELECT * FROM person WHERE last_name = 'Baggins';    True
 
 Drop person and foobar tables
     ${output} =    Execute SQL String    DROP TABLE IF EXISTS person;
