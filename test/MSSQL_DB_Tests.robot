@@ -1,38 +1,32 @@
 *** Settings ***
+Suite Setup       Connect To Database    pymssql    ${DBName}    ${DBUser}    ${DBPass}    ${DBHost}    ${DBPort}
+Suite Teardown    Disconnect From Database
 Library           DatabaseLibrary
 Library           OperatingSystem
 
 *** Variables ***
-${DBName}         my_db_test
+${DBHost}
+${DBName}
+${DBPass}
+${DBPort}
+${DBUser}
 
 *** Test Cases ***
-Remove old DB if exists
-    [Tags]    db    smoke
-    ${Status}    ${value} =    Run Keyword And Ignore Error    File Should Not Exist    ./${DBName}.db
-    Run Keyword If    "${Status}" == "FAIL"    Run Keyword And Ignore Error    Remove File    ./${DBName}.db
-    File Should Not Exist    ./${DBName}.db
-    Comment    Sleep    1s
-
-Connect to SQLiteDB
-    [Tags]    db    smoke
-    Comment    Connect To Database Using Custom Params sqlite3 database='path_to_dbfile\dbname.db'
-    Connect To Database Using Custom Params    sqlite3    database="./${DBName}.db", isolation_level=None
-
 Create person table
     [Tags]    db    smoke
-    ${output} =    Execute SQL String    CREATE TABLE person (id integer unique,first_name varchar,last_name varchar);
+    ${output} =    Execute SQL String    CREATE TABLE person (id integer unique, first_name varchar(20), last_name varchar(20));
     Log    ${output}
     Should Be Equal As Strings    ${output}    None
 
 Execute SQL Script - Insert Data person table
     [Tags]    db    smoke
-    ${output} =    Execute SQL Script    ./${DBName}_insertData.sql
+    ${output} =    Execute SQL Script    ./my_db_test_insertData.sql
     Log    ${output}
     Should Be Equal As Strings    ${output}    None
 
 Execute SQL String - Create Table
     [Tags]    db    smoke
-    ${output} =    Execute SQL String    create table foobar (id integer primary key, firstname varchar unique)
+    ${output} =    Execute SQL String    create table foobar (id integer primary key, firstname varchar(20) unique)
     Log    ${output}
     Should Be Equal As Strings    ${output}    None
 
@@ -79,26 +73,26 @@ Retrieve records from person table
 Verify person Description
     [Tags]    db    smoke
     Comment    Query db for table column descriptions
-    @{queryResults} =    Description    SELECT * FROM person LIMIT 1;
+    @{queryResults} =    Description    SELECT TOP 1 * FROM person;
     Log Many    @{queryResults}
     ${output} =    Set Variable    ${queryResults[0]}
-    Should Be Equal As Strings    ${output}    ('id', None, None, None, None, None, None)
+    Should Be Equal As Strings    ${output}    (u'id', 3, None, None, None, None, None)
     ${output} =    Set Variable    ${queryResults[1]}
-    Should Be Equal As Strings    ${output}    ('first_name', None, None, None, None, None, None)
+    Should Be Equal As Strings    ${output}    (u'first_name', 1, None, None, None, None, None)
     ${output} =    Set Variable    ${queryResults[2]}
-    Should Be Equal As Strings    ${output}    ('last_name', None, None, None, None, None, None)
+    Should Be Equal As Strings    ${output}    (u'last_name', 1, None, None, None, None, None)
     ${NumColumns} =    Get Length    ${queryResults}
     Should Be Equal As Integers    ${NumColumns}    3
 
 Verify foobar Description
     [Tags]    db    smoke
     Comment    Query db for table column descriptions
-    @{queryResults} =    Description    SELECT * FROM foobar LIMIT 1;
+    @{queryResults} =    Description    SELECT TOP 1 * FROM foobar;
     Log Many    @{queryResults}
     ${output} =    Set Variable    ${queryResults[0]}
-    Should Be Equal As Strings    ${output}    ('id', None, None, None, None, None, None)
+    Should Be Equal As Strings    ${output}    (u'id', 3, None, None, None, None, None)
     ${output} =    Set Variable    ${queryResults[1]}
-    Should Be Equal As Strings    ${output}    ('firstname', None, None, None, None, None, None)
+    Should Be Equal As Strings    ${output}    (u'firstname', 1, None, None, None, None, None)
     ${NumColumns} =    Get Length    ${queryResults}
     Should Be Equal As Integers    ${NumColumns}    2
 
@@ -149,7 +143,7 @@ Verify Query - Row Count foobar table 0 row
 
 Begin first transaction
     [Tags]    db    smoke
-    ${output} =    Execute SQL String    SAVEPOINT first    True
+    ${output} =    Execute SQL String    SAVE TRANSACTION first    True
     Log    ${output}
     Should Be Equal As Strings    ${output}    None
 
@@ -165,7 +159,7 @@ Verify person in first transaction
 
 Begin second transaction
     [Tags]    db    smoke
-    ${output} =    Execute SQL String    SAVEPOINT second    True
+    ${output} =    Execute SQL String    SAVE TRANSACTION second    True
     Log    ${output}
     Should Be Equal As Strings    ${output}    None
 
@@ -181,7 +175,7 @@ Verify persons in first and second transactions
 
 Rollback second transaction
     [Tags]    db    smoke
-    ${output} =    Execute SQL String    ROLLBACK TO SAVEPOINT second    True
+    ${output} =    Execute SQL String    ROLLBACK TRANSACTION second    True
     Log    ${output}
     Should Be Equal As Strings    ${output}    None
 
@@ -191,7 +185,7 @@ Verify second transaction rollback
 
 Rollback first transaction
     [Tags]    db    smoke
-    ${output} =    Execute SQL String    ROLLBACK TO SAVEPOINT first    True
+    ${output} =    Execute SQL String    ROLLBACK TRANSACTION first    True
     Log    ${output}
     Should Be Equal As Strings    ${output}    None
 
