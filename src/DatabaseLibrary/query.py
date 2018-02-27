@@ -324,7 +324,10 @@ class Query(object):
             spParams = []
         cur = None
         try:
-            cur = self._dbconnection.cursor(as_dict=False)
+            if self.db_api_module_name in ["cx_Oracle"]:
+                cur = self._dbconnection.cursor()
+            else:
+                cur = self._dbconnection.cursor(as_dict=False)
             spName = spName.encode('ascii', 'ignore')
             logger.info('Executing : Call Stored Procedure  |  %s  |  %s ' % (spName, spParams))
             cur.callproc(spName, spParams)
