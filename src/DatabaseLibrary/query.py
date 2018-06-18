@@ -20,10 +20,11 @@ class Query(object):
     Query handles all the querying done by the Database Library.
     """
 
-    def query(self, selectStatement, sansTran=False):
+    def query(self, selectStatement, sansTran=False, returnAsDict=False):
         """
         Uses the input `selectStatement` to query for the values that will be returned as a list of tuples. Set optional
         input `sansTran` to True to run command without an explicit transaction commit or rollback.
+        Set optional input `returnAsDict` to True to return values as a list of dictionaries.
 
         Tip: Unless you want to log all column values of the specified rows,
         try specifying the column names in your select statements
@@ -59,6 +60,18 @@ class Query(object):
             logger.info('Executing : Query  |  %s ' % selectStatement)
             self.__execute_sql(cur, selectStatement)
             allRows = cur.fetchall()
+
+            if returnAsDict:
+                mappedRows = []
+                col_names = [c[0] for c in cur.description]
+
+                for rowIdx in range(len(allRows)):
+                    d = {}
+                    for colIdx in range(len(allRows[rowIdx])):
+                        d[col_names[colIdx]] = allRows[rowIdx][colIdx]
+                    mappedRows.append(d)
+                return mappedRows
+
             return allRows
         finally:
             if cur:
