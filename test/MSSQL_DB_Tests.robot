@@ -5,11 +5,11 @@ Library           DatabaseLibrary
 Library           OperatingSystem
 
 *** Variables ***
-${DBHost}
-${DBName}
-${DBPass}
-${DBPort}
-${DBUser}
+${DBHost}         ${EMPTY}
+${DBName}         ${EMPTY}
+${DBPass}         ${EMPTY}
+${DBPort}         ${EMPTY}
+${DBUser}         ${EMPTY}
 
 *** Test Cases ***
 Create person table
@@ -107,6 +107,13 @@ Verify Query - Row Count foobar table
     ${output} =    Query    SELECT COUNT(*) FROM foobar;
     Log    ${output}
     Should Be Equal As Strings    ${output}    [(0,)]
+
+Verify Query - Get results as a list of dictionaries
+    [Tags]    db    smoke
+    ${output} =    Query    SELECT * FROM person;    \    True
+    Log    ${output}
+    Should Be Equal As Strings    &{output[0]}[first_name]    Franz Allan
+    Should Be Equal As Strings    &{output[1]}[first_name]    Jerry
 
 Verify Execute SQL String - Row Count person table
     [Tags]    db    smoke

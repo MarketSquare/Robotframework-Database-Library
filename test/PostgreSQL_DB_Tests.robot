@@ -102,6 +102,13 @@ Verify Query - Row Count foobar table
     ${val}=    Get from list    ${val}    0
     Should be equal as Integers    ${val}    0
 
+Verify Query - Get results as a list of dictionaries
+    [Tags]    db    smoke
+    ${output} =    Query    SELECT * FROM person;    \    True
+    Log    ${output}
+    Should Be Equal As Strings    &{output[0]}[first_name]    Franz Allan
+    Should Be Equal As Strings    &{output[1]}[first_name]    Jerry
+
 Verify Execute SQL String - Row Count person table
     ${output} =    Execute SQL String    SELECT COUNT(*) FROM person;
     Log    ${output}

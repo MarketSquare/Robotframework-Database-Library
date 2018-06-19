@@ -1,9 +1,8 @@
 *** Settings ***
-Resource	      DB2SQL_DB_Conf.txt
-Library           DatabaseLibrary
-
 Suite Setup       Connect To Database    ibm_db_dbi    ${DBName}    ${DBUser}    ${DBPass}    ${DBHost}    ${DBPort}
 Suite Teardown    Disconnect From Database
+Resource          DB2SQL_DB_Conf.txt
+Library           DatabaseLibrary
 
 *** Test Cases ***
 Create person table
@@ -72,6 +71,13 @@ Verify Query - Row Count foobar table
     Log    ${output}
     Should Be Equal As Strings    ${output}    [(0,)]
 
+Verify Query - Get results as a list of dictionaries
+    [Tags]    db    smoke
+    ${output} =    Query    SELECT * FROM person;    \    True
+    Log    ${output}
+    Should Be Equal As Strings    &{output[0]}[first_name]    Franz Allan
+    Should Be Equal As Strings    &{output[1]}[first_name]    Jerry
+
 Insert Data Into Table foobar
     ${output} =    Execute SQL String    INSERT INTO foobar VALUES(1,'Jerry');
     Log    ${output}
@@ -82,12 +88,11 @@ Verify Query - Row Count foobar table 1 row
     Log    ${output}
     Should Be Equal As Strings    ${output}    [(1,)]
 
-
 Verify Delete All Rows From Table - foobar
     Delete All Rows From Table    foobar
 
 Verify Query - Row Count foobar table 0 row
-    Row Count Is 0     SELECT * FROM foobar;
+    Row Count Is 0    SELECT * FROM foobar;
 
 Drop person and foobar table
     Execute SQL String    DROP TABLE person;
