@@ -21,7 +21,6 @@ from .version import VERSION
 
 _version_ = VERSION
 
-
 class DatabaseLibrary(ConnectionManager, Query, Assertion):
     """
     Database Library contains utilities meant for Robot Framework's usage.
