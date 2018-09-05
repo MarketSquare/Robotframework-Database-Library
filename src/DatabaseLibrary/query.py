@@ -299,6 +299,7 @@ class Query(object):
         Using optional `sansTran` to run command without an explicit transaction commit or rollback:
         | Execute Sql String | DELETE FROM person_employee_table; DELETE FROM person_table | True |
         """
+        cur = None
         try:
             cur = self._dbconnection.cursor()
             logger.info('Executing : Execute SQL String  |  %s ' % sqlString)
