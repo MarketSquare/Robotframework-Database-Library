@@ -13,6 +13,7 @@
 #  limitations under the License.
 
 from robot.api import logger
+import sys
 
 
 class Query(object):
@@ -342,7 +343,9 @@ class Query(object):
                 cur = self._dbconnection.cursor()
             else:
                 cur = self._dbconnection.cursor(as_dict=False)
-            spName = spName.encode('ascii', 'ignore')
+            PY3K = sys.version_info >= (3, 0)
+            if not PY3K:
+                spName = spName.encode('ascii', 'ignore')
             logger.info('Executing : Call Stored Procedure  |  %s  |  %s ' % (spName, spParams))
             cur.callproc(spName, spParams)
             cur.nextset()
