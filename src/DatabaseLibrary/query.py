@@ -253,7 +253,7 @@ class Query(object):
             logger.info('Executing : Execute SQL Script  |  %s ' % sqlScriptFileName)
             sqlStatement = ''
             for line in sqlScriptFile:
-                line = line.strip()
+                line = line.strip().decode("utf-8")
                 if line.startswith('#'):
                     continue
                 elif line.startswith('--'):
