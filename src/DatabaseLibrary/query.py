@@ -14,7 +14,6 @@
 
 import sys
 from robot.api import logger
-import sys
 
 
 class Query(object):
