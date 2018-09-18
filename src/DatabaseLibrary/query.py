@@ -12,6 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import sys
 from robot.api import logger
 import sys
 
@@ -148,7 +149,10 @@ class Query(object):
             cur = self._dbconnection.cursor()
             logger.info('Executing : Description  |  %s ' % selectStatement)
             self.__execute_sql(cur, selectStatement)
-            description = cur.description
+            description = list(cur.description)
+            if sys.version_info[0] < 3:
+                for row in range(0, len(description)):
+                    description[row] = (description[row][0].encode('utf-8'),) + description[row][1:]
             return description
         finally:
             if cur:
