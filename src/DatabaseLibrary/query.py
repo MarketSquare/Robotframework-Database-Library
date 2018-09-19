@@ -256,7 +256,10 @@ class Query(object):
             logger.info('Executing : Execute SQL Script  |  %s ' % sqlScriptFileName)
             sqlStatement = ''
             for line in sqlScriptFile:
-                line = line.strip().decode("utf-8")
+                PY3K = sys.version_info >= (3, 0)
+                if not PY3K:
+                    #spName = spName.encode('ascii', 'ignore')
+                    line = line.strip().decode("utf-8")
                 if line.startswith('#'):
                     continue
                 elif line.startswith('--'):
