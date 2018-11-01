@@ -76,9 +76,12 @@ class ConnectionManager(object):
         dbHost = dbHost or config.get('default', 'dbHost') or 'localhost'
         dbPort = int(dbPort or config.get('default', 'dbPort'))
 
-        self.db_api_module_name = dbapiModuleName
-
-        db_api_2 = importlib.import_module(dbapiModuleName)
+        if dbapiModuleName == "excel":
+            self.db_api_module_name = "pyodbc"
+            db_api_2 = importlib.import_module("pyodbc")
+        else:
+            self.db_api_module_name = dbapiModuleName
+            db_api_2 = importlib.import_module(dbapiModuleName)
         if dbapiModuleName in ["MySQLdb", "pymysql"]:
             dbPort = dbPort or 3306
             logger.info('Connecting using : %s.connect(db=%s, user=%s, passwd=%s, host=%s, port=%s, charset=%s) ' % (dbapiModuleName, dbName, dbUsername, dbPassword, dbHost, dbPort, dbCharset))
@@ -92,11 +95,12 @@ class ConnectionManager(object):
             logger.info('Connecting using : %s.connect(DRIVER={SQL Server};SERVER=%s,%s;DATABASE=%s;UID=%s;PWD=%s)' % (dbapiModuleName, dbHost, dbPort, dbName, dbUsername, dbPassword))
             self._dbconnection = db_api_2.connect('DRIVER={SQL Server};SERVER=%s,%s;DATABASE=%s;UID=%s;PWD=%s' % (dbHost, dbPort, dbName, dbUsername, dbPassword))
         elif dbapiModuleName in ["excel"]:
-            dbPort = dbPort or 1433
-            logger.info('Connecting using : %s.connect(DRIVER={Microsoft Excel Driver (*.xls, *.xlsx, *xlsm, *.xlsb)};DBQ=%s;ReadOnly=0)' % (
-            dbapiModuleName, dbName))
-            self._dbconnection = db_api_2.connect('DRIVER={Microsoft Excel Driver (*.xls, *.xlsx, *xlsm, *.xlsb)};DBQ=%s;ReadOnly=0)' % (
-            dbName))
+            logger.info(
+                'Connecting using : %s.connect(DRIVER={Microsoft Excel Driver (*.xls, *.xlsx, *.xlsm, *.xlsb)};DBQ=%s;ReadOnly=0;Extended Properties="Excel 8.0;HDR=YES";)' % (
+                dbapiModuleName, dbName))
+            self._dbconnection = db_api_2.connect(
+                'DRIVER={Microsoft Excel Driver (*.xls, *.xlsx, *.xlsm, *.xlsb)};DBQ=%s;ReadOnly=0;Extended Properties="Excel 8.0;HDR=YES";)' % (
+                    dbName), autocommit=True)
         elif dbapiModuleName in ["ibm_db", "ibm_db_dbi"]:
             dbPort = dbPort or 50000
             logger.info('Connecting using : %s.connect(DATABASE=%s;HOSTNAME=%s;PORT=%s;PROTOCOL=TCPIP;UID=%s;PWD=%s;) ' % (dbapiModuleName, dbName, dbHost, dbPort, dbUsername, dbPassword))
@@ -142,12 +146,12 @@ class ConnectionManager(object):
 
     def set_auto_commit(self, autoCommit=True):
         """
-        Turn the autocommit on the database connection ON or OFF. 
+        Turn the autocommit on the database connection ON or OFF.
 
-        The default behaviour on a newly created database connection is to automatically start a 
-        transaction, which means that database actions that won't work if there is an active 
-        transaction will fail. Common examples of these actions are creating or deleting a database 
-        or database snapshot. By turning on auto commit on the database connection these actions 
+        The default behaviour on a newly created database connection is to automatically start a
+        transaction, which means that database actions that won't work if there is an active
+        transaction will fail. Common examples of these actions are creating or deleting a database
+        or database snapshot. By turning on auto commit on the database connection these actions
         can be performed.
 
         Example:
