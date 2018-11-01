@@ -91,6 +91,12 @@ class ConnectionManager(object):
             dbPort = dbPort or 1433
             logger.info('Connecting using : %s.connect(DRIVER={SQL Server};SERVER=%s,%s;DATABASE=%s;UID=%s;PWD=%s)' % (dbapiModuleName, dbHost, dbPort, dbName, dbUsername, dbPassword))
             self._dbconnection = db_api_2.connect('DRIVER={SQL Server};SERVER=%s,%s;DATABASE=%s;UID=%s;PWD=%s' % (dbHost, dbPort, dbName, dbUsername, dbPassword))
+        elif dbapiModuleName in ["excel"]:
+            dbPort = dbPort or 1433
+            logger.info('Connecting using : %s.connect(DRIVER={Microsoft Excel Driver (*.xls, *.xlsx, *xlsm, *.xlsb)};DBQ=%s;ReadOnly=0)' % (
+            dbapiModuleName, dbName))
+            self._dbconnection = db_api_2.connect('DRIVER={Microsoft Excel Driver (*.xls, *.xlsx, *xlsm, *.xlsb)};DBQ=%s;ReadOnly=0)' % (
+            dbName))
         elif dbapiModuleName in ["ibm_db", "ibm_db_dbi"]:
             dbPort = dbPort or 50000
             logger.info('Connecting using : %s.connect(DATABASE=%s;HOSTNAME=%s;PORT=%s;PROTOCOL=TCPIP;UID=%s;PWD=%s;) ' % (dbapiModuleName, dbName, dbHost, dbPort, dbUsername, dbPassword))
