@@ -76,7 +76,7 @@ class ConnectionManager(object):
         dbHost = dbHost or config.get('default', 'dbHost') or 'localhost'
         dbPort = int(dbPort or config.get('default', 'dbPort'))
 
-        if dbapiModuleName == "excel":
+        if dbapiModuleName == "excel" or dbapiModuleName == "excelrw":
             self.db_api_module_name = "pyodbc"
             db_api_2 = importlib.import_module("pyodbc")
         else:
@@ -95,6 +95,13 @@ class ConnectionManager(object):
             logger.info('Connecting using : %s.connect(DRIVER={SQL Server};SERVER=%s,%s;DATABASE=%s;UID=%s;PWD=%s)' % (dbapiModuleName, dbHost, dbPort, dbName, dbUsername, dbPassword))
             self._dbconnection = db_api_2.connect('DRIVER={SQL Server};SERVER=%s,%s;DATABASE=%s;UID=%s;PWD=%s' % (dbHost, dbPort, dbName, dbUsername, dbPassword))
         elif dbapiModuleName in ["excel"]:
+            logger.info(
+                'Connecting using : %s.connect(DRIVER={Microsoft Excel Driver (*.xls, *.xlsx, *.xlsm, *.xlsb)};DBQ=%s;ReadOnly=1;Extended Properties="Excel 8.0;HDR=YES";)' % (
+                dbapiModuleName, dbName))
+            self._dbconnection = db_api_2.connect(
+                'DRIVER={Microsoft Excel Driver (*.xls, *.xlsx, *.xlsm, *.xlsb)};DBQ=%s;ReadOnly=1;Extended Properties="Excel 8.0;HDR=YES";)' % (
+                    dbName), autocommit=True)
+        elif dbapiModuleName in ["excelrw"]:
             logger.info(
                 'Connecting using : %s.connect(DRIVER={Microsoft Excel Driver (*.xls, *.xlsx, *.xlsm, *.xlsb)};DBQ=%s;ReadOnly=0;Extended Properties="Excel 8.0;HDR=YES";)' % (
                 dbapiModuleName, dbName))
