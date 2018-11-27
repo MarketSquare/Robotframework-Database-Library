@@ -154,11 +154,13 @@ class ConnectionManager(object):
     def set_auto_commit(self, autoCommit=True):
         """
         Turn the autocommit on the database connection ON or OFF. 
+        
         The default behaviour on a newly created database connection is to automatically start a 
         transaction, which means that database actions that won't work if there is an active 
         transaction will fail. Common examples of these actions are creating or deleting a database 
         or database snapshot. By turning on auto commit on the database connection these actions 
         can be performed.
+        
         Example:
         | # Default behaviour, sets auto commit to true
         | Set Auto Commit
