@@ -8,18 +8,18 @@ Library           DatabaseLibrary
 Create person table
     ${output} =    Execute SQL String    CREATE TABLE person (id decimal(10,0),first_name varchar(30),last_name varchar(30));
     Log    ${output}
-    Should Be Equal As Strings    ${output}    None
+    Should Be Equal As Strings    ${output}    0
 
 Execute SQL Script - Insert Data person table
     Comment    ${output} =    Execute SQL Script    ./my_db_test_insertData.sql
     ${output} =    Execute SQL Script    ../test/my_db_test_insertData.sql
     Log    ${output}
-    Should Be Equal As Strings    ${output}    None
+    Should Be Equal As Strings    ${output}    2
 
 Execute SQL String - Create Table
     ${output} =    Execute SQL String    create table foobar (id integer , firstname varchar(20) )
     Log    ${output}
-    Should Be Equal As Strings    ${output}    None
+    Should Be Equal As Strings    ${output}    0
 
 Check If Exists In DB - Franz Allan
     Check If Exists In Database    SELECT id FROM person WHERE first_name = 'Franz Allan';
@@ -81,7 +81,7 @@ Verify Query - Get results as a list of dictionaries
 Insert Data Into Table foobar
     ${output} =    Execute SQL String    INSERT INTO foobar VALUES(1,'Jerry');
     Log    ${output}
-    Should Be Equal As Strings    ${output}    None
+    Should Be Equal As Strings    ${output}    1
 
 Verify Query - Row Count foobar table 1 row
     ${output} =    Query    SELECT COUNT(*) FROM foobar;
