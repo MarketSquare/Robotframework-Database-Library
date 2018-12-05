@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<robot generated="20181205 14:10:36.432" generator="Robot 3.0.4 (Python 2.7.15 on darwin)">
+<suite source="/Users/jackd/git/Robotframework-Database-Library/test/Excel_DB_Test.robot" id="s1" name="Excel DB Test">
+<kw type="setup" name="Connect To Database" library="DatabaseLibrary">
+<doc>Loads the DB API 2.0 module given `dbapiModuleName` then uses it to</doc>
+<arguments>
+<arg>excelrw</arg>
+<arg>${DBName}</arg>
+<arg>${DBUser}</arg>
+<arg>${DBPass}</arg>
+<arg>${DBHost}</arg>
+<arg>${DBPort}</arg>
+</arguments>
+<msg timestamp="20181205 14:10:36.481" level="INFO">Connecting using : excelrw.connect(DRIVER={Microsoft Excel Driver (*.xls, *.xlsx, *.xlsm, *.xlsb)};DBQ=/Users/jackd/git/Robotframework-Database-Library/test/Test_Excel.xls;ReadOnly=0;Extended Properties="Excel 8.0;HDR=YES";)</msg>
+<msg timestamp="20181205 14:10:36.483" level="FAIL">('01000', u"[01000] [unixODBC][Driver Manager]Can't open lib 'Microsoft Excel Driver (*.xls, *.xlsx, *.xlsm, *.xlsb)' : file not found (0) (SQLDriverConnect)")</msg>
+<status status="FAIL" endtime="20181205 14:10:36.483" starttime="20181205 14:10:36.475"></status>
+</kw>
+<test id="s1-t1" name="Execute SQL Script - Insert Data person table">
+<tags>
+<tag>db</tag>
+<tag>smoke</tag>
+</tags>
+<status status="FAIL" endtime="20181205 14:10:36.484" critical="yes" starttime="20181205 14:10:36.483">Parent suite setup failed:
+('01000', u"[01000] [unixODBC][Driver Manager]Can't open lib 'Microsoft Excel Driver (*.xls, *.xlsx, *.xlsm, *.xlsb)' : file not found (0) (SQLDriverConnect)")</status>
+</test>
+<kw type="teardown" name="Disconnect From Database" library="DatabaseLibrary">
+<doc>Disconnects from the database.</doc>
+<msg timestamp="20181205 14:10:36.485" level="INFO">Executing : Disconnect From Database</msg>
+<msg timestamp="20181205 14:10:36.485" level="FAIL">AttributeError: 'NoneType' object has no attribute 'close'</msg>
+<status status="FAIL" endtime="20181205 14:10:36.485" starttime="20181205 14:10:36.484">AttributeError: 'NoneType' object has no attribute 'close'</status>
+</kw>
+<status status="FAIL" endtime="20181205 14:10:36.485" starttime="20181205 14:10:36.433">Suite setup failed:
+('01000', u"[01000] [unixODBC][Driver Manager]Can't open lib 'Microsoft Excel Driver (*.xls, *.xlsx, *.xlsm, *.xlsb)' : file not found (0) (SQLDriverConnect)")
+
+Also suite teardown failed:
+AttributeError: 'NoneType' object has no attribute 'close'</status>
+</suite>
+<statistics>
+<total>
+<stat fail="1" pass="0">Critical Tests</stat>
+<stat fail="1" pass="0">All Tests</stat>
+</total>
+<tag>
+<stat fail="1" pass="0">db</stat>
+<stat fail="1" pass="0">smoke</stat>
+</tag>
+<suite>
+<stat fail="1" id="s1" name="Excel DB Test" pass="0">Excel DB Test</stat>
+</suite>
+</statistics>
+<errors>
+</errors>
+</robot>
