@@ -48,6 +48,14 @@ class ConnectionManager(object):
 
         The `dbConfigFile` is useful if you don't want to check into your SCM
         your database credentials.
+        Example db.cfg file
+        [default]
+        dbapiModuleName=pymysqlforexample
+        dbName=yourdbname
+        dbUsername=yourusername
+        dbPassword=yourpassword
+        dbHost=yourhost
+        dbPort=yourport
 
         Example usage:
         | # explicitly specifies all db property values |
