@@ -196,11 +196,9 @@ class Query(object):
 
     def execute_sql_script(self, sqlScriptFileName, sansTran=False):
         """
-        Executes the content of the `sqlScriptFileName` as SQL commands and
-        returns number of rows affected. Useful for setting the database to
-        a known state before running your tests, or clearing out your test
-        data after running each a test. Set optional input `sansTran` to
-        True to run command without an explicit transaction commit or rollback.
+        Executes the content of the `sqlScriptFileName` as SQL commands. Useful for setting the database to a known
+        state before running your tests, or clearing out your test data after running each a test. Set optional input
+        `sansTran` to True to run command without an explicit transaction commit or rollback.
 
         Sample usage :
         | Execute Sql Script | ${EXECDIR}${/}resources${/}DDL-setup.sql |
@@ -253,7 +251,6 @@ class Query(object):
         sqlScriptFile = open(sqlScriptFileName)
 
         cur = None
-        result = 0
         try:
             cur = self._dbconnection.cursor()
             logger.info('Executing : Execute SQL Script  |  %s ' % sqlScriptFileName)
@@ -279,12 +276,12 @@ class Query(object):
 
                         sqlStatement += sqlFragment + ' '
 
-                        result = result + self.__execute_sql(cur, sqlStatement)
+                        self.__execute_sql(cur, sqlStatement)
                         sqlStatement = ''
 
             sqlStatement = sqlStatement.strip()
             if len(sqlStatement) != 0:
-                result = self.__execute_sql(cur, sqlStatement)
+                self.__execute_sql(cur, sqlStatement)
 
             if not sansTran:
                 self._dbconnection.commit()
@@ -292,14 +289,11 @@ class Query(object):
             if cur:
                 if not sansTran:
                     self._dbconnection.rollback()
-        return result
 
     def execute_sql_string(self, sqlString, sansTran=False):
         """
-        Executes the sqlString as SQL commands  and returns number of rows
-        affected. Useful to pass arguments to your sql. Set optional input
-        `sansTran` to True to run command without an explicit transaction
-        commit or rollback.
+        Executes the sqlString as SQL commands. Useful to pass arguments to your sql. Set optional input `sansTran` to
+        True to run command without an explicit transaction commit or rollback.
 
         SQL commands are expected to be delimited by a semi-colon (';').
 
@@ -313,18 +307,16 @@ class Query(object):
         | Execute Sql String | DELETE FROM person_employee_table; DELETE FROM person_table | True |
         """
         cur = None
-        result = 0
         try:
             cur = self._dbconnection.cursor()
             logger.info('Executing : Execute SQL String  |  %s ' % sqlString)
-            result = self.__execute_sql(cur, sqlString)
+            self.__execute_sql(cur, sqlString)
             if not sansTran:
                 self._dbconnection.commit()
         finally:
             if cur:
                 if not sansTran:
                     self._dbconnection.rollback()
-        return result
 
     def call_stored_procedure(self, spName, spParams=None, sansTran=False):
         """
