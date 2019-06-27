@@ -22,19 +22,19 @@ Create person table
     [Tags]    db    smoke
     ${output} =    Execute SQL String    CREATE TABLE person (id integer unique,first_name varchar,last_name varchar);
     Log    ${output}
-    Should Be Equal As Strings    ${output}    0
+    Should Be Equal As Strings    ${output}    None
 
 Execute SQL Script - Insert Data person table
     [Tags]    db    smoke
     ${output} =    Execute SQL Script    ./${DBName}_insertData.sql
     Log    ${output}
-    Should Be Equal As Strings    ${output}    2
+    Should Be Equal As Strings    ${output}    None
 
 Execute SQL String - Create Table
     [Tags]    db    smoke
     ${output} =    Execute SQL String    create table foobar (id integer primary key, firstname varchar unique)
     Log    ${output}
-    Should Be Equal As Strings    ${output}    0
+    Should Be Equal As Strings    ${output}    None
 
 Check If Exists In DB - Franz Allan
     [Tags]    db    smoke
@@ -137,7 +137,7 @@ Insert Data Into Table foobar
     [Tags]    db    smoke
     ${output} =    Execute SQL String    INSERT INTO foobar VALUES(1,'Jerry');
     Log    ${output}
-    Should Be Equal As Strings    ${output}    1
+    Should Be Equal As Strings    ${output}    None
 
 Verify Query - Row Count foobar table 1 row
     [Tags]    db    smoke
@@ -158,13 +158,13 @@ Begin first transaction
     [Tags]    db    smoke
     ${output} =    Execute SQL String    SAVEPOINT first    True
     Log    ${output}
-    Should Be Equal As Strings    ${output}    0
+    Should Be Equal As Strings    ${output}    None
 
 Add person in first transaction
     [Tags]    db    smoke
     ${output} =    Execute SQL String    INSERT INTO person VALUES(101,'Bilbo','Baggins');    True
     Log    ${output}
-    Should Be Equal As Strings    ${output}    1
+    Should Be Equal As Strings    ${output}    None
 
 Verify person in first transaction
     [Tags]    db    smoke
@@ -174,13 +174,13 @@ Begin second transaction
     [Tags]    db    smoke
     ${output} =    Execute SQL String    SAVEPOINT second    True
     Log    ${output}
-    Should Be Equal As Strings    ${output}    0
+    Should Be Equal As Strings    ${output}    None
 
 Add person in second transaction
     [Tags]    db    smoke
     ${output} =    Execute SQL String    INSERT INTO person VALUES(102,'Frodo','Baggins');    True
     Log    ${output}
-    Should Be Equal As Strings    ${output}    1
+    Should Be Equal As Strings    ${output}    None
 
 Verify persons in first and second transactions
     [Tags]    db    smoke
@@ -200,7 +200,7 @@ Rollback first transaction
     [Tags]    db    smoke
     ${output} =    Execute SQL String    ROLLBACK TO SAVEPOINT first    True
     Log    ${output}
-    Should Be Equal As Strings    ${output}    0
+    Should Be Equal As Strings    ${output}    None
 
 Verify first transaction rollback
     [Tags]    db    smoke
@@ -210,7 +210,7 @@ Drop person and foobar tables
     [Tags]    db    smoke
     ${output} =    Execute SQL String    DROP TABLE IF EXISTS person;
     Log    ${output}
-    Should Be Equal As Strings    ${output}    0
+    Should Be Equal As Strings    ${output}    None
     ${output} =    Execute SQL String    DROP TABLE IF EXISTS foobar;
     Log    ${output}
-    Should Be Equal As Strings    ${output}    0
+    Should Be Equal As Strings    ${output}    None

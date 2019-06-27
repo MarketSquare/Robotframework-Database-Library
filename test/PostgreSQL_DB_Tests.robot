@@ -16,18 +16,18 @@ ${DBUser}         postgres
 Create person table
     ${output} =    Execute SQL String    CREATE TABLE person (id integer unique,first_name varchar,last_name varchar);
     Log    ${output}
-    Should Be Equal As Strings    ${output}    0
+    Should Be Equal As Strings    ${output}    None
 
 Execute SQL Script - Insert Data person table
     Comment    ${output} =    Execute SQL Script    ./${DBName}_insertData.sql
     ${output} =    Execute SQL Script    ./my_db_test_insertData.sql
     Log    ${output}
-    Should Be Equal As Strings    ${output}    2
+    Should Be Equal As Strings    ${output}    None
 
 Execute SQL String - Create Table
     ${output} =    Execute SQL String    create table foobar (id integer primary key, firstname varchar unique)
     Log    ${output}
-    Should Be Equal As Strings    ${output}    0
+    Should Be Equal As Strings    ${output}    None
 
 Check If Exists In DB - Franz Allan
     Check If Exists In Database    SELECT id FROM person WHERE first_name = 'Franz Allan';
@@ -117,12 +117,12 @@ Verify Execute SQL String - Row Count person table
 Verify Execute SQL String - Row Count foobar table
     ${output} =    Execute SQL String    SELECT COUNT(*) FROM foobar;
     Log    ${output}
-    Should Be Equal As Strings    ${output}    1
+    Should Be Equal As Strings    ${output}    None
 
 Insert Data Into Table foobar
     ${output} =    Execute SQL String    INSERT INTO foobar VALUES(1,'Jerry');
     Log    ${output}
-    Should Be Equal As Strings    ${output}    1
+    Should Be Equal As Strings    ${output}    None
 
 Verify Query - Row Count foobar table 1 row
     ${output} =    Query    SELECT COUNT(*) FROM foobar;
@@ -145,4 +145,4 @@ Verify Query - Row Count foobar table 0 row
 Drop person and foobar tables
     ${output} =    Execute SQL String    DROP TABLE IF EXISTS person,foobar;
     Log    ${output}
-    Should Be Equal As Strings    ${output}    0
+    Should Be Equal As Strings    ${output}    None
