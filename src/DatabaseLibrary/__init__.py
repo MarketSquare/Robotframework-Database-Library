@@ -17,9 +17,9 @@ import os
 from DatabaseLibrary.connection_manager import ConnectionManager
 from DatabaseLibrary.query import Query
 from DatabaseLibrary.assertion import Assertion
+from DatabaseLibrary.version import VERSION
 
-__version_file_path__ = os.path.join(os.path.dirname(__file__), 'VERSION')
-__version__ = open(__version_file_path__, 'r').read().strip()
+_version_ = VERSION
 
 class DatabaseLibrary(ConnectionManager, Query, Assertion):
     """
