@@ -210,6 +210,8 @@ class Assertion(object):
             selectStatement = ("SELECT name FROM sqlite_master WHERE type='table' AND name='%s' COLLATE NOCASE" % tableName)
         elif self.db_api_module_name in ["ibm_db", "ibm_db_dbi"]:
             selectStatement = ("SELECT name FROM SYSIBM.SYSTABLES WHERE type='T' AND name=UPPER('%s')" % tableName)
+        elif self.db_api_module_name in ["teradata"]:
+            selectStatement = ("SELECT TableName FROM DBC.TablesV WHERE TableKind='T' AND TableName='%s'" % tableName)
         else:
             selectStatement = ("SELECT * FROM information_schema.tables WHERE table_name='%s'" % tableName)
         num_rows = self.row_count(selectStatement, sansTran)
