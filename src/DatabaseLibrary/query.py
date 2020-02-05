@@ -248,7 +248,7 @@ class Query(object):
         Using optional `sansTran` to run command without an explicit transaction commit or rollback:
         | Execute Sql Script | ${EXECDIR}${/}resources${/}DDL-setup.sql | True |
         """
-        sqlScriptFile = open(sqlScriptFileName)
+        sqlScriptFile = open(sqlScriptFileName ,encoding='UTF-8')
 
         cur = None
         try:
