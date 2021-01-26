@@ -139,6 +139,12 @@ class ConnectionManager(object):
                 host=dbHost,
                 port=dbPort
             )
+        elif dbapiModuleName in ["ksycopg2"]:
+            dbPort = dbPort or 54321
+            logger.info('Connecting using : %s.connect(database=%s, user=%s, password=%s, host=%s, port=%s) ' % (
+            dbapiModuleName, dbName, dbUsername, dbPassword, dbHost, dbPort))
+            self._dbconnection = db_api_2.connect(database=dbName, user=dbUsername, password=dbPassword, host=dbHost,
+                                                  port=dbPort)
         else:
             logger.info('Connecting using : %s.connect(database=%s, user=%s, password=%s, host=%s, port=%s) ' % (dbapiModuleName, dbName, dbUsername, dbPassword, dbHost, dbPort))
             self._dbconnection = db_api_2.connect(database=dbName, user=dbUsername, password=dbPassword, host=dbHost, port=dbPort)
