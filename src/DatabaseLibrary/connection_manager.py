@@ -178,7 +178,10 @@ class ConnectionManager(object):
         | Disconnect From Database | # disconnects from current connection to the database |
         """
         logger.info('Executing : Disconnect From Database')
-        self._dbconnection.close()
+        if self._dbconnection==None:
+            return 'No open connection to close'
+        else:
+            self._dbconnection.close()
 
     def set_auto_commit(self, autoCommit=True):
         """
