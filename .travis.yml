@@ -22,7 +22,7 @@ before_script:
   - mysql -e 'create database my_db_test;'
   - mysql -e "GRANT ALL PRIVILEGES ON *.* TO 'root'@'127.0.0.1';" -uroot
 script:
-#  - flake8 src/
-  - if [ $DB == 'SQLite' ]; then (cd test/ && pybot SQLite3_DB_Tests.robot); fi
-  - if [ $DB == 'Postgres' ]; then (cd test/ && pybot PostgreSQL_DB_Tests.robot); fi
-  - if [ $DB == 'MySQL' ]; then (cd test/ && pybot MySQL_DB_Tests.robot); fi
+  #  - flake8 src/
+  - if [ $DB == 'SQLite' ]; then (cd test/ && robot SQLite3_DB_Tests.robot); fi
+  - if [ $DB == 'Postgres' ]; then (cd test/ && robot PostgreSQL_DB_Tests.robot); fi
+  - if [ $DB == 'MySQL' ]; then (cd test/ && robot MySQL_DB_Tests.robot); fi

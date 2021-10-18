@@ -26,13 +26,13 @@ except ImportError as error:
 
 
 version_file = join(dirname(abspath(__file__)), 'src', 'DatabaseLibrary', 'version.py')
+pkg_vars  = {}
 
-with open(version_file) as file:
-    code = compile(file.read(), version_file, 'exec')
-    exec(code)
+with open(version_file) as fp:
+    exec(fp.read(), pkg_vars)
 
 setup(name         = 'robotframework-databaselibrary',
-      version      = VERSION,
+      version      = pkg_vars['VERSION'],
       description  = 'Database utility library for Robot Framework',
       author       = 'Franz Allan Valencia See',
       author_email = 'franz.see@gmail.com',
