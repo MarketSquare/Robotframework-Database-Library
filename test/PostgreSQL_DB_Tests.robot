@@ -1,9 +1,10 @@
 *** Settings ***
-Suite Setup       Connect To Database    psycopg2    ${DBName}    ${DBUser}    ${DBPass}    ${DBHost}    ${DBPort}
+Suite Setup       Connect To Database    psycopg2    ${POSTGRESQL_DBName}    ${POSTGRESQL_DBUser}    ${POSTGRESQL_DBPass}    ${POSTGRESQL_DBHost}    ${POSTGRESQL_DBPort}
 Suite Teardown    Disconnect From Database
 Library           DatabaseLibrary
 Library           OperatingSystem
 Library           Collections
+Force Tags        standard
 
 *** Variables ***
 ${DBHost}         localhost
@@ -11,6 +12,11 @@ ${DBName}         travis_ci_test
 ${DBPass}         ""
 ${DBPort}         5432
 ${DBUser}         postgres
+${POSTGRESQL_DBName}    ${DBName}
+${POSTGRESQL_DBUser}    ${DBUser}
+${POSTGRESQL_DBPass}    ${DBPass}
+${POSTGRESQL_DBHost}    ${DBHost}
+${POSTGRESQL_DBPort}    ${DBPort}
 
 *** Test Cases ***
 Create person table
@@ -66,11 +72,11 @@ Verify person Description
     @{queryResults} =    Description    SELECT * FROM person LIMIT 1;
     Log Many    @{queryResults}
     ${output} =    Set Variable    ${queryResults[0]}
-    Should Be Equal As Strings    ${output}    Column(name='id', type_code=23, display_size=None, internal_size=4, precision=None, scale=None, null_ok=None)
+    Should Be Equal As Strings    ${output}    Column(name='id', type_code=23)
     ${output} =    Set Variable    ${queryResults[1]}
-    Should Be Equal As Strings    ${output}    Column(name='first_name', type_code=1043, display_size=None, internal_size=-1, precision=None, scale=None, null_ok=None)
+    Should Be Equal As Strings    ${output}    Column(name='first_name', type_code=1043)
     ${output} =    Set Variable    ${queryResults[2]}
-    Should Be Equal As Strings    ${output}    Column(name='last_name', type_code=1043, display_size=None, internal_size=-1, precision=None, scale=None, null_ok=None)
+    Should Be Equal As Strings    ${output}    Column(name='last_name', type_code=1043)
     ${NumColumns} =    Get Length    ${queryResults}
     Should Be Equal As Integers    ${NumColumns}    3
 
@@ -80,9 +86,9 @@ Verify foobar Description
     @{queryResults} =    Description    SELECT * FROM foobar LIMIT 1;
     Log Many    @{queryResults}
     ${output} =    Set Variable    ${queryResults[0]}
-    Should Be Equal As Strings    ${output}    Column(name='id', type_code=23, display_size=None, internal_size=4, precision=None, scale=None, null_ok=None)
+    Should Be Equal As Strings    ${output}    Column(name='id', type_code=23)
     ${output} =    Set Variable    ${queryResults[1]}
-    Should Be Equal As Strings    ${output}    Column(name='firstname', type_code=1043, display_size=None, internal_size=-1, precision=None, scale=None, null_ok=None)
+    Should Be Equal As Strings    ${output}    Column(name='firstname', type_code=1043)
     ${NumColumns} =    Get Length    ${queryResults}
     Should Be Equal As Integers    ${NumColumns}    2
 
@@ -106,8 +112,8 @@ Verify Query - Get results as a list of dictionaries
     [Tags]    db    smoke
     ${output} =    Query    SELECT * FROM person;    \    True
     Log    ${output}
-    Should Be Equal As Strings    &{output[0]}[first_name]    Franz Allan
-    Should Be Equal As Strings    &{output[1]}[first_name]    Jerry
+    Should Be Equal As Strings    ${output[0]['first_name']}    Franz Allan
+    Should Be Equal As Strings    ${output[1]['first_name']}    Jerry
 
 Verify Execute SQL String - Row Count person table
     ${output} =    Execute SQL String    SELECT COUNT(*) FROM person;

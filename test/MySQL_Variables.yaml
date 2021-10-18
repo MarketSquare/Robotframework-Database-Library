@@ -1,0 +1,5 @@
+MYSQL_DBHost: localhost
+MYSQL_DBName: mydb
+MYSQL_DBPass: mypass
+MYSQL_DBPort: 64479
+MYSQL_DBUser: myuser

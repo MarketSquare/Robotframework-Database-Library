@@ -1,9 +1,11 @@
 *** Settings ***
 Library           DatabaseLibrary
 Library           OperatingSystem
+Force Tags        standard
 
 *** Variables ***
 ${DBName}         my_db_test
+${SQLITE3_DBName}    ${DBName}
 
 *** Test Cases ***
 Remove old DB if exists
@@ -118,8 +120,8 @@ Verify Query - Get results as a list of dictionaries
     [Tags]    db    smoke
     ${output} =    Query    SELECT * FROM person;    \    True
     Log    ${output}
-    Should Be Equal As Strings    &{output[0]}[first_name]    Franz Allan
-    Should Be Equal As Strings    &{output[1]}[first_name]    Jerry
+    Should Be Equal As Strings    ${output[0]['first_name']}    Franz Allan
+    Should Be Equal As Strings    ${output[1]['first_name']}    Jerry
 
 Verify Execute SQL String - Row Count person table
     [Tags]    db    smoke

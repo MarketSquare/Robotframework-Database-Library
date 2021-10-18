@@ -1,0 +1,5 @@
+POSTGRESQL_DBHost: localhost
+POSTGRESQL_DBName: mydb
+POSTGRESQL_DBPass: mypass
+POSTGRESQL_DBPort: 54308
+POSTGRESQL_DBUser: myuser

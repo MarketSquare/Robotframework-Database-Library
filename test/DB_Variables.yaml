@@ -1,0 +1,13 @@
+MYSQL_DBHost: localhost
+MYSQL_DBName: mydb
+MYSQL_DBPass: mypass
+MYSQL_DBPort: 64479
+MYSQL_DBUser: myuser
+
+POSTGRESQL_DBHost: localhost
+POSTGRESQL_DBName: mydb
+POSTGRESQL_DBPass: mypass
+POSTGRESQL_DBPort: 64480
+POSTGRESQL_DBUser: myuser
+
+SQLITE3_DBName: mydb

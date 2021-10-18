@@ -1,8 +1,20 @@
 *** Settings ***
-Suite Setup       Connect To Database    ibm_db_dbi    ${DBName}    ${DBUser}    ${DBPass}    ${DBHost}    ${DBPort}
+Suite Setup       Connect To Database    ibm_db_dbi    ${DB2_DBName}    ${DB2_DBUser}    ${DB2_DBPass}    ${DB2_DBHost}    ${DB2_DBPort}
 Suite Teardown    Disconnect From Database
 Resource          DB2SQL_DB_Conf.txt
 Library           DatabaseLibrary
+
+*** Variables ***
+${DBName}         dbname
+${DBUser}         user
+${DBPass}         password
+${DBHost}         host
+${DBPort}         port
+${DB2_DBName}     ${DBName}
+${DB2_DBUser}     ${DBUser}
+${DB2_DBPass}     ${DBPass}
+${DB2_DBHost}     ${DBHost}
+${DB2_DBPort}     ${DBPort}
 
 *** Test Cases ***
 Create person table
