@@ -4,6 +4,8 @@ Suite Teardown    Disconnect From Database
 Library           DatabaseLibrary
 Library           Collections
 Library           OperatingSystem
+Test Tags        main    db    smoke
+
 
 *** Variables ***
 ${DBModule}       pyodbc
@@ -178,3 +180,6 @@ Drop person and foobar tables
     ${output} =    Execute SQL String    DROP TABLE IF EXISTS foobar;
     Log    ${output}
     Should Be Equal As Strings    ${output}    None
+
+Disconnect from all databases
+    Disconnect From All Databases

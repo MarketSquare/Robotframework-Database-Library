@@ -24,7 +24,7 @@ class Query:
     Query handles all the querying done by the Database Library.
     """
 
-    def query(self, selectStatement: str, sansTran: bool = False, returnAsDict: bool = False):
+    def query(self, selectStatement: str, sansTran: bool = False, returnAsDict: bool = False, alias: Optional[str] = None):
         """
         Uses the input `selectStatement` to query for the values that will be returned as a list of tuples. Set optional
         input `sansTran` to True to run command without an explicit transaction commit or rollback.
@@ -43,6 +43,7 @@ class Query:
 
         When you do the following:
         | @{queryResults} | Query | SELECT * FROM person |
+        | @{queryResults} | Query | SELECT * FROM person | alias=my_alias |
         | Log Many | @{queryResults} |
 
         You will get the following:
@@ -58,10 +59,11 @@ class Query:
         Using optional `sansTran` to run command without an explicit transaction commit or rollback:
         | @{queryResults} | Query | SELECT * FROM person | True |
         """
+        db_connection, _ = self._cache.switch(alias)
         cur = None
         try:
-            cur = self._dbconnection.cursor()
-            logger.info(f"Executing : Query  |  {selectStatement}")
+            cur = db_connection.cursor()
+            logger.info(f"Executing : Query  |  {selectStatement} ")
             self.__execute_sql(cur, selectStatement)
             all_rows = cur.fetchall()
             if returnAsDict:
@@ -70,9 +72,9 @@ class Query:
             return all_rows
         finally:
             if cur and not sansTran:
-                self._dbconnection.rollback()
+                db_connection.rollback()
 
-    def row_count(self, selectStatement: str, sansTran: bool = False):
+    def row_count(self, selectStatement: str, sansTran: bool = False, alias: Optional[str] = None):
         """
         Uses the input `selectStatement` to query the database and returns the number of rows from the query. Set
         optional input `sansTran` to True to run command without an explicit transaction commit or rollback.
@@ -84,6 +86,7 @@ class Query:
 
         When you do the following:
         | ${rowCount} | Row Count | SELECT * FROM person |
+        | ${rowCount} | Row Count | SELECT * FROM person | alias=my_alias |
         | Log | ${rowCount} |
 
         You will get the following:
@@ -99,20 +102,21 @@ class Query:
         Using optional `sansTran` to run command without an explicit transaction commit or rollback:
         | ${rowCount} | Row Count | SELECT * FROM person | True |
         """
+        db_connection, db_api_module_name = self._cache.switch(alias)
         cur = None
         try:
-            cur = self._dbconnection.cursor()
+            cur = db_connection.cursor()
             logger.info(f"Executing : Row Count  |  {selectStatement}")
             self.__execute_sql(cur, selectStatement)
             data = cur.fetchall()
-            if self.db_api_module_name in ["sqlite3", "ibm_db", "ibm_db_dbi", "pyodbc"]:
+            if db_api_module_name in ["sqlite3", "ibm_db", "ibm_db_dbi", "pyodbc"]:
                 return len(data)
             return cur.rowcount
         finally:
             if cur and not sansTran:
-                self._dbconnection.rollback()
+                db_connection.rollback()
 
-    def description(self, selectStatement: str, sansTran: bool = False):
+    def description(self, selectStatement: str, sansTran: bool = False, alias: Optional[str] = None):
         """
         Uses the input `selectStatement` to query a table in the db which will be used to determine the description. Set
         optional input `sansTran` to True to run command without an explicit transaction commit or rollback.
@@ -123,6 +127,7 @@ class Query:
 
         When you do the following:
         | @{queryResults} | Description | SELECT * FROM person |
+        | @{queryResults} | Description | SELECT * FROM person | alias=my_alias |
         | Log Many | @{queryResults} |
 
         You will get the following:
@@ -133,9 +138,10 @@ class Query:
         Using optional `sansTran` to run command without an explicit transaction commit or rollback:
         | @{queryResults} | Description | SELECT * FROM person | True |
         """
+        db_connection, _ = self._cache.switch(alias)
         cur = None
         try:
-            cur = self._dbconnection.cursor()
+            cur = db_connection.cursor()
             logger.info("Executing : Description  |  {selectStatement}")
             self.__execute_sql(cur, selectStatement)
             description = list(cur.description)
@@ -145,9 +151,9 @@ class Query:
             return description
         finally:
             if cur and not sansTran:
-                self._dbconnection.rollback()
+                db_connection.rollback()
 
-    def delete_all_rows_from_table(self, tableName: str, sansTran: bool = False):
+    def delete_all_rows_from_table(self, tableName: str, sansTran: bool = False, alias: Optional[str] = None):
         """
         Delete all the rows within a given table. Set optional input `sansTran` to True to run command without an
         explicit transaction commit or rollback.
@@ -156,6 +162,7 @@ class Query:
 
         When you do the following:
         | Delete All Rows From Table | person |
+        | Delete All Rows From Table | person | alias=my_alias |
 
         If all the rows can be successfully deleted, then you will get:
         | Delete All Rows From Table | person | # PASS |
@@ -166,23 +173,24 @@ class Query:
         Using optional `sansTran` to run command without an explicit transaction commit or rollback:
         | Delete All Rows From Table | person | True |
         """
+        db_connection, _ = self._cache.switch(alias)
         cur = None
         query = f"DELETE FROM {tableName}"
         try:
-            cur = self._dbconnection.cursor()
+            cur = db_connection.cursor()
             logger.info(f"Executing : Delete All Rows From Table  |  {query}")
             result = self.__execute_sql(cur, query)
             if result is not None:
                 if not sansTran:
-                    self._dbconnection.commit()
+                    db_connection.commit()
                 return result
             if not sansTran:
-                self._dbconnection.commit()
+                db_connection.commit()
         finally:
             if cur and not sansTran:
-                self._dbconnection.rollback()
+                db_connection.rollback()
 
-    def execute_sql_script(self, sqlScriptFileName: str, sansTran: bool = False):
+    def execute_sql_script(self, sqlScriptFileName: str, sansTran: bool = False, alias: Optional[str] = None):
         """
         Executes the content of the `sqlScriptFileName` as SQL commands. Useful for setting the database to a known
         state before running your tests, or clearing out your test data after running each a test. Set optional input
@@ -192,6 +200,7 @@ class Query:
         Sample usage :
         | Execute Sql Script | ${EXECDIR}${/}resources${/}DDL-setup.sql |
         | Execute Sql Script | ${EXECDIR}${/}resources${/}DML-setup.sql |
+        | Execute Sql Script | ${EXECDIR}${/}resources${/}DDL-setup.sql | alias=my_alias |
         | #interesting stuff here |
         | Execute Sql Script | ${EXECDIR}${/}resources${/}DML-teardown.sql |
         | Execute Sql Script | ${EXECDIR}${/}resources${/}DDL-teardown.sql |
@@ -240,11 +249,12 @@ class Query:
         Using optional `sansTran` to run command without an explicit transaction commit or rollback:
         | Execute Sql Script | ${EXECDIR}${/}resources${/}DDL-setup.sql | True |
         """
+        db_connection, _ = self._cache.switch(alias)
         with open(sqlScriptFileName, encoding="UTF-8") as sql_file:
             cur = None
             try:
                 statements_to_execute = []
-                cur = self._dbconnection.cursor()
+                cur = db_connection.cursor()
                 logger.info(f"Executing : Execute SQL Script  |  {sqlScriptFileName}")
                 current_statement = ""
                 inside_statements_group = False
@@ -300,12 +310,12 @@ class Query:
                     omit_semicolon = not statement.lower().endswith("end;")
                     self.__execute_sql(cur, statement, omit_semicolon)
                 if not sansTran:
-                    self._dbconnection.commit()
+                    db_connection.commit()
             finally:
                 if cur and not sansTran:
-                    self._dbconnection.rollback()
+                    db_connection.rollback()
 
-    def execute_sql_string(self, sqlString: str, sansTran: bool = False):
+    def execute_sql_string(self, sqlString: str, sansTran: bool = False, alias: Optional[str] = None):
         """
         Executes the sqlString as SQL commands. Useful to pass arguments to your sql. Set optional input `sansTran` to
         True to run command without an explicit transaction commit or rollback.
@@ -314,6 +324,7 @@ class Query:
 
         For example:
         | Execute Sql String | DELETE FROM person_employee_table; DELETE FROM person_table |
+        | Execute Sql String | DELETE FROM person_employee_table; DELETE FROM person_table | alias=my_alias |
 
         For example with an argument:
         | Execute Sql String | SELECT * FROM person WHERE first_name = ${FIRSTNAME} |
@@ -321,18 +332,19 @@ class Query:
         Using optional `sansTran` to run command without an explicit transaction commit or rollback:
         | Execute Sql String | DELETE FROM person_employee_table; DELETE FROM person_table | True |
         """
+        db_connection, _ = self._cache.switch(alias)
         cur = None
         try:
-            cur = self._dbconnection.cursor()
+            cur = db_connection.cursor()
             logger.info(f"Executing : Execute SQL String  |  {sqlString}")
             self.__execute_sql(cur, sqlString)
             if not sansTran:
-                self._dbconnection.commit()
+                db_connection.commit()
         finally:
             if cur and not sansTran:
-                self._dbconnection.rollback()
+                db_connection.rollback()
 
-    def call_stored_procedure(self, spName: str, spParams: Optional[List[str]] = None, sansTran: bool = False):
+    def call_stored_procedure(self, spName: str, spParams: Optional[List[str]] = None, sansTran: bool = False, alias: Optional[str] = None):
         """
         Calls a stored procedure `spName` with the `spParams` - a *list* of parameters the procedure requires.
         Use the special *CURSOR* value for OUT params, which should receive result sets -
@@ -371,20 +383,21 @@ class Query:
         Using optional `sansTran` to run command without an explicit transaction commit or rollback:
         | @{Param values}    @{Result sets} = | Call Stored Procedure | DBName.SchemaName.StoredProcName | ${Params} | True |
         """
+        db_connection, db_api_module_name = self._cache.switch(alias)
         if spParams is None:
             spParams = []
         cur = None
         try:
             logger.info(f"Executing : Call Stored Procedure  |  {spName}  |  {spParams}")
-            if self.db_api_module_name == "pymssql":
-                cur = self._dbconnection.cursor(as_dict=False)
+            if db_api_module_name == "pymssql":
+                cur = db_connection.cursor(as_dict=False)
             else:
-                cur = self._dbconnection.cursor()
+                cur = db_connection.cursor()
 
             param_values = []
             result_sets = []
 
-            if self.db_api_module_name == "pymysql":
+            if db_api_module_name == "pymysql":
                 cur.callproc(spName, spParams)
 
                 # first proceed the result sets if available
@@ -401,22 +414,22 @@ class Query:
                     cur.execute(f"select @_{spName}_{i}")
                     param_values.append(cur.fetchall()[0][0])
 
-            elif self.db_api_module_name in ["oracledb", "cx_Oracle"]:
+            elif db_api_module_name in ["oracledb", "cx_Oracle"]:
                 # check if "CURSOR" params were passed - they will be replaced
                 # with cursor variables for storing the result sets
                 params_substituted = spParams.copy()
                 cursor_params = []
                 for i in range(0, len(spParams)):
                     if spParams[i] == "CURSOR":
-                        cursor_param = self._dbconnection.cursor()
+                        cursor_param = db_connection.cursor()
                         params_substituted[i] = cursor_param
                         cursor_params.append(cursor_param)
                 param_values = cur.callproc(spName, params_substituted)
                 for result_set in cursor_params:
                     result_sets.append(list(result_set))
 
-            elif self.db_api_module_name in ["psycopg2", "psycopg3"]:
-                cur = self._dbconnection.cursor()
+            elif db_api_module_name in ["psycopg2", "psycopg3"]:
+                cur = db_connection.cursor()
                 # check if "CURSOR" params were passed - they will be replaced
                 # with cursor variables for storing the result sets
                 params_substituted = spParams.copy()
@@ -433,7 +446,7 @@ class Query:
                         result_set = cur.fetchall()
                         result_sets.append(list(result_set))
                 else:
-                    if self.db_api_module_name in ["psycopg3"]:
+                    if db_api_module_name in ["psycopg3"]:
                         result_sets_available = True
                         while result_sets_available:
                             result_sets.append(list(cur.fetchall()))
@@ -444,10 +457,10 @@ class Query:
 
             else:
                 logger.info(
-                    f"CAUTION! Calling a stored procedure for '{self.db_api_module_name}' is not tested, "
+                    f"CAUTION! Calling a stored procedure for '{db_api_module_name}' is not tested, "
                     "results might be invalid!"
                 )
-                cur = self._dbconnection.cursor()
+                cur = db_connection.cursor()
                 param_values = cur.callproc(spName, spParams)
                 logger.info("Reading the procedure results..")
                 result_sets_available = True
@@ -463,12 +476,12 @@ class Query:
                         result_sets_available = False
 
             if not sansTran:
-                self._dbconnection.commit()
+                db_connection.commit()
 
             return param_values, result_sets
         finally:
             if cur and not sansTran:
-                self._dbconnection.rollback()
+                db_connection.rollback()
 
     def __execute_sql(self, cur, sql_statement: str, omit_trailing_semicolon: Optional[bool] = None):
         """

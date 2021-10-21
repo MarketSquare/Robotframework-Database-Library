@@ -6,9 +6,9 @@ build/
 .py*/
 **/my_db_test.db
 logs
-**/output.xml
-**/interactive_console_output.xml
-**/log.html
-**/report.html
+interactive_console_output.xml
+log.html
+output.xml
+report.html
 venv
 .runNumber
