@@ -3,8 +3,8 @@ build/
 .idea
 .py*/
 *.egg-info/
-test/log.html
-test/my_db_test.db
-test/output.xml
-test/report.html
+log.html
+output.xml
+report.html
 test/logs/
+test/*.db

@@ -20,7 +20,7 @@ class Assertion(object):
     Assertion handles all the assertions of Database Library.
     """
 
-    def check_if_exists_in_database(self, selectStatement, sansTran=False):
+    def check_if_exists_in_database(self, selectStatement, sansTran=False, alias=None):
         """
         Check if any row would be returned by given the input `selectStatement`. If there are no results, then this will
         throw an AssertionError. Set optional input `sansTran` to True to run command without an explicit transaction
@@ -33,6 +33,7 @@ class Assertion(object):
         When you have the following assertions in your robot
         | Check If Exists In Database | SELECT id FROM person WHERE first_name = 'Franz Allan' |
         | Check If Exists In Database | SELECT id FROM person WHERE first_name = 'John' |
+        | Check If Exists In Database | SELECT id FROM person WHERE first_name = 'Franz Allan' | alias=my_alias |
 
         Then you will get the following:
         | Check If Exists In Database | SELECT id FROM person WHERE first_name = 'Franz Allan' | # PASS |
@@ -41,12 +42,12 @@ class Assertion(object):
         Using optional `sansTran` to run command without an explicit transaction commit or rollback:
         | Check If Exists In Database | SELECT id FROM person WHERE first_name = 'John' | True |
         """
-        logger.info ('Executing : Check If Exists In Database  |  %s ' % selectStatement)
-        if not self.query(selectStatement, sansTran):
+        logger.info ('Executing : Check If Exists In Database [%s] |  %s ' % (alias, selectStatement))
+        if not self.query(selectStatement, sansTran, alias=alias):
             raise AssertionError("Expected to have have at least one row from '%s' "
                                  "but got 0 rows." % selectStatement)
 
-    def check_if_not_exists_in_database(self, selectStatement, sansTran=False):
+    def check_if_not_exists_in_database(self, selectStatement, sansTran=False, alias=None):
         """
         This is the negation of `check_if_exists_in_database`.
 
@@ -61,6 +62,7 @@ class Assertion(object):
         When you have the following assertions in your robot
         | Check If Not Exists In Database | SELECT id FROM person WHERE first_name = 'John' |
         | Check If Not Exists In Database | SELECT id FROM person WHERE first_name = 'Franz Allan' |
+        | Check If Not Exists In Database | SELECT id FROM person WHERE first_name = 'Franz Allan' | alias=my_alias |
 
         Then you will get the following:
         | Check If Not Exists In Database | SELECT id FROM person WHERE first_name = 'John' | # PASS |
@@ -70,12 +72,12 @@ class Assertion(object):
         | Check If Not Exists In Database | SELECT id FROM person WHERE first_name = 'John' | True |
         """
         logger.info('Executing : Check If Not Exists In Database  |  %s ' % selectStatement)
-        queryResults = self.query(selectStatement, sansTran)
+        queryResults = self.query(selectStatement, sansTran, alias=alias)
         if queryResults:
             raise AssertionError("Expected to have have no rows from '%s' "
                                  "but got some rows : %s." % (selectStatement, queryResults))
 
-    def row_count_is_0(self, selectStatement, sansTran=False):
+    def row_count_is_0(self, selectStatement, sansTran=False, alias=None):
         """
         Check if any rows are returned from the submitted `selectStatement`. If there are, then this will throw an
         AssertionError. Set optional input `sansTran` to True to run command without an explicit transaction commit or
@@ -88,6 +90,7 @@ class Assertion(object):
         When you have the following assertions in your robot
         | Row Count is 0 | SELECT id FROM person WHERE first_name = 'Franz Allan' |
         | Row Count is 0 | SELECT id FROM person WHERE first_name = 'John' |
+        | Row Count is 0 | SELECT id FROM person WHERE first_name = 'John' | alias=my_alias |
 
         Then you will get the following:
         | Row Count is 0 | SELECT id FROM person WHERE first_name = 'Franz Allan' | # FAIL |
@@ -97,12 +100,12 @@ class Assertion(object):
         | Row Count is 0 | SELECT id FROM person WHERE first_name = 'John' | True |
         """
         logger.info('Executing : Row Count Is 0  |  %s ' % selectStatement)
-        num_rows = self.row_count(selectStatement, sansTran)
+        num_rows = self.row_count(selectStatement, sansTran, alias=alias)
         if num_rows > 0:
             raise AssertionError("Expected zero rows to be returned from '%s' "
                                  "but got rows back. Number of rows returned was %s" % (selectStatement, num_rows))
 
-    def row_count_is_equal_to_x(self, selectStatement, numRows, sansTran=False):
+    def row_count_is_equal_to_x(self, selectStatement, numRows, sansTran=False, alias=None):
         """
         Check if the number of rows returned from `selectStatement` is equal to the value submitted. If not, then this
         will throw an AssertionError. Set optional input `sansTran` to True to run command without an explicit
@@ -116,6 +119,7 @@ class Assertion(object):
         When you have the following assertions in your robot
         | Row Count Is Equal To X | SELECT id FROM person | 1 |
         | Row Count Is Equal To X | SELECT id FROM person WHERE first_name = 'John' | 0 |
+        | Row Count Is Equal To X | SELECT id FROM person WHERE first_name = 'John' | 0 | alias=my_alias |
 
         Then you will get the following:
         | Row Count Is Equal To X | SELECT id FROM person | 1 | # FAIL |
@@ -125,12 +129,12 @@ class Assertion(object):
         | Row Count Is Equal To X | SELECT id FROM person WHERE first_name = 'John' | 0 | True |
         """
         logger.info('Executing : Row Count Is Equal To X  |  %s  |  %s ' % (selectStatement, numRows))
-        num_rows = self.row_count(selectStatement, sansTran)
+        num_rows = self.row_count(selectStatement, sansTran, alias=alias)
         if num_rows != int(numRows.encode('ascii')):
             raise AssertionError("Expected same number of rows to be returned from '%s' "
                                  "than the returned rows of %s" % (selectStatement, num_rows))
 
-    def row_count_is_greater_than_x(self, selectStatement, numRows, sansTran=False):
+    def row_count_is_greater_than_x(self, selectStatement, numRows, sansTran=False, alias=None):
         """
         Check if the number of rows returned from `selectStatement` is greater than the value submitted. If not, then
         this will throw an AssertionError. Set optional input `sansTran` to True to run command without an explicit
@@ -144,6 +148,7 @@ class Assertion(object):
         When you have the following assertions in your robot
         | Row Count Is Greater Than X | SELECT id FROM person | 1 |
         | Row Count Is Greater Than X | SELECT id FROM person WHERE first_name = 'John' | 0 |
+        | Row Count Is Greater Than X | SELECT id FROM person WHERE first_name = 'John' | 0 | alias=my_alias |
 
         Then you will get the following:
         | Row Count Is Greater Than X | SELECT id FROM person | 1 | # PASS |
@@ -153,12 +158,12 @@ class Assertion(object):
         | Row Count Is Greater Than X | SELECT id FROM person | 1 | True |
         """
         logger.info('Executing : Row Count Is Greater Than X  |  %s  |  %s ' % (selectStatement, numRows))
-        num_rows = self.row_count(selectStatement, sansTran)
+        num_rows = self.row_count(selectStatement, sansTran, alias=alias)
         if num_rows <= int(numRows.encode('ascii')):
             raise AssertionError("Expected more rows to be returned from '%s' "
                                  "than the returned rows of %s" % (selectStatement, num_rows))
 
-    def row_count_is_less_than_x(self, selectStatement, numRows, sansTran=False):
+    def row_count_is_less_than_x(self, selectStatement, numRows, sansTran=False, alias=None):
         """
         Check if the number of rows returned from `selectStatement` is less than the value submitted. If not, then this
         will throw an AssertionError. Set optional input `sansTran` to True to run command without an explicit
@@ -172,6 +177,7 @@ class Assertion(object):
         When you have the following assertions in your robot
         | Row Count Is Less Than X | SELECT id FROM person | 3 |
         | Row Count Is Less Than X | SELECT id FROM person WHERE first_name = 'John' | 1 |
+        | Row Count Is Less Than X | SELECT id FROM person WHERE first_name = 'John' | 1 | alias=my_alias |
 
         Then you will get the following:
         | Row Count Is Less Than X | SELECT id FROM person | 3 | # PASS |
@@ -181,12 +187,12 @@ class Assertion(object):
         | Row Count Is Less Than X | SELECT id FROM person | 3 | True |
         """
         logger.info('Executing : Row Count Is Less Than X  |  %s  |  %s ' % (selectStatement, numRows))
-        num_rows = self.row_count(selectStatement, sansTran)
+        num_rows = self.row_count(selectStatement, sansTran, alias=alias)
         if num_rows >= int(numRows.encode('ascii')):
             raise AssertionError("Expected less rows to be returned from '%s' "
                                  "than the returned rows of %s" % (selectStatement, num_rows))
 
-    def table_must_exist(self, tableName, sansTran=False):
+    def table_must_exist(self, tableName, sansTran=False, alias=None):
         """
         Check if the table given exists in the database. Set optional input `sansTran` to True to run command without an
         explicit transaction commit or rollback.
@@ -199,21 +205,23 @@ class Assertion(object):
         Then you will get the following:
         | Table Must Exist | person | # PASS |
         | Table Must Exist | first_name | # FAIL |
+        | Table Must Exist | first_name | alias=my_alias |
 
         Using optional `sansTran` to run command without an explicit transaction commit or rollback:
         | Table Must Exist | person | True |
         """
+        _, db_api_module_name = self._cache.switch(alias)
         logger.info('Executing : Table Must Exist  |  %s ' % tableName)
-        if self.db_api_module_name in ["cx_Oracle"]:
+        if db_api_module_name in ["cx_Oracle"]:
             selectStatement = ("SELECT * FROM all_objects WHERE object_type IN ('TABLE','VIEW') AND owner = SYS_CONTEXT('USERENV', 'SESSION_USER') AND object_name = UPPER('%s')" % tableName)
-        elif self.db_api_module_name in ["sqlite3"]:
+        elif db_api_module_name in ["sqlite3"]:
             selectStatement = ("SELECT name FROM sqlite_master WHERE type='table' AND name='%s' COLLATE NOCASE" % tableName)
-        elif self.db_api_module_name in ["ibm_db", "ibm_db_dbi"]:
+        elif db_api_module_name in ["ibm_db", "ibm_db_dbi"]:
             selectStatement = ("SELECT name FROM SYSIBM.SYSTABLES WHERE type='T' AND name=UPPER('%s')" % tableName)
-        elif self.db_api_module_name in ["teradata"]:
+        elif db_api_module_name in ["teradata"]:
             selectStatement = ("SELECT TableName FROM DBC.TablesV WHERE TableKind='T' AND TableName='%s'" % tableName)
         else:
             selectStatement = ("SELECT * FROM information_schema.tables WHERE table_name='%s'" % tableName)
-        num_rows = self.row_count(selectStatement, sansTran)
+        num_rows = self.row_count(selectStatement, sansTran, alias=alias)
         if num_rows == 0:
             raise AssertionError("Table '%s' does not exist in the db" % tableName)

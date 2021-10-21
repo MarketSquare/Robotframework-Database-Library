@@ -4,17 +4,25 @@ Database Library contains utilities meant for Robot Framework's usage. This can 
 
 ## Testing
 
+Manualy start databases in docker-compose and then run "main" tests:
+
 ```
 docker-compose up -d
 docker-compose ps
 
-popd test
 # Update `DB_Variables.yaml` with proper ports
 
-robot -V DB_Variables.yaml -i standard .
+robot -V test/DB_Variables.yaml -i main test
+```
 
-# or just
+Or just leave it all to the small Bash script that will setup docker-compose environment and set proper values to test/DB_Variables.yaml:
+
+```
+./run_tests.sh clean
+```
+
+If you wish to start only tests without setup docker-compose setup:
+
+```
 ./run_tests.sh
-
-pushd
 ```

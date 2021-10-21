@@ -1,5 +1,5 @@
 DB2_DBHost: localhost
 DB2_DBName: mydb
 DB2_DBPass: mypass
-DB2_DBPort: 64481
-DB2_DBUser: myuser
+DB2_DBPort: 64382
+DB2_DBUser: db2inst1

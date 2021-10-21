@@ -23,6 +23,6 @@ before_script:
   - mysql -e "GRANT ALL PRIVILEGES ON *.* TO 'root'@'127.0.0.1';" -uroot
 script:
   #  - flake8 src/
-  - if [ $DB == 'SQLite' ]; then (cd test/ && robot SQLite3_DB_Tests.robot); fi
-  - if [ $DB == 'Postgres' ]; then (cd test/ && robot PostgreSQL_DB_Tests.robot); fi
-  - if [ $DB == 'MySQL' ]; then (cd test/ && robot MySQL_DB_Tests.robot); fi
+  - if [ $DB == 'SQLite' ]; then (robot test/SQLite3_DB_Tests.robot test/Aliases_SQLite3_DB_Tests.robot); fi
+  - if [ $DB == 'Postgres' ]; then (robot test/robot PostgreSQL_DB_Tests.robot); fi
+  - if [ $DB == 'MySQL' ]; then (robot test/robot MySQL_DB_Tests.robot); fi

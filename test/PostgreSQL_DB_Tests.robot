@@ -4,7 +4,7 @@ Suite Teardown    Disconnect From Database
 Library           DatabaseLibrary
 Library           OperatingSystem
 Library           Collections
-Force Tags        standard
+Force Tags        main    db    smoke
 
 *** Variables ***
 ${DBHost}         localhost
@@ -25,8 +25,8 @@ Create person table
     Should Be Equal As Strings    ${output}    None
 
 Execute SQL Script - Insert Data person table
-    Comment    ${output} =    Execute SQL Script    ./${DBName}_insertData.sql
-    ${output} =    Execute SQL Script    ./my_db_test_insertData.sql
+    Comment    ${output} =    Execute SQL Script    ./my_db_test_insertData.sql
+    ${output} =    Execute SQL Script    ${CURDIR}/my_db_test_insertData.sql
     Log    ${output}
     Should Be Equal As Strings    ${output}    None
 
@@ -67,7 +67,6 @@ Retrieve records from person table
     Should Be Equal As Strings    ${output}    None
 
 Verify person Description
-    [Tags]    db    smoke
     Comment    Query db for table column descriptions
     @{queryResults} =    Description    SELECT * FROM person LIMIT 1;
     Log Many    @{queryResults}
@@ -81,7 +80,6 @@ Verify person Description
     Should Be Equal As Integers    ${NumColumns}    3
 
 Verify foobar Description
-    [Tags]    db    smoke
     Comment    Query db for table column descriptions
     @{queryResults} =    Description    SELECT * FROM foobar LIMIT 1;
     Log Many    @{queryResults}
@@ -109,7 +107,6 @@ Verify Query - Row Count foobar table
     Should be equal as Integers    ${val}    0
 
 Verify Query - Get results as a list of dictionaries
-    [Tags]    db    smoke
     ${output} =    Query    SELECT * FROM person;    \    True
     Log    ${output}
     Should Be Equal As Strings    ${output[0]['first_name']}    Franz Allan
@@ -152,3 +149,6 @@ Drop person and foobar tables
     ${output} =    Execute SQL String    DROP TABLE IF EXISTS person,foobar;
     Log    ${output}
     Should Be Equal As Strings    ${output}    None
+
+Disconnect from all databases
+    Disconnect From All Databases

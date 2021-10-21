@@ -26,7 +26,6 @@ services:
     environment:
       LICENSE: accept
       DBNAME: mydb
-      DB2INSTANCE: myuser
       DB2INST1_PASSWORD: mypass
     ports:
       - '50000'
