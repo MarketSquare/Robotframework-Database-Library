@@ -269,7 +269,14 @@ class Query(object):
                 if len(sqlFragments) == 1:
                     sqlStatement += line + ' '
                 else:
+                    quotes = 0
                     for sqlFragment in sqlFragments:
+                        quotes += sqlFragment.count('\'')
+                        quotes -= sqlFragment.count('\\\'')
+                        if quotes % 2 != 0:
+                            sqlStatement += sqlFragment + ';'
+                            continue
+                        
                         sqlFragment = sqlFragment.strip()
                         if len(sqlFragment) == 0:
                             continue
@@ -278,6 +285,7 @@ class Query(object):
 
                         self.__execute_sql(cur, sqlStatement)
                         sqlStatement = ''
+                        quotes = 0
 
             sqlStatement = sqlStatement.strip()
             if len(sqlStatement) != 0:
