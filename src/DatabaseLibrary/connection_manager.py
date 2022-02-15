@@ -12,12 +12,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import configparser as ConfigParser
 import importlib
-
-try:
-    import ConfigParser
-except:
-    import configparser as ConfigParser
 
 from robot.api import logger
 
