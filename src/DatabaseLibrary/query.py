@@ -112,7 +112,7 @@ class Query(object):
             logger.info('Executing : Row Count  |  %s ' % selectStatement)
             self.__execute_sql(cur, selectStatement)
             data = cur.fetchall()
-            if self.db_api_module_name in ["sqlite3", "ibm_db", "ibm_db_dbi", "pyodbc"]:
+            if self.db_api_module_name in ["sqlite3", "ibm_db", "ibm_db_dbi", "pyodbc", "jaydebeapi"]:
                 rowCount = len(data)
             else:
                 rowCount = cur.rowcount
