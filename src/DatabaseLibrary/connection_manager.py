@@ -34,7 +34,8 @@ class ConnectionManager(object):
         self._dbconnection = None
         self.db_api_module_name = None
 
-    def connect_to_database(self, dbapiModuleName=None, dbName=None, dbUsername=None, dbPassword=None, dbHost=None, dbPort=None, dbCharset=None, dbDriver=None, dbConfigFile="./resources/db.cfg"):
+    def connect_to_database(self, dbapiModuleName=None, dbName=None, dbUsername=None, dbPassword=None, dbHost=None, dbPort=None, dbEncoding=None, dbCharset=None, dbDriver=None, dbConfigFile="./resources/db.cfg"):
+
         """
         Loads the DB API 2.0 module given `dbapiModuleName` then uses it to
         connect to the database using `dbName`, `dbUsername`, and `dbPassword`.
@@ -125,8 +126,8 @@ class ConnectionManager(object):
         elif dbapiModuleName in ["cx_Oracle"]:
             dbPort = dbPort or 1521
             oracle_dsn =  db_api_2.makedsn(host=dbHost, port=dbPort, service_name=dbName)
-            logger.info('Connecting using: %s.connect(user=%s, password=%s, dsn=%s) ' % (dbapiModuleName, dbUsername, dbPassword, oracle_dsn))
-            self._dbconnection = db_api_2.connect(user=dbUsername, password=dbPassword, dsn=oracle_dsn)
+            logger.info('Connecting using: %s.connect(user=%s, password=%s, dsn=%s, encoding=%s) ' % (dbapiModuleName, dbUsername, dbPassword, oracle_dsn, dbEncoding))
+            self._dbconnection = db_api_2.connect(user=dbUsername, password=dbPassword, dsn=oracle_dsn, encoding=dbEncoding)       
         elif dbapiModuleName in ["teradata"]:
             dbPort = dbPort or 1025
             teradata_udaExec = db_api_2.UdaExec(appName="RobotFramework", version="1.0", logConsole=False)
