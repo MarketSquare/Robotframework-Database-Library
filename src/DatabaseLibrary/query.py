@@ -56,7 +56,7 @@ class Query:
             cur = self._dbconnection.cursor()
             logger.info(f'Executing: Query | {select_statement}')
             logger.debug(f"Query will be limited to {reference_count + 1} records.")
-            self.__execute_sql(cur, select_statement)
+            self.execute_sql(cur, select_statement)
             # only fetch however many we need to make a positive verification
             rows = cur.fetchmany(reference_count + 1)
             actual_length = len(rows) if rows else 0
@@ -92,7 +92,7 @@ class Query:
             if limit:
                 logger.debug(f"Query will be limited to {limit} records.")
                 limit = int(limit)
-            self.__execute_sql(cur, select_statement)
+            self.execute_sql(cur, select_statement)
             allRows = cur.fetchmany(limit) if limit else cur.fetchall()
             mappedRows = []
             col_names = [c[0] for c in cur.description]
@@ -123,13 +123,13 @@ class Query:
         try:
             cur = self._dbconnection.cursor()
             logger.info(f'Executing: Description of {select_statement}')
-            self.__execute_sql(cur, select_statement)
+            self.execute_sql(cur, select_statement)
             description = list(cur.description)
             return description
         finally:
             if cur:
                 self._dbconnection.rollback()
 
-    @not_keyword
-    def __execute_sql(self, cur, sqlStatement):
+    @keyword(name="Execute SQL Script")
+    def execute_sql(self, cur, sqlStatement):
         return cur.execute(sqlStatement)
