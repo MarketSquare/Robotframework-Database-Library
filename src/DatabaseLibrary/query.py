@@ -135,9 +135,8 @@ class Query:
         cur = self._dbconnection.cursor()
         result = cur.execute(sqlStatement)
         if commit:
-            cur.commit()
+            self._dbconnection.commit()
         return result
-
 
     @not_keyword
     def execute_sql(self, cur, sqlStatement):
