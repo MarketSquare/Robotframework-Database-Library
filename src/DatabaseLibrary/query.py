@@ -131,5 +131,10 @@ class Query:
                 self._dbconnection.rollback()
 
     @keyword(name="Execute SQL Script")
+    def execute_sql_script(self, sqlStatement):
+        cur = self._dbconnection.cursor()
+        return cur.execute(sqlStatement)
+
+    @not_keyword()
     def execute_sql(self, cur, sqlStatement):
         return cur.execute(sqlStatement)
