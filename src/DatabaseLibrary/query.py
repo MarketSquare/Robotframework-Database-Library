@@ -135,6 +135,6 @@ class Query:
         cur = self._dbconnection.cursor()
         return cur.execute(sqlStatement)
 
-    @not_keyword()
+    @not_keyword
     def execute_sql(self, cur, sqlStatement):
         return cur.execute(sqlStatement)
