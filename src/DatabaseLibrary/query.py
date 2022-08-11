@@ -131,12 +131,13 @@ class Query:
                 self._dbconnection.rollback()
 
     @keyword(name="Execute SQL Script")
-    def execute_sql_script(self, sqlStatement, commit=False) -> int:
+    def execute_sql_script(self, sqlStatement, commit=False, last_row_id=False):
         cur = self._dbconnection.cursor()
         cur.execute(sqlStatement)
         if commit:
             self._dbconnection.commit()
-        return cur.lastrowid
+        if last_row_id:
+            return cur.lastrowid
 
     @not_keyword
     def execute_sql(self, cur, sqlStatement):
