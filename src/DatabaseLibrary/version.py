@@ -1,1 +1,1 @@
-VERSION = '2.4.1-xam'
+VERSION = '3.0.0'
