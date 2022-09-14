@@ -25,20 +25,21 @@ except ImportError as error:
     from distutils.core import setup
 
 
-version_file = join(dirname(abspath(__file__)), 'src', 'DatabaseLibrary', 'version.py')
+version_file = join(dirname(abspath(__file__)), "src", "DatabaseLibrary", "version.py")
 
 with open(version_file) as file:
-    code = compile(file.read(), version_file, 'exec')
+    code = compile(file.read(), version_file, "exec")
     exec(code)
 
-setup(name         = 'robotframework-databaselibrary',
-      version      = VERSION,
-      description  = 'Database utility library for Robot Framework',
-      author       = 'Franz Allan Valencia See',
-      author_email = 'franz.see@gmail.com',
-      url          = 'https://github.com/franz-see/Robotframework-Database-Library',
-      package_dir  = { '' : 'src'},
-      packages     = ['DatabaseLibrary'],
-      package_data = {'DatabaseLibrary': []},
-      requires     = ['robotframework']
-      )
+setup(
+    name="robotframework-databaselibrary",
+    version=VERSION,
+    description="Database utility library for Robot Framework",
+    author="Franz Allan Valencia See",
+    author_email="franz.see@gmail.com",
+    url="https://github.com/franz-see/Robotframework-Database-Library",
+    package_dir={"": "src"},
+    packages=["DatabaseLibrary"],
+    package_data={"DatabaseLibrary": []},
+    requires=["robotframework"],
+)

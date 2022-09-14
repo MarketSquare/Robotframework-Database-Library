@@ -17,17 +17,18 @@ import sys
 from operator import eq, ge, gt, le, lt
 from typing import Dict, List, Union
 
+from func_timeout import func_set_timeout
 from robot.api import logger
 from robot.api.deco import keyword, not_keyword
 from robot.libraries.Collections import Collections
 
 # how do we understand the operators
 semantics = {
-    le: ('at most'),
-    ge: ('at least'),
-    eq: ('exactly'),
-    lt: ('less than'),
-    gt: ('more than')
+    le: ("at most"),
+    ge: ("at least"),
+    eq: ("exactly"),
+    lt: ("less than"),
+    gt: ("more than"),
 }
 
 # need an instance to log list
@@ -40,7 +41,9 @@ class Query:
     """
 
     @not_keyword
-    def asserted_query(self, select_statement: str, reference_count: int, op: Union[le, ge, eq, lt, gt]) -> None:
+    def asserted_query(
+        self, select_statement: str, reference_count: int, op: Union[le, ge, eq, lt, gt]
+    ) -> None:
         """Executes a select statement and asserts whether there are as many results as expected with given comparison operator.
 
         Args:
@@ -50,11 +53,11 @@ class Query:
 
         Raises:
             AssertionError: the count does not fit the operator + reference count
-        """        
+        """
         cur = None
         try:
             cur = self._dbconnection.cursor()
-            logger.info(f'Executing: Query | {select_statement}')
+            logger.info(f"Executing: Query | {select_statement}")
             logger.debug(f"Query will be limited to {reference_count + 1} records.")
             self.execute_sql(cur, select_statement)
             # only fetch however many we need to make a positive verification
@@ -62,17 +65,18 @@ class Query:
             actual_length = len(rows) if rows else 0
             if not op(actual_length, reference_count):
                 # fetching one b y one to keep the memory usage low
-                while(True):
+                while True:
                     if not cur.fetchone():
                         # if no more elements, break the loop and raise the assertion error
                         break
                     # count how many there are
                     actual_length += 1
-                raise AssertionError(f"Expected query to return {semantics[op]} {reference_count} rows, but got {actual_length}.")
+                raise AssertionError(
+                    f"Expected query to return {semantics[op]} {reference_count} rows, but got {actual_length}."
+                )
         finally:
             if cur:
                 self._dbconnection.rollback()
-
 
     @keyword(name="Query")
     def query(self, select_statement: str) -> List[Dict]:
@@ -83,12 +87,12 @@ class Query:
 
         Returns:
             List[Dict]: List of dictionaries (table rows)
-        """        
+        """
         cur = None
         try:
-            limit = os.environ.get('QUERY_LIMIT', None)
+            limit = os.environ.get("QUERY_LIMIT", None)
             cur = self._dbconnection.cursor()
-            logger.info('Executing : Query  |  %s ' % select_statement)
+            logger.info("Executing : Query  |  %s " % select_statement)
             if limit:
                 logger.debug(f"Query will be limited to {limit} records.")
                 limit = int(limit)
@@ -118,11 +122,11 @@ class Query:
 
         Returns:
             List[str]: list of strings describing the query results
-        """        
+        """
         cur = None
         try:
             cur = self._dbconnection.cursor()
-            logger.info(f'Executing: Description of {select_statement}')
+            logger.info(f"Executing: Description of {select_statement}")
             self.execute_sql(cur, select_statement)
             description = list(cur.description)
             return description
@@ -131,8 +135,11 @@ class Query:
                 self._dbconnection.rollback()
 
     @keyword(name="Execute SQL Script")
+    @func_set_timeout(1)
     def execute_sql_script(self, sqlStatement, commit=False, last_row_id=False):
         cur = self._dbconnection.cursor()
+        import time
+        time.sleep(10)
         cur.execute(sqlStatement)
         if commit:
             self._dbconnection.commit()
@@ -140,5 +147,9 @@ class Query:
             return cur.lastrowid
 
     @not_keyword
+    @func_set_timeout(5)
+    # @func_set_timeout(60 * 60)
     def execute_sql(self, cur, sqlStatement):
+        import time
+        time.sleep(10)
         return cur.execute(sqlStatement)

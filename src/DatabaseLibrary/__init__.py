@@ -21,6 +21,7 @@ from DatabaseLibrary.version import VERSION
 
 _version_ = VERSION
 
+
 class DatabaseLibrary(ConnectionManager, Query, Assertion):
     """
     Database Library contains utilities meant for Robot Framework's usage.
@@ -65,4 +66,4 @@ class DatabaseLibrary(ConnectionManager, Query, Assertion):
     | Disconnect from Database |
     """
 
-    ROBOT_LIBRARY_SCOPE = 'GLOBAL'
+    ROBOT_LIBRARY_SCOPE = "GLOBAL"

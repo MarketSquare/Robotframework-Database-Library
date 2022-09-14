@@ -29,8 +29,8 @@ class Assertion:
 
         Args:
             select_statement (_type_): SQL Select Statement
-        """        
-        logger.info (f'Asserting: Check If Exists In Database')
+        """
+        logger.info(f"Asserting: Check If Exists In Database")
         self.asserted_query(select_statement, 0, gt)
 
     @keyword(name="Check If Not Exists In Database")
@@ -39,8 +39,8 @@ class Assertion:
 
         Args:
             select_statement (_type_): SQL Select Statement
-        """        
-        logger.info(f'Asserting: Check If Not Exists In Database')
+        """
+        logger.info(f"Asserting: Check If Not Exists In Database")
         self.asserted_query(select_statement, 0, lt)
 
     @keyword(name="Row Count Is 0")
@@ -49,63 +49,73 @@ class Assertion:
 
         Args:
             select_statement (_type_): SQL Select Statement
-        """        
-        logger.info(f'Asserting: Row Count Is 0')
+        """
+        logger.info(f"Asserting: Row Count Is 0")
         self.asserted_query(select_statement, 0, eq)
 
     @keyword(name="Row Count Is Equal To X")
-    def row_count_is_equal_to_x(self, select_statement: str, row_reference_count: int) -> None:
+    def row_count_is_equal_to_x(
+        self, select_statement: str, row_reference_count: int
+    ) -> None:
         """Checks whether SQL Statement returns exactly X rows.
 
         Args:
             select_statement (str): SQL Select Statement
             row_reference_count (int): reference count for the comparison
-        """        
-        logger.info(f'Asserting: Row Count Is Equal To {row_reference_count}')
+        """
+        logger.info(f"Asserting: Row Count Is Equal To {row_reference_count}")
         self.asserted_query(select_statement, row_reference_count, eq)
 
     @keyword(name="Row Count Is Greater Than X")
-    def row_count_is_greater_than_x(self, select_statement: str, row_reference_count: int) -> None:
+    def row_count_is_greater_than_x(
+        self, select_statement: str, row_reference_count: int
+    ) -> None:
         """Checks whether SQL Statement returns more than X rows.
 
         Args:
             select_statement (str): SQL Select Statement
             row_reference_count (int): reference count for the comparison
-        """        
-        logger.info(f'Asserting: Row Count Is Greater Than {row_reference_count}')
+        """
+        logger.info(f"Asserting: Row Count Is Greater Than {row_reference_count}")
         self.asserted_query(select_statement, row_reference_count, gt)
 
     @keyword("Row Count Is Less Than X")
-    def row_count_is_less_than_x(self, select_statement: str, row_reference_count: int) -> None:
+    def row_count_is_less_than_x(
+        self, select_statement: str, row_reference_count: int
+    ) -> None:
         """Checks whether SQL Statement returns less than X rows.
 
         Args:
             select_statement (str): SQL Select Statement
             row_reference_count (int): reference count for the comparison
-        """        
-        logger.info(f'Asserting: Row Count Is Less Than {row_reference_count}')
+        """
+        logger.info(f"Asserting: Row Count Is Less Than {row_reference_count}")
         self.asserted_query(select_statement, row_reference_count, lt)
 
     @keyword("Row Count Is At Least X")
-    def row_count_is_at_least_x(self, select_statement: str, row_reference_count: int) -> None:
+    def row_count_is_at_least_x(
+        self, select_statement: str, row_reference_count: int
+    ) -> None:
         """Checks whether SQL Statement returns X or more rows.
 
         Args:
             select_statement (str): SQL Select Statement
             row_reference_count (int): reference count for the comparison
-        """        
-        logger.info(f'Asserting: Row Count Is At Least {row_reference_count}')
+        """
+        logger.info(f"Asserting: Row Count Is At Least {row_reference_count}")
         self.asserted_query(select_statement, row_reference_count, ge)
 
     @keyword("Row Count Is At Most X")
-    def row_count_is_at_most_x(self, select_statement: str, row_reference_count: int) -> None:
+    def row_count_is_at_most_x(
+        self, select_statement: str, row_reference_count: int
+    ) -> None:
         """Checks whether SQL Statement no more than X rows.
 
         Args:
             select_statement (str): SQL Select Statement
             row_reference_count (int): reference count for the comparison
-        """        
-        logger.info(f'Asserting: Row Count Is At Most {row_reference_count}')
+        """
+        logger.info(f"Asserting: Row Count Is At Most {row_reference_count}")
         self.asserted_query(select_statement, row_reference_count, le)
 
     @keyword(name="Table Must Exist")
@@ -117,8 +127,8 @@ class Assertion:
 
         Raises:
             AssertionError: when table does not exist
-        """        
-        logger.info(f'Asserting: Table {table_name} Must Exist')
+        """
+        logger.info(f"Asserting: Table {table_name} Must Exist")
         if self.db_api_module_name in ["cx_Oracle"]:
             select_statement = f"SELECT * FROM all_objects WHERE object_type IN ('TABLE','VIEW') AND owner = SYS_CONTEXT('USERENV', 'SESSION_USER') AND object_name = UPPER('{table_name}')"
         elif self.db_api_module_name in ["sqlite3"]:
