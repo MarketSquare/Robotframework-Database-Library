@@ -135,7 +135,7 @@ class Query:
                 self._dbconnection.rollback()
 
     @keyword(name="Execute SQL Script")
-    @func_set_timeout(1)
+    @func_set_timeout(60 * 60)
     def execute_sql_script(self, sqlStatement, commit=False, last_row_id=False):
         cur = self._dbconnection.cursor()
         import time
@@ -147,8 +147,7 @@ class Query:
             return cur.lastrowid
 
     @not_keyword
-    @func_set_timeout(5)
-    # @func_set_timeout(60 * 60)
+    @func_set_timeout(60 * 60)
     def execute_sql(self, cur, sqlStatement):
         import time
         time.sleep(10)
