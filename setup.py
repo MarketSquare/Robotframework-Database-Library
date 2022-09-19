@@ -40,9 +40,13 @@ setup(
     url="https://github.com/franz-see/Robotframework-Database-Library",
     package_dir={"": "src"},
     packages=["DatabaseLibrary"],
-    dependency_links=["git+https://github.com/databobek/func_timeout@master#egg=func_timeout"],
+    dependency_links=[
+        "git+https://github.com/databobek/func_timeout@master#egg=func_timeout"
+    ],
     package_data={"DatabaseLibrary": []},
     requires=["robotframework"],
-    python_requires='>=3.8',
-    install_requires=["func_timeout @ git+https://github.com/databobek/func_timeout@master#egg=func_timeout"]
+    python_requires=">=3.8",
+    install_requires=[
+        "func_timeout @ git+https://github.com/databobek/func_timeout@master#egg=func_timeout"
+    ],
 )

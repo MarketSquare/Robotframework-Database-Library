@@ -231,9 +231,32 @@ class ConnectionManager(object):
                 host=dbHost,
                 port=dbPort,
             )
+        elif dbapiModuleName in ["pymssql"]:
+            # with tds_version=7.2, for pymssql driver, date/datetime values will be returned as strings
+            tdsVersion = "7.2"
+            logger.info(
+                "Connecting using : %s.connect(database=%s, user=%s, password=%s, host=%s, port=%s, tdsVersion=%s)"
+                % (
+                    dbapiModuleName,
+                    dbName,
+                    dbUsername,
+                    dbPassword,
+                    dbHost,
+                    dbPort,
+                    tdsVersion,
+                )
+            )
+            self._dbconnection = db_api_2.connect(
+                database=dbName,
+                user=dbUsername,
+                password=dbPassword,
+                host=dbHost,
+                port=dbPort,
+                tds_version=tdsVersion,
+            )
         else:
             logger.info(
-                "Connecting using : %s.connect(database=%s, user=%s, password=%s, host=%s, port=%s) "
+                "Connecting using : %s.connect(database=%s, user=%s, password=%s, host=%s, port=%s)"
                 % (dbapiModuleName, dbName, dbUsername, dbPassword, dbHost, dbPort)
             )
             self._dbconnection = db_api_2.connect(
