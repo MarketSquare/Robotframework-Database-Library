@@ -138,9 +138,6 @@ class Query:
     @func_set_timeout(60 * 60)
     def execute_sql_script(self, sqlStatement, commit=False, last_row_id=False):
         cur = self._dbconnection.cursor()
-        import time
-
-        time.sleep(10)
         cur.execute(sqlStatement)
         if commit:
             self._dbconnection.commit()
@@ -150,7 +147,4 @@ class Query:
     @not_keyword
     @func_set_timeout(60 * 60)
     def execute_sql(self, cur, sqlStatement):
-        import time
-
-        time.sleep(10)
         return cur.execute(sqlStatement)
