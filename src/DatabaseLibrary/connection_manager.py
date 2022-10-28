@@ -34,19 +34,42 @@ class ConnectionManager(object):
     
     @func_set_timeout(60 * 60)
     def connect_to_snowflake(self, dbName, dbUsername, dbPassword, dbSchema, dbAccount, dbWarehouse):
-        db_api_2 = importlib.import_module("snowflake.connector")
-        logger.info(
-            f"Connecting using : snowflake.connector.connect(db={dbName}, user={dbUsername}, passwd={dbPassword}, account={dbAccount}, schema={dbSchema}, warehouse={dbWarehouse}) "
-        )
-        self._dbconnection = db_api_2.connect(
-            user=dbUsername,
-            password=dbPassword,
-            account=dbAccount,
-            warehouse=dbWarehouse,
-            database=dbName,
-            schema=dbSchema,
-        )
+        try:
+            db_api_2 = importlib.import_module("snowflake.connector")
+            logger.info(
+                f"Connecting using : snowflake.connector.connect(db={dbName}, user={dbUsername}, passwd={dbPassword}, account={dbAccount}, schema={dbSchema}, warehouse={dbWarehouse}) "
+            )
+            self._dbconnection = db_api_2.connect(
+                user=dbUsername,
+                password=dbPassword,
+                account=dbAccount,
+                warehouse=dbWarehouse,
+                database=dbName,
+                schema=dbSchema,
+            )
+        except ImportError:
+            logger.error(
+                "Module for connecting to Snowflake was not found. Please check if needed dependency installed."
+            )
 
+    @func_set_timeout(60 * 60)
+    def connect_to_databricks(self, dbHost, dbToken, dbHttpPath, dbCatalog, dbSchema):
+        try:
+            module = importlib.import_module("databricks.sql")
+            logger.info(
+                f"Connecting using : databricks.sql.connect(server_hostname={dbHost}, http_path={dbHttpPath}, catalog={dbCatalog}, schema={dbSchema}) "
+            )
+            self.connection = module.connect(
+                server_hostname=dbHost,
+                access_token=dbToken,
+                http_path=dbHttpPath,
+                catalog=dbCatalog,
+                schema=dbSchema
+            )
+        except ImportError:
+            logger.error(
+                "Module for connecting to Databricks was not found. Please check if needed dependency installed."
+            )
 
     @func_set_timeout(60 * 60)
     def connect_to_database(
