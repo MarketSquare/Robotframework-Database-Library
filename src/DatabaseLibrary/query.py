@@ -39,6 +39,11 @@ class Query:
     """
     Query handles all the querying done by the Database Library.
     """
+    @not_keyword
+    def _cursor_cleanup(self, cur):
+        if cur and self.db_api_module_name != 'databricks':
+            self._dbconnection.rollback()
+
 
     @not_keyword
     def asserted_query(
@@ -75,8 +80,7 @@ class Query:
                     f"Expected query to return {semantics[op]} {reference_count} rows, but got {actual_length}."
                 )
         finally:
-            if cur:
-                self._dbconnection.rollback()
+            self._cursor_cleanup(cur)
 
     @keyword(name="Query")
     def query(self, select_statement: str) -> List[Dict]:
@@ -110,8 +114,7 @@ class Query:
             return mappedRows
 
         finally:
-            if cur:
-                self._dbconnection.rollback()
+            self._cursor_cleanup(cur)
 
     @keyword(name="Description")
     def description(self, select_statement: str) -> List[str]:
@@ -131,8 +134,7 @@ class Query:
             description = list(cur.description)
             return description
         finally:
-            if cur:
-                self._dbconnection.rollback()
+            self._cursor_cleanup(cur)
 
     @keyword(name="Execute SQL Script")
     @func_set_timeout(60 * 60)

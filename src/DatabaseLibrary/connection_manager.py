@@ -35,6 +35,7 @@ class ConnectionManager(object):
     @func_set_timeout(60 * 60)
     def connect_to_snowflake(self, dbName, dbUsername, dbPassword, dbSchema, dbAccount, dbWarehouse):
         try:
+            self.db_api_module_name = 'snowflake'
             db_api_2 = importlib.import_module("snowflake.connector")
             logger.info(
                 f"Connecting using : snowflake.connector.connect(db={dbName}, user={dbUsername}, passwd={dbPassword}, account={dbAccount}, schema={dbSchema}, warehouse={dbWarehouse}) "
@@ -59,6 +60,7 @@ class ConnectionManager(object):
             logger.info(
                 f"Connecting using : databricks.sql.connect(server_hostname={dbHost}, http_path={dbHttpPath}, catalog={dbCatalog}, schema={dbSchema}) "
             )
+            self.db_api_module_name == 'databricks'
             self._dbconnection = module.connect(
                 server_hostname=dbHost,
                 access_token=dbToken,
