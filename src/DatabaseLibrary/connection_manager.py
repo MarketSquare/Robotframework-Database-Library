@@ -60,7 +60,7 @@ class ConnectionManager(object):
             logger.info(
                 f"Connecting using : databricks.sql.connect(server_hostname={dbHost}, http_path={dbHttpPath}, catalog={dbCatalog}, schema={dbSchema}) "
             )
-            self.db_api_module_name == 'databricks'
+            self.db_api_module_name = 'databricks'
             self._dbconnection = module.connect(
                 server_hostname=dbHost,
                 access_token=dbToken,
