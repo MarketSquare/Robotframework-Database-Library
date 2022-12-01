@@ -14,11 +14,10 @@
 
 from operator import eq, ge, gt, le, lt
 
+from exceptions import TechnicalTestFailure
 from func_timeout import FunctionTimedOut
 from robot.api import logger
 from robot.api.deco import keyword
-
-from . import TechnicalTestFailure
 
 
 class Assertion:

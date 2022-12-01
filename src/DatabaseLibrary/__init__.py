@@ -67,8 +67,3 @@ class DatabaseLibrary(ConnectionManager, Query, Assertion):
     """
 
     ROBOT_LIBRARY_SCOPE = "GLOBAL"
-
-
-class TechnicalTestFailure(Exception):
-    def __init__(self, message) -> None:
-        super().__init__(message)

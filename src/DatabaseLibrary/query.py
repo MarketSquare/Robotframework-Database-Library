@@ -16,12 +16,11 @@ import os
 from operator import eq, ge, gt, le, lt
 from typing import Dict, List, Union
 
+from exceptions import TechnicalTestFailure
 from func_timeout import FunctionTimedOut, func_set_timeout
 from robot.api import logger
 from robot.api.deco import keyword, not_keyword
 from robot.libraries.Collections import Collections
-
-from . import TechnicalTestFailure
 
 # how do we understand the operators
 semantics = {
