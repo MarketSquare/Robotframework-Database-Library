@@ -31,9 +31,8 @@ class ConnectionManager(object):
         self._dbconnection = None
         self.db_api_module_name = None
 
-    
     @func_set_timeout(60 * 60)
-    def connect_to_snowflake(self, dbName, dbUsername, dbPassword, dbSchema, dbAccount, dbWarehouse):
+    def connect_to_snowflake(self, dbName: str, dbUsername: str, dbPassword: str, dbSchema: str, dbAccount: str, dbWarehouse: str):
         try:
             self.db_api_module_name = 'snowflake'
             db_api_2 = importlib.import_module("snowflake.connector")
@@ -52,9 +51,12 @@ class ConnectionManager(object):
             logger.error(
                 "Module for connecting to Snowflake was not found. Please check if needed dependency installed."
             )
+        except Exception as ex:
+            logger.error(
+                f"Unexpected errors when connecting to database: {str(ex)}")
 
     @func_set_timeout(60 * 60)
-    def connect_to_databricks(self, dbHost, dbToken, dbHttpPath, dbCatalog, dbSchema):
+    def connect_to_databricks(self, dbHost: str, dbToken: str, dbHttpPath: str, dbCatalog: str, dbSchema: str):
         try:
             module = importlib.import_module("databricks.sql")
             logger.info(
@@ -72,19 +74,22 @@ class ConnectionManager(object):
             logger.error(
                 "Module for connecting to Databricks was not found. Please check if needed dependency installed."
             )
+        except Exception as ex:
+            logger.error(
+                f"Unexpected errors when connecting to database: {str(ex)}")
 
     @func_set_timeout(60 * 60)
     def connect_to_database(
         self,
-        dbapiModuleName=None,
-        dbName=None,
-        dbUsername=None,
-        dbPassword=None,
-        dbHost=None,
-        dbPort=None,
-        dbCharset=None,
-        dbDriver=None,
-        dbConfigFile="./resources/db.cfg",
+        dbapiModuleName: str = None,
+        dbName: str = None,
+        dbUsername: str = None,
+        dbPassword: str = None,
+        dbHost: str = None,
+        dbPort: str = None,
+        dbCharset: str = None,
+        dbDriver: str = None,
+        dbConfigFile: str = "./resources/db.cfg",
     ):
         """
         Loads the DB API 2.0 module given `dbapiModuleName` then uses it to
@@ -125,193 +130,198 @@ class ConnectionManager(object):
         | # uses explicit `dbapiModuleName` and `dbName` but uses the `dbUsername` and `dbPassword` in './resources/db.cfg' |
         | Connect To Database | psycopg2 | my_db_test |
         """
+        try:
+            config = ConfigParser.ConfigParser()
+            config.read([dbConfigFile])
 
-        config = ConfigParser.ConfigParser()
-        config.read([dbConfigFile])
+            dbapiModuleName = dbapiModuleName or config.get(
+                "default", "dbapiModuleName")
+            dbName = dbName or config.get("default", "dbName")
+            dbUsername = dbUsername or config.get("default", "dbUsername")
+            dbPassword = (
+                dbPassword
+                if dbPassword is not None
+                else config.get("default", "dbPassword")
+            )
+            dbHost = dbHost or config.get("default", "dbHost") or "localhost"
+            dbPort = int(dbPort or config.get("default", "dbPort"))
 
-        dbapiModuleName = dbapiModuleName or config.get("default", "dbapiModuleName")
-        dbName = dbName or config.get("default", "dbName")
-        dbUsername = dbUsername or config.get("default", "dbUsername")
-        dbPassword = (
-            dbPassword
-            if dbPassword is not None
-            else config.get("default", "dbPassword")
-        )
-        dbHost = dbHost or config.get("default", "dbHost") or "localhost"
-        dbPort = int(dbPort or config.get("default", "dbPort"))
-
-        if dbapiModuleName == "excel" or dbapiModuleName == "excelrw":
-            self.db_api_module_name = "pyodbc"
-            db_api_2 = importlib.import_module("pyodbc")
-        else:
-            self.db_api_module_name = dbapiModuleName
-            db_api_2 = importlib.import_module(dbapiModuleName)
-        if dbapiModuleName in ["MySQLdb", "pymysql"]:
-            dbPort = dbPort or 3306
-            logger.info(
-                "Connecting using : %s.connect(db=%s, user=%s, passwd=%s, host=%s, port=%s, charset=%s) "
-                % (
-                    dbapiModuleName,
-                    dbName,
-                    dbUsername,
-                    dbPassword,
-                    dbHost,
-                    dbPort,
-                    dbCharset,
+            if dbapiModuleName == "excel" or dbapiModuleName == "excelrw":
+                self.db_api_module_name = "pyodbc"
+                db_api_2 = importlib.import_module("pyodbc")
+            else:
+                self.db_api_module_name = dbapiModuleName
+                db_api_2 = importlib.import_module(dbapiModuleName)
+            if dbapiModuleName in ["MySQLdb", "pymysql"]:
+                dbPort = dbPort or 3306
+                logger.info(
+                    "Connecting using : %s.connect(db=%s, user=%s, passwd=%s, host=%s, port=%s, charset=%s) "
+                    % (
+                        dbapiModuleName,
+                        dbName,
+                        dbUsername,
+                        dbPassword,
+                        dbHost,
+                        dbPort,
+                        dbCharset,
+                    )
                 )
-            )
-            self._dbconnection = db_api_2.connect(
-                db=dbName,
-                user=dbUsername,
-                passwd=dbPassword,
-                host=dbHost,
-                port=dbPort,
-                charset=dbCharset,
-            )
-        elif dbapiModuleName in ["psycopg2"]:
-            dbPort = dbPort or 5432
-            logger.info(
-                "Connecting using : %s.connect(database=%s, user=%s, password=%s, host=%s, port=%s) "
-                % (dbapiModuleName, dbName, dbUsername, dbPassword, dbHost, dbPort)
-            )
-            self._dbconnection = db_api_2.connect(
-                database=dbName,
-                user=dbUsername,
-                password=dbPassword,
-                host=dbHost,
-                port=dbPort,
-            )
-        elif dbapiModuleName in ["pyodbc", "pypyodbc"]:
-            dbPort = dbPort or 1433
-            dbDriver = dbDriver or "{SQL Server}"
-            logger.info(
-                "Connecting using : %s.connect(DRIVER=%s;SERVER=%s,%s;DATABASE=%s;UID=%s;PWD=%s)"
-                % (
-                    dbapiModuleName,
-                    dbDriver,
-                    dbHost,
-                    dbPort,
-                    dbName,
-                    dbUsername,
-                    dbPassword,
+                self._dbconnection = db_api_2.connect(
+                    db=dbName,
+                    user=dbUsername,
+                    passwd=dbPassword,
+                    host=dbHost,
+                    port=dbPort,
+                    charset=dbCharset,
                 )
-            )
-            self._dbconnection = db_api_2.connect(
-                "DRIVER=%s;SERVER=%s,%s;DATABASE=%s;UID=%s;PWD=%s"
-                % (dbDriver, dbHost, dbPort, dbName, dbUsername, dbPassword)
-            )
-        elif dbapiModuleName in ["excel"]:
-            logger.info(
-                'Connecting using : %s.connect(DRIVER={Microsoft Excel Driver (*.xls, *.xlsx, *.xlsm, *.xlsb)};DBQ=%s;ReadOnly=1;Extended Properties="Excel 8.0;HDR=YES";)'
-                % (dbapiModuleName, dbName)
-            )
-            self._dbconnection = db_api_2.connect(
-                'DRIVER={Microsoft Excel Driver (*.xls, *.xlsx, *.xlsm, *.xlsb)};DBQ=%s;ReadOnly=1;Extended Properties="Excel 8.0;HDR=YES";)'
-                % (dbName),
-                autocommit=True,
-            )
-        elif dbapiModuleName in ["excelrw"]:
-            logger.info(
-                'Connecting using : %s.connect(DRIVER={Microsoft Excel Driver (*.xls, *.xlsx, *.xlsm, *.xlsb)};DBQ=%s;ReadOnly=0;Extended Properties="Excel 8.0;HDR=YES";)'
-                % (dbapiModuleName, dbName)
-            )
-            self._dbconnection = db_api_2.connect(
-                'DRIVER={Microsoft Excel Driver (*.xls, *.xlsx, *.xlsm, *.xlsb)};DBQ=%s;ReadOnly=0;Extended Properties="Excel 8.0;HDR=YES";)'
-                % (dbName),
-                autocommit=True,
-            )
-        elif dbapiModuleName in ["ibm_db", "ibm_db_dbi"]:
-            dbPort = dbPort or 50000
-            logger.info(
-                "Connecting using : %s.connect(DATABASE=%s;HOSTNAME=%s;PORT=%s;PROTOCOL=TCPIP;UID=%s;PWD=%s;) "
-                % (dbapiModuleName, dbName, dbHost, dbPort, dbUsername, dbPassword)
-            )
-            self._dbconnection = db_api_2.connect(
-                "DATABASE=%s;HOSTNAME=%s;PORT=%s;PROTOCOL=TCPIP;UID=%s;PWD=%s;"
-                % (dbName, dbHost, dbPort, dbUsername, dbPassword),
-                "",
-                "",
-            )
-        elif dbapiModuleName in ["cx_Oracle"]:
-            dbPort = dbPort or 1521
-            oracle_dsn = db_api_2.makedsn(host=dbHost, port=dbPort, service_name=dbName)
-            logger.info(
-                "Connecting using: %s.connect(user=%s, password=%s, dsn=%s) "
-                % (dbapiModuleName, dbUsername, dbPassword, oracle_dsn)
-            )
-            self._dbconnection = db_api_2.connect(
-                user=dbUsername, password=dbPassword, dsn=oracle_dsn
-            )
-        elif dbapiModuleName in ["teradata"]:
-            dbPort = dbPort or 1025
-            teradata_udaExec = db_api_2.UdaExec(
-                appName="RobotFramework", version="1.0", logConsole=False
-            )
-            logger.info(
-                "Connecting using : %s.connect(database=%s, user=%s, password=%s, host=%s, port=%s) "
-                % (dbapiModuleName, dbName, dbUsername, dbPassword, dbHost, dbPort)
-            )
-            self._dbconnection = teradata_udaExec.connect(
-                method="odbc",
-                system=dbHost,
-                database=dbName,
-                username=dbUsername,
-                password=dbPassword,
-                host=dbHost,
-                port=dbPort,
-            )
-        elif dbapiModuleName in ["ksycopg2"]:
-            dbPort = dbPort or 54321
-            logger.info(
-                "Connecting using : %s.connect(database=%s, user=%s, password=%s, host=%s, port=%s) "
-                % (dbapiModuleName, dbName, dbUsername, dbPassword, dbHost, dbPort)
-            )
-            self._dbconnection = db_api_2.connect(
-                database=dbName,
-                user=dbUsername,
-                password=dbPassword,
-                host=dbHost,
-                port=dbPort,
-            )
-        elif dbapiModuleName in ["pymssql"]:
-            # with tds_version=7.2, for pymssql driver, date/datetime values will be returned as strings
-            tdsVersion = "7.2"
-            logger.info(
-                "Connecting using : %s.connect(database=%s, user=%s, password=%s, host=%s, port=%s, tdsVersion=%s)"
-                % (
-                    dbapiModuleName,
-                    dbName,
-                    dbUsername,
-                    dbPassword,
-                    dbHost,
-                    dbPort,
-                    tdsVersion,
+            elif dbapiModuleName in ["psycopg2"]:
+                dbPort = dbPort or 5432
+                logger.info(
+                    "Connecting using : %s.connect(database=%s, user=%s, password=%s, host=%s, port=%s) "
+                    % (dbapiModuleName, dbName, dbUsername, dbPassword, dbHost, dbPort)
                 )
-            )
-            self._dbconnection = db_api_2.connect(
-                database=dbName,
-                user=dbUsername,
-                password=dbPassword,
-                host=dbHost,
-                port=dbPort,
-                tds_version=tdsVersion,
-            )
-        else:
-            logger.info(
-                "Connecting using : %s.connect(database=%s, user=%s, password=%s, host=%s, port=%s)"
-                % (dbapiModuleName, dbName, dbUsername, dbPassword, dbHost, dbPort)
-            )
-            self._dbconnection = db_api_2.connect(
-                database=dbName,
-                user=dbUsername,
-                password=dbPassword,
-                host=dbHost,
-                port=dbPort,
-            )
+                self._dbconnection = db_api_2.connect(
+                    database=dbName,
+                    user=dbUsername,
+                    password=dbPassword,
+                    host=dbHost,
+                    port=dbPort,
+                )
+            elif dbapiModuleName in ["pyodbc", "pypyodbc"]:
+                dbPort = dbPort or 1433
+                dbDriver = dbDriver or "{SQL Server}"
+                logger.info(
+                    "Connecting using : %s.connect(DRIVER=%s;SERVER=%s,%s;DATABASE=%s;UID=%s;PWD=%s)"
+                    % (
+                        dbapiModuleName,
+                        dbDriver,
+                        dbHost,
+                        dbPort,
+                        dbName,
+                        dbUsername,
+                        dbPassword,
+                    )
+                )
+                self._dbconnection = db_api_2.connect(
+                    "DRIVER=%s;SERVER=%s,%s;DATABASE=%s;UID=%s;PWD=%s"
+                    % (dbDriver, dbHost, dbPort, dbName, dbUsername, dbPassword)
+                )
+            elif dbapiModuleName in ["excel"]:
+                logger.info(
+                    'Connecting using : %s.connect(DRIVER={Microsoft Excel Driver (*.xls, *.xlsx, *.xlsm, *.xlsb)};DBQ=%s;ReadOnly=1;Extended Properties="Excel 8.0;HDR=YES";)'
+                    % (dbapiModuleName, dbName)
+                )
+                self._dbconnection = db_api_2.connect(
+                    'DRIVER={Microsoft Excel Driver (*.xls, *.xlsx, *.xlsm, *.xlsb)};DBQ=%s;ReadOnly=1;Extended Properties="Excel 8.0;HDR=YES";)'
+                    % (dbName),
+                    autocommit=True,
+                )
+            elif dbapiModuleName in ["excelrw"]:
+                logger.info(
+                    'Connecting using : %s.connect(DRIVER={Microsoft Excel Driver (*.xls, *.xlsx, *.xlsm, *.xlsb)};DBQ=%s;ReadOnly=0;Extended Properties="Excel 8.0;HDR=YES";)'
+                    % (dbapiModuleName, dbName)
+                )
+                self._dbconnection = db_api_2.connect(
+                    'DRIVER={Microsoft Excel Driver (*.xls, *.xlsx, *.xlsm, *.xlsb)};DBQ=%s;ReadOnly=0;Extended Properties="Excel 8.0;HDR=YES";)'
+                    % (dbName),
+                    autocommit=True,
+                )
+            elif dbapiModuleName in ["ibm_db", "ibm_db_dbi"]:
+                dbPort = dbPort or 50000
+                logger.info(
+                    "Connecting using : %s.connect(DATABASE=%s;HOSTNAME=%s;PORT=%s;PROTOCOL=TCPIP;UID=%s;PWD=%s;) "
+                    % (dbapiModuleName, dbName, dbHost, dbPort, dbUsername, dbPassword)
+                )
+                self._dbconnection = db_api_2.connect(
+                    "DATABASE=%s;HOSTNAME=%s;PORT=%s;PROTOCOL=TCPIP;UID=%s;PWD=%s;"
+                    % (dbName, dbHost, dbPort, dbUsername, dbPassword),
+                    "",
+                    "",
+                )
+            elif dbapiModuleName in ["cx_Oracle"]:
+                dbPort = dbPort or 1521
+                oracle_dsn = db_api_2.makedsn(
+                    host=dbHost, port=dbPort, service_name=dbName)
+                logger.info(
+                    "Connecting using: %s.connect(user=%s, password=%s, dsn=%s) "
+                    % (dbapiModuleName, dbUsername, dbPassword, oracle_dsn)
+                )
+                self._dbconnection = db_api_2.connect(
+                    user=dbUsername, password=dbPassword, dsn=oracle_dsn
+                )
+            elif dbapiModuleName in ["teradata"]:
+                dbPort = dbPort or 1025
+                teradata_udaExec = db_api_2.UdaExec(
+                    appName="RobotFramework", version="1.0", logConsole=False
+                )
+                logger.info(
+                    "Connecting using : %s.connect(database=%s, user=%s, password=%s, host=%s, port=%s) "
+                    % (dbapiModuleName, dbName, dbUsername, dbPassword, dbHost, dbPort)
+                )
+                self._dbconnection = teradata_udaExec.connect(
+                    method="odbc",
+                    system=dbHost,
+                    database=dbName,
+                    username=dbUsername,
+                    password=dbPassword,
+                    host=dbHost,
+                    port=dbPort,
+                )
+            elif dbapiModuleName in ["ksycopg2"]:
+                dbPort = dbPort or 54321
+                logger.info(
+                    "Connecting using : %s.connect(database=%s, user=%s, password=%s, host=%s, port=%s) "
+                    % (dbapiModuleName, dbName, dbUsername, dbPassword, dbHost, dbPort)
+                )
+                self._dbconnection = db_api_2.connect(
+                    database=dbName,
+                    user=dbUsername,
+                    password=dbPassword,
+                    host=dbHost,
+                    port=dbPort,
+                )
+            elif dbapiModuleName in ["pymssql"]:
+                # with tds_version=7.2, for pymssql driver, date/datetime values will be returned as strings
+                tdsVersion = "7.2"
+                logger.info(
+                    "Connecting using : %s.connect(database=%s, user=%s, password=%s, host=%s, port=%s, tdsVersion=%s)"
+                    % (
+                        dbapiModuleName,
+                        dbName,
+                        dbUsername,
+                        dbPassword,
+                        dbHost,
+                        dbPort,
+                        tdsVersion,
+                    )
+                )
+                self._dbconnection = db_api_2.connect(
+                    database=dbName,
+                    user=dbUsername,
+                    password=dbPassword,
+                    host=dbHost,
+                    port=dbPort,
+                    tds_version=tdsVersion,
+                )
+            else:
+                logger.info(
+                    "Connecting using : %s.connect(database=%s, user=%s, password=%s, host=%s, port=%s)"
+                    % (dbapiModuleName, dbName, dbUsername, dbPassword, dbHost, dbPort)
+                )
+                self._dbconnection = db_api_2.connect(
+                    database=dbName,
+                    user=dbUsername,
+                    password=dbPassword,
+                    host=dbHost,
+                    port=dbPort,
+                )
+        except Exception as ex:
+            logger.error(
+                f"Unexpected errors when connecting to database: {str(ex)}")
 
     @func_set_timeout(60 * 60)
     def connect_to_database_using_custom_params(
-        self, dbapiModuleName=None, db_connect_string=""
+        self, dbapiModuleName: str = None, db_connect_string: str = ""
     ):
         """
         Loads the DB API 2.0 module given `dbapiModuleName` then uses it to
@@ -344,11 +354,15 @@ class ConnectionManager(object):
         """
         logger.info("Executing : Disconnect From Database")
         if self._dbconnection == None:
-            return "No open connection to close"
+            logger.trace("No open connection to close")
         else:
-            self._dbconnection.close()
+            try:
+                self._dbconnection.close()
+            except Exception as ex:
+                logger.error(
+                    f"Could not close the connection due to error: {str(ex)}")
 
-    def set_auto_commit(self, autoCommit=True):
+    def set_auto_commit(self, autoCommit: bool = True):
         """
         Turn the autocommit on the database connection ON or OFF.
 

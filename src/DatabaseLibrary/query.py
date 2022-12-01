@@ -13,14 +13,15 @@
 #  limitations under the License.
 
 import os
-import sys
 from operator import eq, ge, gt, le, lt
 from typing import Dict, List, Union
 
-from func_timeout import func_set_timeout
+from func_timeout import FunctionTimedOut, func_set_timeout
 from robot.api import logger
 from robot.api.deco import keyword, not_keyword
 from robot.libraries.Collections import Collections
+
+from . import TechnicalTestFailure
 
 # how do we understand the operators
 semantics = {
@@ -41,9 +42,11 @@ class Query:
     """
     @not_keyword
     def _cursor_cleanup(self, cur):
-        if cur and self.db_api_module_name != 'databricks':
-            self._dbconnection.rollback()
-
+        try:
+            if cur and self.db_api_module_name != 'databricks':
+                self._dbconnection.rollback()
+        except Exception as ex:
+            logger.error(f"Error during cleanup: {ex}")
 
     @not_keyword
     def asserted_query(
@@ -60,25 +63,57 @@ class Query:
             AssertionError: the count does not fit the operator + reference count
         """
         cur = None
+        logger.info(f"Executing: Query | {select_statement}")
         try:
-            cur = self._dbconnection.cursor()
-            logger.info(f"Executing: Query | {select_statement}")
-            logger.debug(f"Query will be limited to {reference_count + 1} records.")
-            self.execute_sql(cur, select_statement)
-            # only fetch however many we need to make a positive verification
-            rows = cur.fetchmany(reference_count + 1)
-            actual_length = len(rows) if rows else 0
+            try:
+                cur = self._dbconnection.cursor()
+            except Exception as ex:
+                raise TechnicalTestFailure(
+                    f"Could not create a cursor on the connection because of error: {str(ex)} ")
+            logger.debug(
+                f"Initial fetch will be limited to {reference_count + 1} records.")
+            try:
+                self.execute_sql(cur, select_statement)
+            except FunctionTimedOut:
+                raise
+            except Exception as ex:
+                raise TechnicalTestFailure(
+                    f"Could not execute asserted query because of error: {str(ex)}")
+            try:
+                # only fetch however many we need to make a positive verification
+                rows = cur.fetchmany(reference_count + 1)
+            except Exception as ex:
+                raise TechnicalTestFailure(
+                    f"Could not fetch {reference_count + 1} records from cursor because of error: {str(ex)}")
+            try:
+                actual_length = len(rows) if rows else 0
+            except Exception as ex:
+                raise TechnicalTestFailure(
+                    f"Could not get the length of cursor result because of error: {str(ex)}")
             if not op(actual_length, reference_count):
-                # fetching one b y one to keep the memory usage low
+                # fetching one by one to keep the memory usage low as the rows can be super wide sometimes.
                 while True:
-                    if not cur.fetchone():
-                        # if no more elements, break the loop and raise the assertion error
-                        break
+                    try:
+                        if not cur.fetchone():
+                            # if no more elements, break the loop and raise the assertion error
+                            break
+                    except Exception as ex:
+                        raise TechnicalTestFailure(
+                            f"Could not fetch next record from cursor because of error: {str(ex)}")
                     # count how many there are
                     actual_length += 1
                 raise AssertionError(
                     f"Expected query to return {semantics[op]} {reference_count} rows, but got {actual_length}."
                 )
+        except TechnicalTestFailure as ttf:
+            raise TechnicalTestFailure(
+                f"Asserted query failed because of error: {str(ttf)}") from ttf
+        except FunctionTimedOut:
+            raise
+        except Exception as ex:
+            raise TechnicalTestFailure(
+                f"Asserted query failed because of error: {str(ex)}") from ex
+
         finally:
             self._cursor_cleanup(cur)
 
@@ -93,26 +128,55 @@ class Query:
             List[Dict]: List of dictionaries (table rows)
         """
         cur = None
+        logger.info(f"Executing: Query | {select_statement}")
+        limit = os.environ.get("QUERY_LIMIT", None)
         try:
-            limit = os.environ.get("QUERY_LIMIT", None)
-            cur = self._dbconnection.cursor()
-            logger.info("Executing : Query  |  %s " % select_statement)
+            try:
+                cur = self._dbconnection.cursor()
+            except Exception as ex:
+                raise TechnicalTestFailure(
+                    f"Could not create a cursor on the database connection because of error: {str(ex)}.")
             if limit:
                 logger.debug(f"Query will be limited to {limit} records.")
                 limit = int(limit)
-            self.execute_sql(cur, select_statement)
-            allRows = cur.fetchmany(limit) if limit else cur.fetchall()
+            try:
+                self.execute_sql(cur, select_statement)
+            except FunctionTimedOut:
+                raise
+            except Exception as ex:
+                raise TechnicalTestFailure(
+                    f"Could not execute the query because of error: {str(ex)}.")
+            try:
+                allRows = cur.fetchmany(limit) if limit else cur.fetchall()
+            except Exception as ex:
+                raise TechnicalTestFailure(
+                    f"Could not fetch the rows from cursor because of error: {str(ex)}")
             mappedRows = []
-            col_names = [c[0] for c in cur.description]
+            try:
+                col_names = [c[0] for c in cur.description]
+            except Exception as ex:
+                raise TechnicalTestFailure(
+                    f"Could not fetch the column names from the cursor description because of error: {str(ex)}")
 
             for rowIdx in range(len(allRows)):
                 d = {}
-                for colIdx in range(len(allRows[rowIdx])):
-                    d[col_names[colIdx]] = allRows[rowIdx][colIdx]
-                mappedRows.append(d)
+                try:
+                    for colIdx in range(len(allRows[rowIdx])):
+                        d[col_names[colIdx]] = allRows[rowIdx][colIdx]
+                    mappedRows.append(d)
+                except Exception as ex:
+                    raise TechnicalTestFailure(
+                        f"Could not map rows to columns because of error: {str(ex)}")
             cl.log_list(mappedRows)
             return mappedRows
-
+        except TechnicalTestFailure as ttf:
+            raise TechnicalTestFailure(
+                f"Query failed because of error: {str(ttf)}") from ttf
+        except FunctionTimedOut:
+            raise
+        except Exception as ex:
+            raise TechnicalTestFailure(
+                f"Query failed because of error: {str(ex)}") from ex
         finally:
             self._cursor_cleanup(cur)
 
@@ -127,26 +191,72 @@ class Query:
             List[str]: list of strings describing the query results
         """
         cur = None
+        logger.info(f"Executing: Description of {select_statement}")
         try:
-            cur = self._dbconnection.cursor()
-            logger.info(f"Executing: Description of {select_statement}")
-            self.execute_sql(cur, select_statement)
+            try:
+                cur = self._dbconnection.cursor()
+            except Exception as ex:
+                raise TechnicalTestFailure from ex
+            try:
+                self.execute_sql(cur, select_statement)
+            except FunctionTimedOut:
+                raise
+            except Exception as ttf:
+                raise TechnicalTestFailure(
+                    f"Execution sql failed because of {str(ex)}.")
             description = list(cur.description)
             return description
+        except FunctionTimedOut:
+            raise FunctionTimedOut
+        except TechnicalTestFailure as ttf:
+            raise TechnicalTestFailure(
+                f"Description query failed because of error: {str(ttf)}") from ttf
+        except Exception as ex:
+            raise TechnicalTestFailure(
+                f"Description query failed because of error: {str(ex)}") from ex
         finally:
             self._cursor_cleanup(cur)
 
     @keyword(name="Execute SQL Script")
     @func_set_timeout(60 * 60)
     def execute_sql_script(self, sqlStatement, commit=False, last_row_id=False):
-        cur = self._dbconnection.cursor()
-        cur.execute(sqlStatement)
-        if commit:
-            self._dbconnection.commit()
-        if last_row_id:
-            return cur.lastrowid
+        logger.info(f"Executing:  {sqlStatement}")
+        try:
+            try:
+                cur = self._dbconnection.cursor()
+            except Exception as ex:
+                raise TechnicalTestFailure(
+                    f"Cursor creation failed with error: {str(ex)}")
+            try:
+                cur.execute(sqlStatement)
+            except Exception as ex:
+                raise TechnicalTestFailure(
+                    f"Cursor execution failed with error: {str(ex)}")
+            if commit:
+                try:
+                    self._dbconnection.commit()
+                except Exception as ex:
+                    raise TechnicalTestFailure(
+                        f"Commit failed with error: {str(ex)}.")
+            if last_row_id:
+                try:
+                    return cur.lastrowid
+                except Exception as ex:
+                    raise TechnicalTestFailure(
+                        f"Could not get the last row id from cursor with error: {str(ex)}.")
+        except TechnicalTestFailure as ttf:
+            raise TechnicalTestFailure(
+                f"SQL Script execution failed with error: {str(ttf)}") from ttf
+        except Exception as ex:
+            raise TechnicalTestFailure(
+                f"SQL Script execution failed with error: {str(ex)}") from ex
 
     @not_keyword
     @func_set_timeout(60 * 60)
     def execute_sql(self, cur, sqlStatement):
-        return cur.execute(sqlStatement)
+        logger.info(f"Executing:  {sqlStatement}")
+        try:
+            return cur.execute(sqlStatement)
+        except Exception as ex:
+            raise TechnicalTestFailure(
+                f"Solo cursor execution step failed with: {str(ex)}")

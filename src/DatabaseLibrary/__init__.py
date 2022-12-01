@@ -14,9 +14,9 @@
 
 import os
 
+from DatabaseLibrary.assertion import Assertion
 from DatabaseLibrary.connection_manager import ConnectionManager
 from DatabaseLibrary.query import Query
-from DatabaseLibrary.assertion import Assertion
 from DatabaseLibrary.version import VERSION
 
 _version_ = VERSION
@@ -67,3 +67,8 @@ class DatabaseLibrary(ConnectionManager, Query, Assertion):
     """
 
     ROBOT_LIBRARY_SCOPE = "GLOBAL"
+
+
+class TechnicalTestFailure(Exception):
+    def __init__(self, message) -> None:
+        super().__init__(message)

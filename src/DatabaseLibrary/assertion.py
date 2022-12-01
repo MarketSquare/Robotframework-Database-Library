@@ -14,8 +14,11 @@
 
 from operator import eq, ge, gt, le, lt
 
+from func_timeout import FunctionTimedOut
 from robot.api import logger
-from robot.api.deco import keyword, not_keyword
+from robot.api.deco import keyword
+
+from . import TechnicalTestFailure
 
 
 class Assertion:
@@ -28,30 +31,57 @@ class Assertion:
         """Checks if the SQL Statement returned any rows, expects at least 1.
 
         Args:
-            select_statement (_type_): SQL Select Statement
+            select_statement (str): SQL Select Statement
         """
         logger.info(f"Asserting: Check If Exists In Database")
-        self.asserted_query(select_statement, 0, gt)
+        try:
+            self.asserted_query(select_statement, 0, gt)
+        except FunctionTimedOut:
+            raise AssertionError(f"Query timed out.")
+        except TechnicalTestFailure as ttf:
+            raise TechnicalTestFailure(
+                f"Could not check whether result has rows because of error: {str(ttf)}") from ttf
+        except Exception as ex:
+            raise TechnicalTestFailure(
+                f"Could not check whether result has rows because of error: {str(ex)}")
 
     @keyword(name="Check If Not Exists In Database")
     def check_if_not_exists_in_database(self, select_statement: str) -> None:
         """Checks if the SQL Statement returned any rows, expects at most 0.
 
         Args:
-            select_statement (_type_): SQL Select Statement
+            select_statement (str): SQL Select Statement
         """
         logger.info(f"Asserting: Check If Not Exists In Database")
-        self.asserted_query(select_statement, 0, lt)
+        try:
+            self.asserted_query(select_statement, 0, lt)
+        except FunctionTimedOut:
+            raise AssertionError(f"Query timed out.")
+        except TechnicalTestFailure as ttf:
+            raise TechnicalTestFailure(
+                f"Could not check whether result has no rows because of error: {str(ttf)}") from ttf
+        except Exception as ex:
+            raise TechnicalTestFailure(
+                f"Could not check whether result has no rows because of error: {str(ex)}")
 
     @keyword(name="Row Count Is 0")
     def row_count_is_0(self, select_statement: str) -> None:
         """Checks whether SQL Statement returns exactly 0 rows.
 
         Args:
-            select_statement (_type_): SQL Select Statement
+            select_statement (str): SQL Select Statement
         """
         logger.info(f"Asserting: Row Count Is 0")
-        self.asserted_query(select_statement, 0, eq)
+        try:
+            self.asserted_query(select_statement, 0, eq)
+        except FunctionTimedOut:
+            raise AssertionError(f"Query timed out.")
+        except TechnicalTestFailure as ttf:
+            raise TechnicalTestFailure(
+                f"Could not check whether row count is 0 because of error: {str(ttf)}") from ttf
+        except Exception as ex:
+            raise TechnicalTestFailure(
+                f"Could not check whether row count is 0 because of error: {str(ex)}")
 
     @keyword(name="Row Count Is Equal To X")
     def row_count_is_equal_to_x(
@@ -64,7 +94,16 @@ class Assertion:
             row_reference_count (int): reference count for the comparison
         """
         logger.info(f"Asserting: Row Count Is Equal To {row_reference_count}")
-        self.asserted_query(select_statement, row_reference_count, eq)
+        try:
+            self.asserted_query(select_statement, row_reference_count, eq)
+        except FunctionTimedOut:
+            raise AssertionError(f"Query timed out.")
+        except TechnicalTestFailure as ttf:
+            raise TechnicalTestFailure(
+                f"Could not check whether row count is exactly {row_reference_count} because of error: {str(ttf)}") from ttf
+        except Exception as ex:
+            raise TechnicalTestFailure(
+                f"Could not check whether row count is exactly {row_reference_count} because of error: {str(ex)}")
 
     @keyword(name="Row Count Is Greater Than X")
     def row_count_is_greater_than_x(
@@ -76,8 +115,18 @@ class Assertion:
             select_statement (str): SQL Select Statement
             row_reference_count (int): reference count for the comparison
         """
-        logger.info(f"Asserting: Row Count Is Greater Than {row_reference_count}")
-        self.asserted_query(select_statement, row_reference_count, gt)
+        logger.info(
+            f"Asserting: Row Count Is Greater Than {row_reference_count}")
+        try:
+            self.asserted_query(select_statement, row_reference_count, gt)
+        except FunctionTimedOut:
+            raise AssertionError(f"Query timed out.")
+        except TechnicalTestFailure as ttf:
+            raise TechnicalTestFailure(
+                f"Could not check whether row count is greater than {row_reference_count} because of error: {str(ttf)}") from ttf
+        except Exception as ex:
+            raise TechnicalTestFailure(
+                f"Could not check whether row count is greater than {row_reference_count} because of error: {str(ex)}")
 
     @keyword("Row Count Is Less Than X")
     def row_count_is_less_than_x(
@@ -90,7 +139,16 @@ class Assertion:
             row_reference_count (int): reference count for the comparison
         """
         logger.info(f"Asserting: Row Count Is Less Than {row_reference_count}")
-        self.asserted_query(select_statement, row_reference_count, lt)
+        try:
+            self.asserted_query(select_statement, row_reference_count, lt)
+        except FunctionTimedOut:
+            raise AssertionError(f"Query timed out.")
+        except TechnicalTestFailure as ttf:
+            raise TechnicalTestFailure(
+                f"Could not check whether row count is less than {row_reference_count} because of error: {str(ttf)}") from ttf
+        except Exception as ex:
+            raise TechnicalTestFailure(
+                f"Could not check whether row count is less than {row_reference_count} because of error: {str(ex)}")
 
     @keyword("Row Count Is At Least X")
     def row_count_is_at_least_x(
@@ -103,7 +161,16 @@ class Assertion:
             row_reference_count (int): reference count for the comparison
         """
         logger.info(f"Asserting: Row Count Is At Least {row_reference_count}")
-        self.asserted_query(select_statement, row_reference_count, ge)
+        try:
+            self.asserted_query(select_statement, row_reference_count, ge)
+        except FunctionTimedOut:
+            raise AssertionError(f"Query timed out.")
+        except TechnicalTestFailure as ttf:
+            raise TechnicalTestFailure(
+                f"Could not check whether row count is at least {row_reference_count} because of error: {str(ttf)}") from ttf
+        except Exception as ex:
+            raise TechnicalTestFailure(
+                f"Could not check whether row count is at least {row_reference_count} because of error: {str(ex)}")
 
     @keyword("Row Count Is At Most X")
     def row_count_is_at_most_x(
@@ -116,7 +183,16 @@ class Assertion:
             row_reference_count (int): reference count for the comparison
         """
         logger.info(f"Asserting: Row Count Is At Most {row_reference_count}")
-        self.asserted_query(select_statement, row_reference_count, le)
+        try:
+            self.asserted_query(select_statement, row_reference_count, le)
+        except FunctionTimedOut:
+            raise AssertionError(f"Query timed out.")
+        except TechnicalTestFailure as ttf:
+            raise TechnicalTestFailure(
+                f"Could not check whether row count is at most {row_reference_count} because of error: {str(ttf)}") from ttf
+        except Exception as ex:
+            raise TechnicalTestFailure(
+                f"Could not check whether row count is at most {row_reference_count} because of error: {str(ex)}")
 
     @keyword(name="Table Must Exist")
     def table_must_exist(self, table_name: str):
@@ -140,6 +216,14 @@ class Assertion:
         else:
             select_statement = f"SELECT * FROM information_schema.tables WHERE table_name='{table_name}'"
         try:
-            self.asserted_query(select_statement, 1, eq)
+            self.asserted_query(select_statement, 0, gt)
         except AssertionError:
             raise AssertionError(f"Table {table_name} does not exist.")
+        except FunctionTimedOut:
+            raise AssertionError(f"Query timed out.")
+        except TechnicalTestFailure as ttf:
+            raise TechnicalTestFailure(
+                f"Could not check whether table exists due to error: {str(ttf)}") from ttf
+        except Exception as ex:
+            raise TechnicalTestFailure(
+                f"Could not check whether table exists due to error: {str(ex)}")
