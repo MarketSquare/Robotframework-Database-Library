@@ -259,17 +259,16 @@ class Query:
 
         Returns:
             Any: returns the results of the query
-        """        
+        """
         logger.info(f"Executing:  {sqlStatement}")
         try:
             return cur.execute(sqlStatement)
         except Exception as ex:
-            ex_type = ex.__type__
-            logger.trace(ex_type)
-            if 'OperationalError' in str(type(ex)):
+            ex_type_str = str(type(ex))
+            if 'OperationalError' in ex_type_str:
                 raise TechnicalTestFailure(
                     f"Test failed because of an Operational Error. \nThis might mean that a non-standard column type was encountered in a generic query. \nThis might mean you have used a non-existent column/table/schema. \nQuery: {sqlStatement} \nDetails: {str(ex)}") from ex
-            elif 'ProgrammingError' in str(type(ex)):
+            elif 'ProgrammingError' in ex_type_str:
                 raise TechnicalTestFailure(
                     f"Test failed because of a Programming Error. In most cases this is a syntax error in the query. Double check if the query executed is the intended query. \nQuery: {sqlStatement} \nDetails: {str(ex)}") from ex
             raise TechnicalTestFailure(
