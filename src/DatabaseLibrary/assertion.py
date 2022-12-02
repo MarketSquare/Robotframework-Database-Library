@@ -163,7 +163,7 @@ class Assertion:
         # Test FAIL result:
         except TestFailure as tf:
             raise AssertionError(
-                f"{check_message} failed: {tf.message}") from tf
+                f"{check_message} failed: {str(tf)}") from tf
         # test ERROR result:
         except FunctionTimedOut:
             raise
