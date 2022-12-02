@@ -33,6 +33,20 @@ class ConnectionManager(object):
 
     @func_set_timeout(60 * 60)
     def connect_to_snowflake(self, dbName: str, dbUsername: str, dbPassword: str, dbSchema: str, dbAccount: str, dbWarehouse: str):
+        """Connect to Snowflake and set the _dbconnection object.
+
+        Args:
+            dbName (str): name of the database to connect to
+            dbUsername (str): name of the user to connect as
+            dbPassword (str): password for the user
+            dbSchema (str): name of the schema to connect to
+            dbAccount (str): name of the Snowflake Account to use
+            dbWarehouse (str): name of the warehouse to connect to
+
+        Raises:
+            ImportError: Could not connect, snowflake connector is missing.
+            Exception: Something unexpected happened. Could not connect.
+        """           
         try:
             self.db_api_module_name = 'snowflake'
             db_api_2 = importlib.import_module("snowflake.connector")
@@ -49,14 +63,29 @@ class ConnectionManager(object):
             )
         except ImportError:
             logger.error(
-                "Module for connecting to Snowflake was not found. Please check if needed dependency installed."
+                "Module for connecting to Snowflake was not found. Report this to maintainers."
             )
+            raise
         except Exception as ex:
             logger.error(
                 f"Unexpected errors when connecting to database: {str(ex)}")
+            raise
 
     @func_set_timeout(60 * 60)
     def connect_to_databricks(self, dbHost: str, dbToken: str, dbHttpPath: str, dbCatalog: str, dbSchema: str):
+        """Connect to databricks and set the _db_connection object
+
+        Args:
+            dbHost (str): hostname to connect to
+            dbToken (str): token to use for authentication
+            dbHttpPath (str): http path to the sql extension
+            dbCatalog (str): catalog to connect to
+            dbSchema (str): schema to connect to
+
+        Raises:
+            ImportError: Could not connect, databricks connector is missing.
+            Exception: Something unexpected happened. Could not connect.
+        """        
         try:
             module = importlib.import_module("databricks.sql")
             logger.info(
@@ -72,11 +101,13 @@ class ConnectionManager(object):
             )
         except ImportError:
             logger.error(
-                "Module for connecting to Databricks was not found. Please check if needed dependency installed."
+                "Module for connecting to Databricks was not found. Report this to maintainers."
             )
+            raise
         except Exception as ex:
             logger.error(
                 f"Unexpected errors when connecting to database: {str(ex)}")
+            raise
 
     @func_set_timeout(60 * 60)
     def connect_to_database(
@@ -318,6 +349,7 @@ class ConnectionManager(object):
         except Exception as ex:
             logger.error(
                 f"Unexpected errors when connecting to database: {str(ex)}")
+            raise
 
     @func_set_timeout(60 * 60)
     def connect_to_database_using_custom_params(
@@ -360,7 +392,7 @@ class ConnectionManager(object):
                 self._dbconnection.close()
             except Exception as ex:
                 logger.error(
-                    f"Could not close the connection due to error: {str(ex)}")
+                    f"Could not close the connection due to error: {str(ex)}. \n\nThis should not impact anything.")
 
     def set_auto_commit(self, autoCommit: bool = True):
         """
