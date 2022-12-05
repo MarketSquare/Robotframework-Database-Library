@@ -89,7 +89,7 @@ class Query:
                     # count how many there are
                     actual_length += 1
                 raise TestFailure(
-                    f"Expected query to return {semantics[op]} {reference_count} rows, but got {actual_length}."
+                    f"Query returned {actual_length} rows but test expected {semantics[op]} {reference_count}."
                 )
         except TestFailure:
             raise
