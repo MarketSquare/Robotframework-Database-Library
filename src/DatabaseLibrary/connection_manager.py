@@ -31,7 +31,7 @@ class ConnectionManager(object):
         self._dbconnection = None
         self.db_api_module_name = None
 
-    @func_set_timeout(60 * 60)
+    @func_set_timeout(10 * 60)
     def connect_to_snowflake(self, dbName: str, dbUsername: str, dbPassword: str, dbSchema: str, dbAccount: str, dbWarehouse: str):
         """Connect to Snowflake and set the _dbconnection object.
 
@@ -46,7 +46,7 @@ class ConnectionManager(object):
         Raises:
             ImportError: Could not connect, snowflake connector is missing.
             Exception: Something unexpected happened. Could not connect.
-        """           
+        """
         try:
             self.db_api_module_name = 'snowflake'
             db_api_2 = importlib.import_module("snowflake.connector")
@@ -71,7 +71,7 @@ class ConnectionManager(object):
                 f"Unexpected errors when connecting to database: {str(ex)}")
             raise
 
-    @func_set_timeout(60 * 60)
+    @func_set_timeout(10 * 60)
     def connect_to_databricks(self, dbHost: str, dbToken: str, dbHttpPath: str, dbCatalog: str, dbSchema: str):
         """Connect to databricks and set the _db_connection object
 
@@ -85,7 +85,7 @@ class ConnectionManager(object):
         Raises:
             ImportError: Could not connect, databricks connector is missing.
             Exception: Something unexpected happened. Could not connect.
-        """        
+        """
         try:
             module = importlib.import_module("databricks.sql")
             logger.info(
@@ -109,7 +109,7 @@ class ConnectionManager(object):
                 f"Unexpected errors when connecting to database: {str(ex)}")
             raise
 
-    @func_set_timeout(60 * 60)
+    @func_set_timeout(10 * 60)
     def connect_to_database(
         self,
         dbapiModuleName: str = None,
@@ -351,7 +351,7 @@ class ConnectionManager(object):
                 f"Unexpected errors when connecting to database: {str(ex)}")
             raise
 
-    @func_set_timeout(60 * 60)
+    @func_set_timeout(10 * 60)
     def connect_to_database_using_custom_params(
         self, dbapiModuleName: str = None, db_connect_string: str = ""
     ):
@@ -377,6 +377,7 @@ class ConnectionManager(object):
         )
         self._dbconnection = eval(db_connect_string)
 
+    @func_set_timeout(10 * 60)
     def disconnect_from_database(self):
         """
         Disconnects from the database.
