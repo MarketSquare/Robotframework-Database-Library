@@ -68,8 +68,7 @@ class Assertion:
         """
         message = f"Row Count Is Equal To {row_reference_count}"
         logger.info(f"Asserting: {message}")
-        self._asserted_query_wrapper(
-            select_statement, row_reference_count, eq, message)
+        self._asserted_query_wrapper(select_statement, row_reference_count, eq, message)
 
     @keyword(name="Row Count Is Greater Than X")
     def row_count_is_greater_than_x(
@@ -83,8 +82,7 @@ class Assertion:
         """
         message = f"Row Count Is Greater Than {row_reference_count}"
         logger.info(f"Asserting: {message}")
-        self._asserted_query_wrapper(
-            select_statement, row_reference_count, gt, message)
+        self._asserted_query_wrapper(select_statement, row_reference_count, gt, message)
 
     @keyword("Row Count Is Less Than X")
     def row_count_is_less_than_x(
@@ -98,8 +96,7 @@ class Assertion:
         """
         message = "Row Count Is Less Than {row_reference_count}"
         logger.info(f"Asserting: {message}")
-        self._asserted_query_wrapper(
-            select_statement, row_reference_count, lt, message)
+        self._asserted_query_wrapper(select_statement, row_reference_count, lt, message)
 
     @keyword("Row Count Is At Least X")
     def row_count_is_at_least_x(
@@ -113,8 +110,7 @@ class Assertion:
         """
         message = f"Row Count Is At Least {row_reference_count}"
         logger.info(f"Asserting: {message}")
-        self._asserted_query_wrapper(
-            select_statement, row_reference_count, ge, message)
+        self._asserted_query_wrapper(select_statement, row_reference_count, ge, message)
 
     @keyword("Row Count Is At Most X")
     def row_count_is_at_most_x(
@@ -128,8 +124,7 @@ class Assertion:
         """
         message = f"Row Count Is At Most {row_reference_count}"
         logger.info(f"Asserting: {message}")
-        self._asserted_query_wrapper(
-            select_statement, row_reference_count, le, message)
+        self._asserted_query_wrapper(select_statement, row_reference_count, le, message)
 
     @keyword(name="Table Must Exist")
     def table_must_exist(self, table_name: str):
@@ -148,28 +143,54 @@ class Assertion:
             "sqlite3": f"SELECT name FROM sqlite_master WHERE type='table' AND name='{table_name}' COLLATE NOCASE",
             "ibm_db": f"SELECT name FROM SYSIBM.SYSTABLES WHERE type='T' AND name=UPPER('{table_name}')",
             "ibm_db_dbi": f"SELECT name FROM SYSIBM.SYSTABLES WHERE type='T' AND name=UPPER('{table_name}')",
-            "teradata": f"SELECT table_name FROM DBC.TablesV WHERE TableKind='T' AND table_name='{table_name}'"
+            "teradata": f"SELECT table_name FROM DBC.TablesV WHERE TableKind='T' AND table_name='{table_name}'",
         }
         select_statement = table_exists.get(
-            self.db_api_module_name, f"SELECT * FROM information_schema.tables WHERE table_name='{table_name}'")
+            self.db_api_module_name,
+            f"SELECT * FROM information_schema.tables WHERE table_name='{table_name}'",
+        )
 
-        self._asserted_query_wrapper(
-            select_statement, 0, gt, message)
+        self._asserted_query_wrapper(select_statement, 0, gt, message)
+
+    @keyword(name="Table Must Exist In Schema")
+    def table_must_exist(self, table_name: str, schema_name: str):
+        """Checks whether a given table exists in given schema
+
+        Args:
+            table_name (str): name of the table in the database
+            schema_name (str): name of the schema in the database
+
+        Raises:
+            AssertionError: when table does not exist
+        """
+        message = f"Table {table_name} Must Exist in {schema_name}"
+        logger.info(f"Asserting: {message}")
+
+        select_statement = f"SELECT * FROM information_schema.tables WHERE table_name='{table_name}' and schema_name='{schema_name}'"
+
+        self._asserted_query_wrapper(select_statement, 0, gt, message)
 
     @not_keyword
-    def _asserted_query_wrapper(self, select_statement: str, reference_count: int, op: Union[le, ge, eq, lt, gt], check_message: str):
+    def _asserted_query_wrapper(
+        self,
+        select_statement: str,
+        reference_count: int,
+        op: Union[le, ge, eq, lt, gt],
+        check_message: str,
+    ):
         try:
             self.asserted_query(select_statement, reference_count, op)
         # Test FAIL result:
         except TestFailure as tf:
-            raise AssertionError(
-                f"{check_message} failed: {str(tf)}") from tf
+            raise AssertionError(f"{check_message} failed: {str(tf)}") from tf
         # test ERROR result:
         except FunctionTimedOut:
             raise
         except TechnicalTestFailure as ttf:
             raise TechnicalTestFailure(
-                f"Cannot determine whether `{check_message}` because of error: \nDetails: {str(ttf)}") from ttf
+                f"Cannot determine whether `{check_message}` because of error: \nDetails: {str(ttf)}"
+            ) from ttf
         except Exception as ex:
             raise TechnicalTestFailure(
-                f"Cannot determine whether `{check_message}` because of unexpected error: \nDetails: {str(ex)}") from ex
+                f"Cannot determine whether `{check_message}` because of unexpected error: \nDetails: {str(ex)}"
+            ) from ex
