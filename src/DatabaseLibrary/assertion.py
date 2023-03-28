@@ -166,7 +166,7 @@ class Assertion:
         message = f"Table {table_name} Must Exist in {schema_name}"
         logger.info(f"Asserting: {message}")
 
-        select_statement = f"SELECT * FROM information_schema.tables WHERE table_name='{table_name}' and schema_name='{schema_name}'"
+        select_statement = f"SELECT * FROM information_schema.tables WHERE table_name='{table_name}' and table_schema='{schema_name}'"
 
         self._asserted_query_wrapper(select_statement, 0, gt, message)
 
