@@ -20,11 +20,11 @@ class Assertion(object):
     Assertion handles all the assertions of Database Library.
     """
 
-    def check_if_exists_in_database(self, selectStatement, sansTran=False):
+    def check_if_exists_in_database(self, selectStatement, sansTran=False, msg=None):
         """
         Check if any row would be returned by given the input `selectStatement`. If there are no results, then this will
         throw an AssertionError. Set optional input `sansTran` to True to run command without an explicit transaction
-        commit or rollback.
+        commit or rollback. The default error message can be overridden with the `msg` argument.
 
         For example, given we have a table `person` with the following data:
         | id | first_name  | last_name |
@@ -40,19 +40,22 @@ class Assertion(object):
 
         Using optional `sansTran` to run command without an explicit transaction commit or rollback:
         | Check If Exists In Database | SELECT id FROM person WHERE first_name = 'John' | True |
+
+        Using optional `msg` to override the default error message:
+        | Check If Exists In Database | SELECT id FROM person WHERE first_name = 'John' | msg=my error message |
         """
         logger.info ('Executing : Check If Exists In Database  |  %s ' % selectStatement)
         if not self.query(selectStatement, sansTran):
-            raise AssertionError("Expected to have have at least one row from '%s' "
-                                 "but got 0 rows." % selectStatement)
+            raise AssertionError(msg or "Expected to have have at least one row from '%s' "
+                                        "but got 0 rows." % selectStatement)
 
-    def check_if_not_exists_in_database(self, selectStatement, sansTran=False):
+    def check_if_not_exists_in_database(self, selectStatement, sansTran=False, msg=None):
         """
         This is the negation of `check_if_exists_in_database`.
 
         Check if no rows would be returned by given the input `selectStatement`. If there are any results, then this
         will throw an AssertionError. Set optional input `sansTran` to True to run command without an explicit
-        transaction commit or rollback.
+        transaction commit or rollback. The default error message can be overridden with the `msg` argument.
 
         For example, given we have a table `person` with the following data:
         | id | first_name  | last_name |
@@ -68,18 +71,21 @@ class Assertion(object):
 
         Using optional `sansTran` to run command without an explicit transaction commit or rollback:
         | Check If Not Exists In Database | SELECT id FROM person WHERE first_name = 'John' | True |
+
+        Using optional `msg` to override the default error message:
+        | Check If Not Exists In Database | SELECT id FROM person WHERE first_name = 'Franz Allan' | msg=my error message |
         """
         logger.info('Executing : Check If Not Exists In Database  |  %s ' % selectStatement)
         queryResults = self.query(selectStatement, sansTran)
         if queryResults:
-            raise AssertionError("Expected to have have no rows from '%s' "
-                                 "but got some rows : %s." % (selectStatement, queryResults))
+            raise AssertionError(msg or "Expected to have have no rows from '%s' "
+                                        "but got some rows : %s." % (selectStatement, queryResults))
 
-    def row_count_is_0(self, selectStatement, sansTran=False):
+    def row_count_is_0(self, selectStatement, sansTran=False, msg=None):
         """
         Check if any rows are returned from the submitted `selectStatement`. If there are, then this will throw an
         AssertionError. Set optional input `sansTran` to True to run command without an explicit transaction commit or
-        rollback.
+        rollback. The default error message can be overridden with the `msg` argument.
 
         For example, given we have a table `person` with the following data:
         | id | first_name  | last_name |
@@ -95,18 +101,21 @@ class Assertion(object):
 
         Using optional `sansTran` to run command without an explicit transaction commit or rollback:
         | Row Count is 0 | SELECT id FROM person WHERE first_name = 'John' | True |
+
+        Using optional `msg` to override the default error message:
+        | Row Count is 0 | SELECT id FROM person WHERE first_name = 'Franz Allan' | msg=my error message |
         """
         logger.info('Executing : Row Count Is 0  |  %s ' % selectStatement)
         num_rows = self.row_count(selectStatement, sansTran)
         if num_rows > 0:
-            raise AssertionError("Expected zero rows to be returned from '%s' "
-                                 "but got rows back. Number of rows returned was %s" % (selectStatement, num_rows))
+            raise AssertionError(msg or "Expected zero rows to be returned from '%s' "
+                                        "but got rows back. Number of rows returned was %s" % (selectStatement, num_rows))
 
-    def row_count_is_equal_to_x(self, selectStatement, numRows, sansTran=False):
+    def row_count_is_equal_to_x(self, selectStatement, numRows, sansTran=False, msg=None):
         """
         Check if the number of rows returned from `selectStatement` is equal to the value submitted. If not, then this
         will throw an AssertionError. Set optional input `sansTran` to True to run command without an explicit
-        transaction commit or rollback.
+        transaction commit or rollback. The default error message can be overridden with the `msg` argument.
 
         For example, given we have a table `person` with the following data:
         | id | first_name  | last_name |
@@ -123,18 +132,21 @@ class Assertion(object):
 
         Using optional `sansTran` to run command without an explicit transaction commit or rollback:
         | Row Count Is Equal To X | SELECT id FROM person WHERE first_name = 'John' | 0 | True |
+
+        Using optional `msg` to override the default error message:
+        | Row Count Is Equal To X | SELECT id FROM person | 1 | msg=my error message |
         """
         logger.info('Executing : Row Count Is Equal To X  |  %s  |  %s ' % (selectStatement, numRows))
         num_rows = self.row_count(selectStatement, sansTran)
         if num_rows != int(numRows.encode('ascii')):
-            raise AssertionError("Expected same number of rows to be returned from '%s' "
-                                 "than the returned rows of %s" % (selectStatement, num_rows))
+            raise AssertionError(msg or "Expected same number of rows to be returned from '%s' "
+                                        "than the returned rows of %s" % (selectStatement, num_rows))
 
-    def row_count_is_greater_than_x(self, selectStatement, numRows, sansTran=False):
+    def row_count_is_greater_than_x(self, selectStatement, numRows, sansTran=False, msg=None):
         """
         Check if the number of rows returned from `selectStatement` is greater than the value submitted. If not, then
         this will throw an AssertionError. Set optional input `sansTran` to True to run command without an explicit
-        transaction commit or rollback.
+        transaction commit or rollback. The default error message can be overridden with the `msg` argument.
 
         For example, given we have a table `person` with the following data:
         | id | first_name  | last_name |
@@ -151,14 +163,17 @@ class Assertion(object):
 
         Using optional `sansTran` to run command without an explicit transaction commit or rollback:
         | Row Count Is Greater Than X | SELECT id FROM person | 1 | True |
+
+        Using optional `msg` to override the default error message:
+        | Row Count Is Greater Than X | SELECT id FROM person WHERE first_name = 'John' | 0 | msg=my error message |
         """
         logger.info('Executing : Row Count Is Greater Than X  |  %s  |  %s ' % (selectStatement, numRows))
         num_rows = self.row_count(selectStatement, sansTran)
         if num_rows <= int(numRows.encode('ascii')):
-            raise AssertionError("Expected more rows to be returned from '%s' "
-                                 "than the returned rows of %s" % (selectStatement, num_rows))
+            raise AssertionError(msg or "Expected more rows to be returned from '%s' "
+                                        "than the returned rows of %s" % (selectStatement, num_rows))
 
-    def row_count_is_less_than_x(self, selectStatement, numRows, sansTran=False):
+    def row_count_is_less_than_x(self, selectStatement, numRows, sansTran=False, msg=None):
         """
         Check if the number of rows returned from `selectStatement` is less than the value submitted. If not, then this
         will throw an AssertionError. Set optional input `sansTran` to True to run command without an explicit
@@ -179,17 +194,20 @@ class Assertion(object):
 
         Using optional `sansTran` to run command without an explicit transaction commit or rollback:
         | Row Count Is Less Than X | SELECT id FROM person | 3 | True |
+
+        Using optional `msg` to override the default error message:
+        | Row Count Is Less Than X | SELECT id FROM person WHERE first_name = 'John' | 1 | msg=my error message |
         """
         logger.info('Executing : Row Count Is Less Than X  |  %s  |  %s ' % (selectStatement, numRows))
         num_rows = self.row_count(selectStatement, sansTran)
         if num_rows >= int(numRows.encode('ascii')):
-            raise AssertionError("Expected less rows to be returned from '%s' "
-                                 "than the returned rows of %s" % (selectStatement, num_rows))
+            raise AssertionError(msg or "Expected less rows to be returned from '%s' "
+                                        "than the returned rows of %s" % (selectStatement, num_rows))
 
-    def table_must_exist(self, tableName, sansTran=False):
+    def table_must_exist(self, tableName, sansTran=False, msg=None):
         """
         Check if the table given exists in the database. Set optional input `sansTran` to True to run command without an
-        explicit transaction commit or rollback.
+        explicit transaction commit or rollback. The default error message can be overridden with the `msg` argument.
 
         For example, given we have a table `person` in a database
 
@@ -202,6 +220,9 @@ class Assertion(object):
 
         Using optional `sansTran` to run command without an explicit transaction commit or rollback:
         | Table Must Exist | person | True |
+
+        Using optional `msg` to override the default error message:
+        | Table Must Exist | first_name | msg=my error message |
         """
         logger.info('Executing : Table Must Exist  |  %s ' % tableName)
         if self.db_api_module_name in ["cx_Oracle"]:
@@ -216,4 +237,4 @@ class Assertion(object):
             selectStatement = ("SELECT * FROM information_schema.tables WHERE table_name='%s'" % tableName)
         num_rows = self.row_count(selectStatement, sansTran)
         if num_rows == 0:
-            raise AssertionError("Table '%s' does not exist in the db" % tableName)
+            raise AssertionError(msg or "Table '%s' does not exist in the db" % tableName)
