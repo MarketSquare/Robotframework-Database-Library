@@ -65,15 +65,22 @@ class Query:
         try:
             step = "Getting cursor"
             cur = self._dbconnection.cursor()
+            if not cur:
+                raise TechnicalTestFailure("Cursor could not be set.")
 
             step = "Executing SQL statement"
             self.execute_sql(cur, select_statement)
 
             # only fetch however many we need to make a positive verification
             logger.debug(
-                f"Initial fetch will be limited to {reference_count + 1} records.")
+                f"Initial fetch will be limited to {reference_count + 1} records."
+            )
             step = f"Fetch {reference_count + 1} records."
             rows = cur.fetchmany(reference_count + 1)
+            if rows is None:
+                raise TechnicalTestFailure("Results could not be fetched from cursor.")
+            elif not rows:
+                logger.info("Query returned no rows.")
 
             step = "Get result size"
             actual_length = len(rows) if rows else 0
@@ -95,15 +102,26 @@ class Query:
             raise
         except TechnicalTestFailure as ttf:
             raise TechnicalTestFailure(
-                f"Asserted query failed. \nStep: {step}. \nDetails: {str(ttf)}") from ttf
+                f"Asserted query failed. \nStep: {step}. \nDetails: {str(ttf)}"
+            ) from ttf
         except FunctionTimedOut:
             raise
         except Exception as ex:
             raise TechnicalTestFailure(
-                f"Asserted query failed with unexpected error. \nStep: {step}. \nDetails: {str(ex)}") from ex
+                f"Asserted query failed with unexpected error. \nStep: {step}. \nDetails: {str(ex)}"
+            ) from ex
 
         finally:
             self._cursor_cleanup(cur)
+
+    @not_keyword
+    def _get_limit(self):
+        try:
+            if limit := os.environ.get("QUERY_LIMIT", None):
+                logger.debug(f"Query will be limited to {limit} records.")
+                limit = int(limit)
+        except ValueError as ve:
+            raise TechnicalTestFailure(f"Could not set limit: {str(ve)}") from ve
 
     @keyword(name="Query")
     def query(self, select_statement: str) -> List[Dict]:
@@ -122,43 +140,48 @@ class Query:
         """
         cur = None
         logger.info(f"Executing: Query | {select_statement}")
-        limit = os.environ.get("QUERY_LIMIT", None)
+        limit = self._get_limit()
         try:
             step = "Create a cursor on the database connection."
             cur = self._dbconnection.cursor()
-
-            if limit:
-                step = f"Setting limit query limit"
-                logger.debug(f"Query will be limited to {limit} records.")
-                limit = int(limit)
+            if not cur:
+                raise TechnicalTestFailure("Cursor could not be set.")
 
             step = f"Executing SQL statement"
             self.execute_sql(cur, select_statement)
 
             step = f"Fetching {limit or 'all'} rows"
-            allRows = cur.fetchmany(limit) if limit else cur.fetchall()
+            all_rows = cur.fetchmany(limit) if limit else cur.fetchall()
+            # if there are 0 elements, should return an empty list, not none
+            if all_rows is None:
+                raise TechnicalTestFailure("Results could not be fetched from cursor.")
+            elif not all_rows:
+                logger.info("Query returned no rows.")
+                return []
 
             step = "Mapping rows from cursor description"
             mappedRows = []
             col_names = [c[0] for c in cur.description]
 
             step = "Mapping column names"
-            for rowIdx in range(len(allRows)):
+            for row_index in range(len(all_rows)):
                 d = {}
-                for colIdx in range(len(allRows[rowIdx])):
-                    d[col_names[colIdx]] = allRows[rowIdx][colIdx]
+                for column_index in range(len(all_rows[row_index])):
+                    d[col_names[column_index]] = all_rows[row_index][column_index]
                 mappedRows.append(d)
             cl.log_list(mappedRows)
             return mappedRows
 
         except TechnicalTestFailure as ttf:
             raise TechnicalTestFailure(
-                f"Query failed \n Step: {step} because of error: {str(ttf)}") from ttf
+                f"Query failed \n Step: {step} because of error: {str(ttf)}"
+            ) from ttf
         except FunctionTimedOut:
             raise
         except Exception as ex:
             raise TechnicalTestFailure(
-                f"Query failed because of error: {str(ex)}") from ex
+                f"Query failed because of error: {str(ex)}"
+            ) from ex
         finally:
             self._cursor_cleanup(cur)
 
@@ -193,16 +216,20 @@ class Query:
             raise
         except TechnicalTestFailure as ttf:
             raise TechnicalTestFailure(
-                f"Query failed \n Step: {step} because of error: {str(ttf)}") from ttf
+                f"Query failed \n Step: {step} because of error: {str(ttf)}"
+            ) from ttf
         except Exception as ex:
             raise TechnicalTestFailure(
-                f"SQL Script execution failed. \nStep: {step} \nDetails: {str(ex)}") from ex
+                f"SQL Script execution failed. \nStep: {step} \nDetails: {str(ex)}"
+            ) from ex
         finally:
             self._cursor_cleanup(cur)
 
     @keyword(name="Execute SQL Script")
     @func_set_timeout(60 * 60)
-    def execute_sql_script(self, sqlStatement: str, commit: bool = False, last_row_id: bool = False) -> Optional[int]:
+    def execute_sql_script(
+        self, sqlStatement: str, commit: bool = False, last_row_id: bool = False
+    ) -> Optional[int]:
         """Execute an SQL script.
 
         Args:
@@ -219,7 +246,7 @@ class Query:
             Optional[int]: the last row's id or None.
         """
         logger.info(f"Executing:  {sqlStatement}")
-        step = ''
+        step = ""
         try:
             step = "Cursor creation"
             cur = self._dbconnection.cursor()
@@ -239,45 +266,50 @@ class Query:
             raise
         except Exception as ex:
             raise TechnicalTestFailure(
-                f"SQL Script execution failed. \nStep: {step} \nDetails: {str(ex)}") from ex
+                f"SQL Script execution failed. \nStep: {step} \nDetails: {str(ex)}"
+            ) from ex
         finally:
             self._cursor_cleanup(cur)
 
     @not_keyword
     @func_set_timeout(60 * 60)
     def execute_sql(self, cur, sqlStatement: str) -> Any:
-        """Executes sql statement on a given cursor and returns results.
+        """
+        Executes an SQL statement on a given cursor and returns the results.
 
         Args:
-            cur (dbapi2.cursor): a connected cursor compliant with dbapi2
-            sqlStatement (str): sql statement to be executed
+            cur (dbapi2.cursor): A connected cursor compliant with DB-API 2.0.
+            sqlStatement (str): The SQL statement to be executed.
 
         Raises:
-            TechnicalTestFailure: _description_
-            TechnicalTestFailure: _description_
-            TechnicalTestFailure: _description_
+            TechnicalTestFailure: If the execution fails due to an `OperationalError`, the error message will provide details on the issue.
+            TechnicalTestFailure: If the execution fails due to a `ProgrammingError`, the error message will provide details on the issue.
+            TechnicalTestFailure: If the cursor execution fails for any other reason, the error message will provide details on the issue.
 
         Returns:
-            Any: returns the results of the query
+            Any: The results of the query.
         """
         logger.info(f"Executing:  {sqlStatement}")
         try:
             return cur.execute(sqlStatement)
         except Exception as ex:
             ex_type_str = str(type(ex))
-            if 'OperationalError' in ex_type_str:
+            if "OperationalError" in ex_type_str:
                 raise TechnicalTestFailure(
-                    f"Test failed because of an Operational Error. \nThis might mean that a non-standard column type was encountered in a generic query. \nThis might mean you have used a non-existent column/table/schema. \nQuery: {sqlStatement} \nDetails: {str(ex)}") from ex
-            elif 'ProgrammingError' in ex_type_str:
+                    f"Test failed because of an Operational Error. \nThis might mean that a non-standard column type was encountered in a generic query. \nThis might mean you have used a non-existent column/table/schema. \nQuery: {sqlStatement} \nDetails: {str(ex)}"
+                ) from ex
+            elif "ProgrammingError" in ex_type_str:
                 raise TechnicalTestFailure(
-                    f"Test failed because of a Programming Error. In most cases this is a syntax error in the query. Double check if the query executed is the intended query. \nQuery: {sqlStatement} \nDetails: {str(ex)}") from ex
+                    f"Test failed because of a Programming Error. In most cases this is a syntax error in the query. Double check if the query executed is the intended query. \nQuery: {sqlStatement} \nDetails: {str(ex)}"
+                ) from ex
             raise TechnicalTestFailure(
-                f"Cursor execution failed \nQuery: {sqlStatement} \nDetails: {str(ex)}")
+                f"Cursor execution failed \nQuery: {sqlStatement} \nDetails: {str(ex)}"
+            )
 
     @not_keyword
     def _cursor_cleanup(self, cur):
         try:
-            if cur and self.db_api_module_name != 'databricks':
+            if cur and self.db_api_module_name != "databricks":
                 self._dbconnection.rollback()
         except Exception as ex:
             logger.error(f"Error during cleanup: {ex}")
