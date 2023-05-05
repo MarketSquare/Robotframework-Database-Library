@@ -32,7 +32,15 @@ class ConnectionManager(object):
         self.db_api_module_name = None
 
     @func_set_timeout(10 * 60)
-    def connect_to_snowflake(self, dbName: str, dbUsername: str, dbPassword: str, dbSchema: str, dbAccount: str, dbWarehouse: str):
+    def connect_to_snowflake(
+        self,
+        dbName: str,
+        dbUsername: str,
+        dbPassword: str,
+        dbSchema: str,
+        dbAccount: str,
+        dbWarehouse: str,
+    ):
         """Connect to Snowflake and set the _dbconnection object.
 
         Args:
@@ -48,7 +56,7 @@ class ConnectionManager(object):
             Exception: Something unexpected happened. Could not connect.
         """
         try:
-            self.db_api_module_name = 'snowflake'
+            self.db_api_module_name = "snowflake"
             db_api_2 = importlib.import_module("snowflake.connector")
             logger.info(
                 f"Connecting using : snowflake.connector.connect(db={dbName}, user={dbUsername}, passwd={dbPassword}, account={dbAccount}, schema={dbSchema}, warehouse={dbWarehouse}) "
@@ -67,12 +75,13 @@ class ConnectionManager(object):
             )
             raise
         except Exception as ex:
-            logger.error(
-                f"Unexpected errors when connecting to database: {str(ex)}")
+            logger.error(f"Unexpected errors when connecting to database: {str(ex)}")
             raise
 
     @func_set_timeout(10 * 60)
-    def connect_to_databricks(self, dbHost: str, dbToken: str, dbHttpPath: str, dbCatalog: str, dbSchema: str):
+    def connect_to_databricks(
+        self, dbHost: str, dbToken: str, dbHttpPath: str, dbCatalog: str, dbSchema: str
+    ):
         """Connect to databricks and set the _db_connection object
 
         Args:
@@ -91,13 +100,13 @@ class ConnectionManager(object):
             logger.info(
                 f"Connecting using : databricks.sql.connect(server_hostname={dbHost}, http_path={dbHttpPath}, catalog={dbCatalog}, schema={dbSchema}) "
             )
-            self.db_api_module_name = 'databricks'
+            self.db_api_module_name = "databricks"
             self._dbconnection = module.connect(
                 server_hostname=dbHost,
                 access_token=dbToken,
                 http_path=dbHttpPath,
                 catalog=dbCatalog,
-                schema=dbSchema
+                schema=dbSchema,
             )
         except ImportError:
             logger.error(
@@ -105,8 +114,7 @@ class ConnectionManager(object):
             )
             raise
         except Exception as ex:
-            logger.error(
-                f"Unexpected errors when connecting to database: {str(ex)}")
+            logger.error(f"Unexpected errors when connecting to database: {str(ex)}")
             raise
 
     @func_set_timeout(10 * 60)
@@ -166,7 +174,8 @@ class ConnectionManager(object):
             config.read([dbConfigFile])
 
             dbapiModuleName = dbapiModuleName or config.get(
-                "default", "dbapiModuleName")
+                "default", "dbapiModuleName"
+            )
             dbName = dbName or config.get("default", "dbName")
             dbUsername = dbUsername or config.get("default", "dbUsername")
             dbPassword = (
@@ -272,7 +281,8 @@ class ConnectionManager(object):
             elif dbapiModuleName in ["cx_Oracle"]:
                 dbPort = dbPort or 1521
                 oracle_dsn = db_api_2.makedsn(
-                    host=dbHost, port=dbPort, service_name=dbName)
+                    host=dbHost, port=dbPort, service_name=dbName
+                )
                 logger.info(
                     "Connecting using: %s.connect(user=%s, password=%s, dsn=%s) "
                     % (dbapiModuleName, dbUsername, dbPassword, oracle_dsn)
@@ -347,8 +357,7 @@ class ConnectionManager(object):
                     port=dbPort,
                 )
         except Exception as ex:
-            logger.error(
-                f"Unexpected errors when connecting to database: {str(ex)}")
+            logger.error(f"Unexpected errors when connecting to database: {str(ex)}")
             raise
 
     @func_set_timeout(10 * 60)
@@ -377,7 +386,7 @@ class ConnectionManager(object):
         )
         self._dbconnection = eval(db_connect_string)
 
-    @func_set_timeout(10 * 60)
+    # @func_set_timeout(10 * 60)
     def disconnect_from_database(self):
         """
         Disconnects from the database.
@@ -393,7 +402,8 @@ class ConnectionManager(object):
                 self._dbconnection.close()
             except Exception as ex:
                 logger.error(
-                    f"Could not close the connection due to error: {str(ex)}. \n\nThis should not impact anything.")
+                    f"Could not close the connection due to error: {str(ex)}. \n\nThis should not impact anything."
+                )
 
     def set_auto_commit(self, autoCommit: bool = True):
         """
