@@ -76,7 +76,7 @@ class Query:
             step = "Executing SQL statement"
             self.execute_sql(cur, select_statement)
 
-            if expected_first_tuple_value:
+            if expected_first_tuple_value is not None:
                 step = "Getting the first row of results"
                 act = cur.fetchone()[0]
                 assert op(
