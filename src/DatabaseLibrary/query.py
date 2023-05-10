@@ -43,7 +43,11 @@ class Query:
 
     @not_keyword
     def asserted_query(
-        self, select_statement: str, reference_count: int, op: Union[le, ge, eq, lt, gt]
+        self,
+        select_statement: str,
+        reference_count: int,
+        op: Union[le, ge, eq, lt, gt],
+        expected_first_tuple_value: Optional[Any] = None,
     ) -> None:
         """Executes a select statement and asserts whether there are as many results as expected with given comparison operator.
 
@@ -51,6 +55,7 @@ class Query:
             select_statement (str): SQL Select Statement.
             reference_count (int): what's the frame of reference for the returned size?
             op (Union[le, ge, eq, lt, gt]): what operator should be used for comparison (lesser, greater, equal, greaterequal, lesserequal)
+            expected_first_tuple_value: Optional[Any]
 
         Raises:
             TestFailure: the count does not fit the operator + reference count
@@ -70,6 +75,14 @@ class Query:
 
             step = "Executing SQL statement"
             self.execute_sql(cur, select_statement)
+
+            if expected_first_tuple_value:
+                step = "Getting the first row of results"
+                act = cur.fetchone()[0]
+                assert op(
+                    act, expected_first_tuple_value
+                ), f"Expected {act} to be {semantics[op]} {expected_first_tuple_value}"
+                return
 
             # only fetch however many we need to make a positive verification
             logger.debug(

@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 from operator import eq, ge, gt, le, lt
-from typing import Dict, List, Union
+from typing import Any, Dict, List, Optional, Union
 
 from func_timeout import FunctionTimedOut
 from robot.api import logger
@@ -126,6 +126,86 @@ class Assertion:
         logger.info(f"Asserting: {message}")
         self._asserted_query_wrapper(select_statement, row_reference_count, le, message)
 
+
+    @keyword(name="Result Is 0")
+    def result_is_0(self, select_statement: str) -> None:
+        """Checks whether SQL Statement returns exactly 0.
+
+        Args:
+            select_statement (str): SQL Select Statement
+        """
+        self.result_is_equal_to_x(select_statement, 0)
+
+    @keyword(name="Result Is Equal To X")
+    def result_is_equal_to_x(
+        self, select_statement: str, row_reference_value: Any
+    ) -> None:
+        """Checks whether SQL Statement return value is exactly X.
+
+        Args:
+            select_statement (str): SQL Select Statement
+            row_reference_value (Any): reference value for the comparison
+        """
+        message = f"Result Is Equal To {row_reference_value}"
+        logger.info(f"Asserting: {message}")
+        self._asserted_query_wrapper(select_statement, row_reference_value, eq, message, row_reference_value)
+
+    @keyword(name="Result Is Greater Than X")
+    def result_is_greater_than_x(
+        self, select_statement: str, row_reference_value: int
+    ) -> None:
+        """Checks whether SQL Statement returns a value bigger than X.
+
+        Args:
+            select_statement (str): SQL Select Statement
+            row_reference_value (int): reference value for the comparison
+        """
+        message = f"Result Is Greater Than {row_reference_value}"
+        logger.info(f"Asserting: {message}")
+        self._asserted_query_wrapper(select_statement, row_reference_value, gt, message, row_reference_value)
+
+    @keyword("Result Is Less Than X")
+    def result_is_less_than_x(
+        self, select_statement: str, row_reference_value: int
+    ) -> None:
+        """Checks whether SQL Statement returns a value smaller than X.
+
+        Args:
+            select_statement (str): SQL Select Statement
+            row_reference_value (int): reference value for the comparison
+        """
+        message = "Result Is Less Than {row_reference_value}"
+        logger.info(f"Asserting: {message}")
+        self._asserted_query_wrapper(select_statement, row_reference_value, lt, message, row_reference_value)
+
+    @keyword("Result Is At Least X")
+    def result_is_at_least_x(
+        self, select_statement: str, row_reference_value: int
+    ) -> None:
+        """Checks whether SQL Statement returns value not smaller than X.
+
+        Args:
+            select_statement (str): SQL Select Statement
+            row_reference_value (int): reference value for the comparison
+        """
+        message = f"Result Is At Least {row_reference_value}"
+        logger.info(f"Asserting: {message}")
+        self._asserted_query_wrapper(select_statement, row_reference_value, ge, message, row_reference_value)
+
+    @keyword("Result Is At Most X")
+    def result_is_at_most_x(
+        self, select_statement: str, row_reference_value: int
+    ) -> None:
+        """Checks whether SQL Statement returns value no greater than X.
+
+        Args:
+            select_statement (str): SQL Select Statement
+            row_reference_value (int): reference value for the comparison
+        """
+        message = f"Result Is At Most {row_reference_value}"
+        logger.info(f"Asserting: {message}")
+        self._asserted_query_wrapper(select_statement, row_reference_value, le, message, row_reference_value)
+
     @keyword(name="Table Must Exist")
     def table_must_exist(self, table_name: str):
         """Checks whether a given table exists
@@ -177,9 +257,12 @@ class Assertion:
         reference_count: int,
         op: Union[le, ge, eq, lt, gt],
         check_message: str,
+        expected_first_tuple_value: Optional[Any] = None,
     ):
         try:
-            self.asserted_query(select_statement, reference_count, op)
+            self.asserted_query(
+                select_statement, reference_count, op, expected_first_tuple_value
+            )
         # Test FAIL result:
         except TestFailure as tf:
             raise AssertionError(f"{check_message} failed: {str(tf)}") from tf
