@@ -48,6 +48,7 @@ class Query:
         reference_count: int,
         op: Union[le, ge, eq, lt, gt],
         expected_first_tuple_value: Optional[Any] = None,
+        exact_result: bool = False,
     ) -> None:
         """Executes a select statement and asserts whether there are as many results as expected with given comparison operator.
 
@@ -79,9 +80,10 @@ class Query:
             if expected_first_tuple_value is not None:
                 step = "Getting the first row of results"
                 act = cur.fetchone()[0]
-                assert op(
-                    act, expected_first_tuple_value
-                ), f"Expected {act} to be {semantics[op]} {expected_first_tuple_value}"
+                if not op(act, expected_first_tuple_value):
+                    raise TestFailure(
+                        f"Expected {act} to be {semantics[op]} {expected_first_tuple_value}"
+                    )
                 return
 
             # only fetch however many we need to make a positive verification
@@ -100,17 +102,24 @@ class Query:
 
             step = "Compare expected to actual"
             if not op(actual_length, reference_count):
-                # fetching one by one to keep the memory usage low as the rows can be super wide sometimes.
-                while True:
-                    step = f"Fetch next row. Currently {actual_length} rows fetched."
-                    if not cur.fetchone():
-                        # if no more elements, break the loop and raise the test failure
-                        break
-                    # count how many there are
-                    actual_length += 1
-                raise TestFailure(
-                    f"Query returned {actual_length} rows but test expected {semantics[op]} {reference_count}."
-                )
+                if exact_result:
+                    # fetching one by one to keep the memory usage low as the rows can be super wide sometimes.
+                    while True:
+                        step = (
+                            f"Fetch next row. Currently {actual_length} rows fetched."
+                        )
+                        if not cur.fetchone():
+                            # if no more elements, break the loop and raise the test failure
+                            break
+                        # count how many there are
+                        actual_length += 1
+                    raise TestFailure(
+                        f"Query returned {actual_length} rows but test expected {semantics[op]} {reference_count}."
+                    )
+                else:
+                    raise TestFailure(
+                        f"Query did not return {semantics[op]} {reference_count} rows."
+                    )
         except TestFailure:
             raise
         except TechnicalTestFailure as ttf:
@@ -258,6 +267,7 @@ class Query:
         Returns:
             Optional[int]: the last row's id or None.
         """
+        cur = None
         logger.info(f"Executing:  {sqlStatement}")
         step = ""
         try:

@@ -38,27 +38,29 @@ class Assertion:
         self.row_count_is_greater_than_x(select_statement, 0)
 
     @keyword(name="Check If Not Exists In Database")
-    def check_if_not_exists_in_database(self, select_statement: str) -> None:
+    def check_if_not_exists_in_database(
+        self, select_statement: str, exact_result: bool
+    ) -> None:
         """Checks if the SQL Statement returned any rows, expects at most 0.
 
         Args:
             select_statement (str): SQL Select Statement
         """
         logger.info(f"Asserting: Check If Not Exists In Database")
-        self.row_count_is_0(select_statement)
+        self.row_count_is_0(select_statement, exact_result)
 
     @keyword(name="Row Count Is 0")
-    def row_count_is_0(self, select_statement: str) -> None:
+    def row_count_is_0(self, select_statement: str, exact_result: bool) -> None:
         """Checks whether SQL Statement returns exactly 0 rows.
 
         Args:
             select_statement (str): SQL Select Statement
         """
-        self.row_count_is_equal_to_x(select_statement, 0)
+        self.row_count_is_equal_to_x(select_statement, 0, exact_result)
 
     @keyword(name="Row Count Is Equal To X")
     def row_count_is_equal_to_x(
-        self, select_statement: str, row_reference_count: int
+        self, select_statement: str, row_reference_count: int, exact_result: bool
     ) -> None:
         """Checks whether SQL Statement returns exactly X rows.
 
@@ -68,11 +70,17 @@ class Assertion:
         """
         message = f"Row Count Is Equal To {row_reference_count}"
         logger.info(f"Asserting: {message}")
-        self._asserted_query_wrapper(select_statement, row_reference_count, eq, message)
+        self._asserted_query_wrapper(
+            select_statement,
+            row_reference_count,
+            eq,
+            message,
+            exact_result=exact_result,
+        )
 
     @keyword(name="Row Count Is Greater Than X")
     def row_count_is_greater_than_x(
-        self, select_statement: str, row_reference_count: int
+        self, select_statement: str, row_reference_count: int, exact_result: bool
     ) -> None:
         """Checks whether SQL Statement returns more than X rows.
 
@@ -82,11 +90,17 @@ class Assertion:
         """
         message = f"Row Count Is Greater Than {row_reference_count}"
         logger.info(f"Asserting: {message}")
-        self._asserted_query_wrapper(select_statement, row_reference_count, gt, message)
+        self._asserted_query_wrapper(
+            select_statement,
+            row_reference_count,
+            gt,
+            message,
+            exact_result=exact_result,
+        )
 
     @keyword("Row Count Is Less Than X")
     def row_count_is_less_than_x(
-        self, select_statement: str, row_reference_count: int
+        self, select_statement: str, row_reference_count: int, exact_result: bool
     ) -> None:
         """Checks whether SQL Statement returns less than X rows.
 
@@ -96,11 +110,17 @@ class Assertion:
         """
         message = "Row Count Is Less Than {row_reference_count}"
         logger.info(f"Asserting: {message}")
-        self._asserted_query_wrapper(select_statement, row_reference_count, lt, message)
+        self._asserted_query_wrapper(
+            select_statement,
+            row_reference_count,
+            lt,
+            message,
+            exact_result=exact_result,
+        )
 
     @keyword("Row Count Is At Least X")
     def row_count_is_at_least_x(
-        self, select_statement: str, row_reference_count: int
+        self, select_statement: str, row_reference_count: int, exact_result: bool
     ) -> None:
         """Checks whether SQL Statement returns X or more rows.
 
@@ -110,11 +130,17 @@ class Assertion:
         """
         message = f"Row Count Is At Least {row_reference_count}"
         logger.info(f"Asserting: {message}")
-        self._asserted_query_wrapper(select_statement, row_reference_count, ge, message)
+        self._asserted_query_wrapper(
+            select_statement,
+            row_reference_count,
+            ge,
+            message,
+            exact_result=exact_result,
+        )
 
     @keyword("Row Count Is At Most X")
     def row_count_is_at_most_x(
-        self, select_statement: str, row_reference_count: int
+        self, select_statement: str, row_reference_count: int, exact_result: bool
     ) -> None:
         """Checks whether SQL Statement no more than X rows.
 
@@ -124,8 +150,13 @@ class Assertion:
         """
         message = f"Row Count Is At Most {row_reference_count}"
         logger.info(f"Asserting: {message}")
-        self._asserted_query_wrapper(select_statement, row_reference_count, le, message)
-
+        self._asserted_query_wrapper(
+            select_statement,
+            row_reference_count,
+            le,
+            message,
+            exact_result=exact_result,
+        )
 
     @keyword(name="Result Is 0")
     def result_is_0(self, select_statement: str) -> None:
@@ -148,7 +179,9 @@ class Assertion:
         """
         message = f"Result Is Equal To {row_reference_value}"
         logger.info(f"Asserting: {message}")
-        self._asserted_query_wrapper(select_statement, row_reference_value, eq, message, row_reference_value)
+        self._asserted_query_wrapper(
+            select_statement, row_reference_value, eq, message, row_reference_value
+        )
 
     @keyword(name="Result Is Greater Than X")
     def result_is_greater_than_x(
@@ -162,7 +195,9 @@ class Assertion:
         """
         message = f"Result Is Greater Than {row_reference_value}"
         logger.info(f"Asserting: {message}")
-        self._asserted_query_wrapper(select_statement, row_reference_value, gt, message, row_reference_value)
+        self._asserted_query_wrapper(
+            select_statement, row_reference_value, gt, message, row_reference_value
+        )
 
     @keyword("Result Is Less Than X")
     def result_is_less_than_x(
@@ -176,7 +211,9 @@ class Assertion:
         """
         message = "Result Is Less Than {row_reference_value}"
         logger.info(f"Asserting: {message}")
-        self._asserted_query_wrapper(select_statement, row_reference_value, lt, message, row_reference_value)
+        self._asserted_query_wrapper(
+            select_statement, row_reference_value, lt, message, row_reference_value
+        )
 
     @keyword("Result Is At Least X")
     def result_is_at_least_x(
@@ -190,7 +227,9 @@ class Assertion:
         """
         message = f"Result Is At Least {row_reference_value}"
         logger.info(f"Asserting: {message}")
-        self._asserted_query_wrapper(select_statement, row_reference_value, ge, message, row_reference_value)
+        self._asserted_query_wrapper(
+            select_statement, row_reference_value, ge, message, row_reference_value
+        )
 
     @keyword("Result Is At Most X")
     def result_is_at_most_x(
@@ -204,7 +243,9 @@ class Assertion:
         """
         message = f"Result Is At Most {row_reference_value}"
         logger.info(f"Asserting: {message}")
-        self._asserted_query_wrapper(select_statement, row_reference_value, le, message, row_reference_value)
+        self._asserted_query_wrapper(
+            select_statement, row_reference_value, le, message, row_reference_value
+        )
 
     @keyword(name="Table Must Exist")
     def table_must_exist(self, table_name: str):
@@ -258,10 +299,15 @@ class Assertion:
         op: Union[le, ge, eq, lt, gt],
         check_message: str,
         expected_first_tuple_value: Optional[Any] = None,
+        exact_result: bool = False,
     ):
         try:
             self.asserted_query(
-                select_statement, reference_count, op, expected_first_tuple_value
+                select_statement,
+                reference_count,
+                op,
+                expected_first_tuple_value,
+                exact_result,
             )
         # Test FAIL result:
         except TestFailure as tf:
