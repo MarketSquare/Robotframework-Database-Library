@@ -35,7 +35,7 @@ class Assertion:
             select_statement (str): SQL Select Statement
         """
         logger.info(f"Asserting: Check If Exists In Database")
-        self.row_count_is_greater_than_x(select_statement, 0)
+        self.row_count_is_greater_than_x(select_statement, 0, exact_result=False)
 
     @keyword(name="Check If Not Exists In Database")
     def check_if_not_exists_in_database(
