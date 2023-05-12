@@ -76,6 +76,7 @@ class Query:
 
             step = "Executing SQL statement"
             self.execute_sql(cur, select_statement)
+            limit = self._get_limit() or 1
 
             if expected_first_tuple_value is not None:
                 step = "Getting the first row of results"
@@ -105,14 +106,12 @@ class Query:
                 if exact_result:
                     # fetching one by one to keep the memory usage low as the rows can be super wide sometimes.
                     while True:
-                        step = (
-                            f"Fetch next row. Currently {actual_length} rows fetched."
-                        )
-                        if not cur.fetchone():
+                        step = f"Fetch next {limit} rows. Currently {actual_length} rows fetched."
+                        if not cur.fetchmany(limit):
                             # if no more elements, break the loop and raise the test failure
                             break
                         # count how many there are
-                        actual_length += 1
+                        actual_length = cur.rowcount
                     raise TestFailure(
                         f"Query returned {actual_length} rows but test expected {semantics[op]} {reference_count}."
                     )
