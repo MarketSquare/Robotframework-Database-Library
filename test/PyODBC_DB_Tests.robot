@@ -1,16 +1,19 @@
 *** Settings ***
-Suite Setup       Connect To Database    pyodbc    ${DBName}    ${DBUser}    ${DBPass}    ${DBHost}    ${DBPort}    dbDriver=${dbDriver}
+Suite Setup       Connect To Database    ${DBModule}    ${DBName}    ${DBUser}    ${DBPass}    dbHost=${DBHost}    dbPort=${DBPort}    dbCharset=${DBCharset}    dbDriver=${dbDriver}
 Suite Teardown    Disconnect From Database
 Library           DatabaseLibrary
+Library           Collections
 Library           OperatingSystem
 
 *** Variables ***
+${DBModule}       pyodbc
 ${DBHost}         ${EMPTY}
 ${DBName}         ${EMPTY}
 ${DBPass}         ${EMPTY}
 ${DBPort}         ${EMPTY}
 ${DBUser}         ${EMPTY}
-${dbDriver}       ${EMPTY}
+${DBCharset}      ${None}
+#${dbDriver}       ${EMPTY}
 
 *** Test Cases ***
 Create person table
@@ -61,25 +64,25 @@ Retrieve records from person table
 
 Verify person Description
     Comment    Query db for table column descriptions
-    @{queryResults} =    Description    SELECT TOP 1 * FROM person;
+    @{queryResults} =    Description    SELECT * FROM person LIMIT 1;
     Log Many    @{queryResults}
     ${output} =    Set Variable    ${queryResults[0]}
-    Should Be Equal As Strings    ${output}    (u'id', 3, None, None, None, None, None)
+    Should Be Equal As Strings    ${output}    ('id', <class 'int'>, None, 10, 10, 0, True)
     ${output} =    Set Variable    ${queryResults[1]}
-    Should Be Equal As Strings    ${output}    (u'first_name', 1, None, None, None, None, None)
+    Should Be Equal As Strings    ${output}    ('first_name', <class 'str'>, None, 20, 20, 0, True)
     ${output} =    Set Variable    ${queryResults[2]}
-    Should Be Equal As Strings    ${output}    (u'last_name', 1, None, None, None, None, None)
+    Should Be Equal As Strings    ${output}    ('last_name', <class 'str'>, None, 20, 20, 0, True)
     ${NumColumns} =    Get Length    ${queryResults}
     Should Be Equal As Integers    ${NumColumns}    3
 
 Verify foobar Description
     Comment    Query db for table column descriptions
-    @{queryResults} =    Description    SELECT TOP 1 * FROM foobar;
+    @{queryResults} =    Description    SELECT * FROM foobar LIMIT 1;
     Log Many    @{queryResults}
     ${output} =    Set Variable    ${queryResults[0]}
-    Should Be Equal As Strings    ${output}    (u'id', 3, None, None, None, None, None)
+    Should Be Equal As Strings    ${output}    ('id', <class 'int'>, None, 10, 10, 0, False)
     ${output} =    Set Variable    ${queryResults[1]}
-    Should Be Equal As Strings    ${output}    (u'firstname', 1, None, None, None, None, None)
+    Should Be Equal As Strings    ${output}    ('firstname', <class 'str'>, None, 20, 20, 0, True)
     ${NumColumns} =    Get Length    ${queryResults}
     Should Be Equal As Integers    ${NumColumns}    2
 
@@ -96,8 +99,8 @@ Verify Query - Row Count foobar table
 Verify Query - Get results as a list of dictionaries
     ${output} =    Query    SELECT * FROM person;    \    True
     Log    ${output}
-    Should Be Equal As Strings    &{output[0]}[first_name]    Franz Allan
-    Should Be Equal As Strings    &{output[1]}[first_name]    Jerry
+    Should Be Equal As Strings    ${output}[0][first_name]    Franz Allan
+    Should Be Equal As Strings    ${output}[1][first_name]    Jerry
 
 Verify Execute SQL String - Row Count person table
     ${output} =    Execute SQL String    SELECT COUNT(*) FROM person;
@@ -127,7 +130,7 @@ Verify Query - Row Count foobar table 0 row
     Row Count Is 0    SELECT * FROM foobar;
 
 Begin first transaction
-    ${output} =    Execute SQL String    SAVE TRANSACTION first    True
+    ${output} =    Execute SQL String    SAVEPOINT first    True
     Log    ${output}
     Should Be Equal As Strings    ${output}    None
 
@@ -140,7 +143,7 @@ Verify person in first transaction
     Row Count is Equal to X    SELECT * FROM person WHERE last_name = 'Baggins';    1    True
 
 Begin second transaction
-    ${output} =    Execute SQL String    SAVE TRANSACTION second    True
+    ${output} =    Execute SQL String    SAVEPOINT second    True
     Log    ${output}
     Should Be Equal As Strings    ${output}    None
 
@@ -153,7 +156,7 @@ Verify persons in first and second transactions
     Row Count is Equal to X    SELECT * FROM person WHERE last_name = 'Baggins';    2    True
 
 Rollback second transaction
-    ${output} =    Execute SQL String    ROLLBACK TRANSACTION second    True
+    ${output} =    Execute SQL String    ROLLBACK TO second    True
     Log    ${output}
     Should Be Equal As Strings    ${output}    None
 
@@ -161,7 +164,7 @@ Verify second transaction rollback
     Row Count is Equal to X    SELECT * FROM person WHERE last_name = 'Baggins';    1    True
 
 Rollback first transaction
-    ${output} =    Execute SQL String    ROLLBACK TRANSACTION first    True
+    ${output} =    Execute SQL String    ROLLBACK TO first    True
     Log    ${output}
     Should Be Equal As Strings    ${output}    None
 

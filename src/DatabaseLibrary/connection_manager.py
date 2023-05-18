@@ -34,7 +34,7 @@ class ConnectionManager(object):
         self._dbconnection = None
         self.db_api_module_name = None
 
-    def connect_to_database(self, dbapiModuleName=None, dbName=None, dbUsername=None, dbPassword=None, dbHost=None, dbPort=None, dbCharset=None, dbDriver=None, dbConfigFile="./resources/db.cfg"):
+    def connect_to_database(self, dbapiModuleName=None, dbName=None, dbUsername=None, dbPassword=None, dbHost=None, dbPort=None, dbCharset=None, dbDriver=None, dbConfigFile=None):
         """
         Loads the DB API 2.0 module given `dbapiModuleName` then uses it to
         connect to the database using `dbName`, `dbUsername`, and `dbPassword`.
@@ -75,6 +75,8 @@ class ConnectionManager(object):
         | Connect To Database | psycopg2 | my_db_test |
         """
 
+        if dbConfigFile is None:
+            dbConfigFile = "./resources/db.cfg"
         config = ConfigParser.ConfigParser()
         config.read([dbConfigFile])
 
@@ -91,6 +93,7 @@ class ConnectionManager(object):
         else:
             self.db_api_module_name = dbapiModuleName
             db_api_2 = importlib.import_module(dbapiModuleName)
+
         if dbapiModuleName in ["MySQLdb", "pymysql"]:
             dbPort = dbPort or 3306
             logger.info('Connecting using : %s.connect(db=%s, user=%s, passwd=%s, host=%s, port=%s, charset=%s) ' % (dbapiModuleName, dbName, dbUsername, dbPassword, dbHost, dbPort, dbCharset))
@@ -102,8 +105,8 @@ class ConnectionManager(object):
         elif dbapiModuleName in ["pyodbc", "pypyodbc"]:
             dbPort = dbPort or 1433
             dbDriver = dbDriver or "{SQL Server}"
-            logger.info('Connecting using : %s.connect(DRIVER=%s;SERVER=%s,%s;DATABASE=%s;UID=%s;PWD=%s)' % (dbapiModuleName, dbDriver,  dbHost, dbPort, dbName, dbUsername, dbPassword))
-            self._dbconnection = db_api_2.connect('DRIVER=%s;SERVER=%s,%s;DATABASE=%s;UID=%s;PWD=%s' % ( dbDriver, dbHost, dbPort, dbName, dbUsername, dbPassword))
+            logger.info('Connecting using : %s.connect(DRIVER=%s;SERVER=%s:%s;DATABASE=%s;UID=%s;PWD=%s)' % (dbapiModuleName, dbDriver,  dbHost, dbPort, dbName, dbUsername, dbPassword))
+            self._dbconnection = db_api_2.connect('DRIVER=%s;SERVER=%s:%s;DATABASE=%s;UID=%s;PWD=%s' % ( dbDriver, dbHost, dbPort, dbName, dbUsername, dbPassword))
         elif dbapiModuleName in ["excel"]:
             logger.info(
                 'Connecting using : %s.connect(DRIVER={Microsoft Excel Driver (*.xls, *.xlsx, *.xlsm, *.xlsb)};DBQ=%s;ReadOnly=1;Extended Properties="Excel 8.0;HDR=YES";)' % (
