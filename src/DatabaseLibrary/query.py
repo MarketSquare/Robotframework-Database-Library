@@ -83,7 +83,7 @@ class Query:
                 act = cur.fetchone()[0]
                 if not op(act, expected_first_tuple_value):
                     raise TestFailure(
-                        f"Expected {act} to be {semantics[op]} {expected_first_tuple_value}"
+                        f"Expected returned count: {act} to be {semantics[op]} {expected_first_tuple_value}"
                     )
                 return
 
@@ -107,11 +107,12 @@ class Query:
                     # fetching one by one to keep the memory usage low as the rows can be super wide sometimes.
                     while True:
                         step = f"Fetch next {limit} rows. Currently {actual_length} rows fetched."
-                        if not cur.fetchmany(limit):
+                        curr = cur.fetchmany(limit)
+                        if not curr:
                             # if no more elements, break the loop and raise the test failure
                             break
                         # count how many there are
-                        actual_length = cur.rowcount
+                        actual_length += len(curr)
                     raise TestFailure(
                         f"Query returned {actual_length} rows but test expected {semantics[op]} {reference_count}."
                     )
