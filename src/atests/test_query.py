@@ -344,3 +344,18 @@ def test_asserted_query_first_tup(
     cursor.assert_called_once()
     rollback.assert_called_once()
     executed.assert_called_once()
+
+@pytest.mark.parametrize("input,expected_output", [
+    ("1.0", 1),
+    ("1", 1),
+    ("1.234", 1.234),
+    ("zero", "zero"),
+    ("None", None),
+    ("Null", None),
+    ("NULL", None),
+    ("REEEE", "REEEE"),
+    ("True", True),
+    ("FALSE", False)
+], ids=["float to int", "int to int", "float to float", "string to string", "None to None", "Null to None", "NULL to None", "string to string2", "True to True", "FALSE to false"])
+def test_typer(yield_dl: DatabaseLibrary, input, expected_output):
+    assert expected_output == yield_dl.type_clearer(input)

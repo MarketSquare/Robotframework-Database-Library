@@ -41,6 +41,32 @@ class Query:
     Query handles all the querying done by the Database Library.
     """
 
+
+    @not_keyword
+    def type_clearer(self, user_parameter: Any) -> Union[str, float, int, bool, None]:
+        try:
+            # is it a number?
+            floated = float(user_parameter)
+        except ValueError:
+            # it's not a number, is it a boolean?
+            if user_parameter.strip().lower() == 'true':
+                return True
+            if user_parameter.strip().lower() == 'false':
+                return False
+            # is it null or none?
+            if user_parameter.strip().lower() in ('null', 'none'):
+                return None
+            # it's a string
+            return user_parameter
+        else:
+            # is it an integer?
+            inted = int(floated)
+            if inted == floated:
+                return inted
+            else:
+                # it's not an integer
+                return floated
+
     @not_keyword
     def asserted_query(
         self,
@@ -81,9 +107,10 @@ class Query:
             if expected_first_tuple_value is not None:
                 step = "Getting the first row of results"
                 act = cur.fetchone()[0]
-                if not op(act, expected_first_tuple_value):
+                really_expected_value = self.type_clearer(expected_first_tuple_value)
+                if not op(act, really_expected_value):
                     raise TestFailure(
-                        f"Expected returned count: {act} to be {semantics[op]} {expected_first_tuple_value}"
+                        f"Expected returned count: {act} to be {semantics[op]} {really_expected_value}"
                     )
                 return
 
