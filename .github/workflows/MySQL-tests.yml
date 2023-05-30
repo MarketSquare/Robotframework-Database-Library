@@ -27,7 +27,7 @@ jobs:
             py-db-module: MySQLdb
             pip-install: mysqlclient
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Set up MySQL
         run: |
@@ -83,7 +83,7 @@ jobs:
           echo '*** ls -l /usr/lib/x86_64-linux-gnu/odbc'
           ls -l /usr/lib/x86_64-linux-gnu/odbc || true
 
-      - uses: actions/setup-python@v2
+      - uses: actions/setup-python@v4
         with:
           python-version: '3.8.16'
 
@@ -125,7 +125,7 @@ jobs:
 
       - name: Upload Robot Logs
         if: always()
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: log-files
           path: ./test/
