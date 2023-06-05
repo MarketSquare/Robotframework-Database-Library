@@ -36,6 +36,12 @@ PostgreSQL                          psycopg2     Completed                   Pos
 \                                   psycopg3     Not Yet Implemented
 \                                   pyodbc       Not Yet Implemented
 SQLite                              sqlite3      Completed                   SQLite-tests.yml
+Oracle - "custom params"            oracledb     Workflow is done,           Oracle-tests.yml
+                                                 but some tests are failing
+                                                 bugs have to be fixed
+                                                 in the library,
+                                                 tests are to be checked
+                                                 and probably extended
 ==================================  ===========  ==========================  =======================================
 
 
@@ -51,3 +57,5 @@ References:
 `PEP 249 - Python Database API Specification v2.0<https://peps.python.org/pep-0249/>`_
 
 `Database interfaces available for Python<https://wiki.python.org/moin/DatabaseInterfaces>`_
+
+Docker container with Oracle DB: https://github.com/gvenzl/oci-oracle-free
