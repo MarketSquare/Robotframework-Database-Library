@@ -18,10 +18,17 @@ jobs:
       oracle:
         image: gvenzl/oracle-free:latest
         env:
+          ORACLE_PASSWORD: pass
           APP_USER: db_user
           APP_USER_PASSWORD: pass
         ports:
           - 1521:1521
+         # Provide healthcheck script options for startup
+        options: >-
+          --health-cmd healthcheck.sh
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
 
     steps:
       - name: Check out repository code
