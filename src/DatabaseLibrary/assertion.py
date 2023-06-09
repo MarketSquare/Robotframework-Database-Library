@@ -206,14 +206,26 @@ class Assertion(object):
         logger.info('Executing : Table Must Exist  |  %s ' % tableName)
         if self.db_api_module_name in ["cx_Oracle"]:
             selectStatement = ("SELECT * FROM all_objects WHERE object_type IN ('TABLE','VIEW') AND owner = SYS_CONTEXT('USERENV', 'SESSION_USER') AND object_name = UPPER('%s')" % tableName)
+            table_exists = self.row_count(selectStatement, sansTran) > 0
         elif self.db_api_module_name in ["sqlite3"]:
             selectStatement = ("SELECT name FROM sqlite_master WHERE type='table' AND name='%s' COLLATE NOCASE" % tableName)
+            table_exists = self.row_count(selectStatement, sansTran) > 0
         elif self.db_api_module_name in ["ibm_db", "ibm_db_dbi"]:
             selectStatement = ("SELECT name FROM SYSIBM.SYSTABLES WHERE type='T' AND name=UPPER('%s')" % tableName)
+            table_exists = self.row_count(selectStatement, sansTran) > 0
         elif self.db_api_module_name in ["teradata"]:
             selectStatement = ("SELECT TableName FROM DBC.TablesV WHERE TableKind='T' AND TableName='%s'" % tableName)
+            table_exists = self.row_count(selectStatement, sansTran) > 0
         else:
-            selectStatement = ("SELECT * FROM information_schema.tables WHERE table_name='%s'" % tableName)
-        num_rows = self.row_count(selectStatement, sansTran)
-        if num_rows == 0:
-            raise AssertionError("Table '%s' does not exist in the db" % tableName)
+            try:
+                selectStatement = (f"SELECT * FROM information_schema.tables WHERE table_name='{tableName}'")
+                table_exists = self.row_count(selectStatement, sansTran) > 0
+            except:
+                logger.info("Database doesn't support information schema, try using a simple SQL request")
+                try:
+                    selectStatement = (f"SELECT 1 from {tableName} where 1=0")
+                    num_rows = self.row_count(selectStatement, sansTran)
+                    table_exists = True
+                except:
+                    table_exists = False
+        assert table_exists, f"Table '{tableName}' does not exist in the db"

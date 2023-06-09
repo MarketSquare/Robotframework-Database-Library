@@ -43,7 +43,7 @@ Check If Not Exists In DB - Joe
     Check If Not Exists In Database    SELECT id FROM person WHERE first_name = 'Joe'
 
 Table Must Exist - person
-    [Tags]    db    smoke    bug
+    [Tags]    db    smoke
     Table Must Exist    person
 
 Verify Row Count is 0
