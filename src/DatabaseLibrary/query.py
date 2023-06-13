@@ -178,7 +178,7 @@ class Query(object):
         | Delete All Rows From Table | person | True |
         """
         cur = None
-        selectStatement = ("DELETE FROM %s;" % tableName)
+        selectStatement = ("DELETE FROM %s" % tableName)
         try:
             cur = self._dbconnection.cursor()
             logger.info('Executing : Delete All Rows From Table  |  %s ' % selectStatement)
