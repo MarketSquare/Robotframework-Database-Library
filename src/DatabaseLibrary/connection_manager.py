@@ -167,11 +167,14 @@ class ConnectionManager(object):
         """
         db_api_2 = importlib.import_module(dbapiModuleName)
 
-        db_connect_string = 'db_api_2.connect(%s)' % db_connect_string
+        # delete possible quotation marks deliberately provided in RF- it was necessary previously.
+        # so this should stay for backwards compatibility.
+        db_connect_string = db_connect_string.strip('"')
+        db_connect_string = db_connect_string.strip("'")
 
         self.db_api_module_name = dbapiModuleName
-        logger.info('Executing : Connect To Database Using Custom Params : %s.connect(%s) ' % (dbapiModuleName, db_connect_string))
-        self._dbconnection = eval(db_connect_string)
+        logger.info(f"Executing : Connect To Database Using Custom Params : {dbapiModuleName}.connect('{db_connect_string}')")        
+        self._dbconnection = db_api_2.connect(db_connect_string)
 
     def disconnect_from_database(self, error_if_no_connection=False):
         """
