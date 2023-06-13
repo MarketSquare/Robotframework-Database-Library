@@ -1,5 +1,6 @@
 *** Settings ***
 Library             DatabaseLibrary
+Library             Collections
 
 Suite Setup         Connect To DB
 Suite Teardown      Disconnect From Database
@@ -105,21 +106,27 @@ Verify Query - Row Count person table
     [Tags]    db    smoke
     ${output} =    Query    SELECT COUNT(*) FROM person
     Log    ${output}
-    Should Be Equal As Strings    ${output}    ((2,),)
+    ${val} =    Get from list    ${output}    0
+    ${val} =    Convert to list    ${val}
+    ${val} =    Get from list    ${val}    0
+    Should be equal as Integers    ${val}    2
 
 Verify Query - Row Count foobar table
     [Tags]    db    smoke
     [Setup]    Create Foobar Table
     ${output} =    Query    SELECT COUNT(*) FROM foobar
     Log    ${output}
-    Should Be Equal As Strings    ${output}    ((0,),)
+    ${val}=    Get from list    ${output}    0
+    ${val}=    Convert to list    ${val}
+    ${val}=    Get from list    ${val}    0
+    Should be equal as Integers    ${val}    0
 
 Verify Query - Get results as a list of dictionaries
     [Tags]    db    smoke
     ${output} =    Query    SELECT * FROM person    \    True
     Log    ${output}
-    Should Be Equal As Strings    ${output[0]}[first_name]    Franz Allan
-    Should Be Equal As Strings    ${output[1]}[first_name]    Jerry
+    Should Be Equal As Strings    ${output}[0][FIRST_NAME]    Franz Allan
+    Should Be Equal As Strings    ${output}[1][FIRST_NAME]    Jerry
 
 Verify Execute SQL String - Row Count person table
     [Tags]    db    smoke
@@ -146,7 +153,10 @@ Verify Query - Row Count foobar table 1 row
     [Setup]    Create Foobar Table And Insert Data
     ${output} =    Query    SELECT COUNT(*) FROM foobar
     Log    ${output}
-    Should Be Equal As Strings    ${output}    ((1,),)
+        ${val}=    Get from list    ${output}    0
+    ${val}=    Convert to list    ${val}
+    ${val}=    Get from list    ${val}    0
+    Should be equal as Integers    ${val}    1
 
 Verify Delete All Rows From Table - foobar
     [Tags]    db    smoke
