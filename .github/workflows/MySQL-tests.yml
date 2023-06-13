@@ -106,12 +106,6 @@ jobs:
           python3 -c "import pyodbc; print(pyodbc.drivers())"
           robot --loglevel TRACE -d pyodbc/ -v DBName:${{ matrix.py-db-module }} -v DBUser:${{ env.DB_USER }} -v DBPass:${{ env.DB_PASSWORD }} -v DBHost:localhost -v DBPort:${{ env.DB_PORT }} -v DBCharset:utf8mb4 -v dbDriver:"{MySQL ODBC 8.0 ANSI Driver}" ${{ github.workspace }}/test/PyODBC_DB_Tests.robot
 
-      - name: Run Robot Framework tests using ${{ matrix.py-db-module }}
-        if: matrix.py-db-module == 'ignore-all-modules'
-        working-directory: ./test
-        run: |
-          robot -v DBName:${{ matrix.py-db-module }} -v DBUser:${{ env.DB_USER }} -v DBPass:${{ env.DB_PASSWORD }} -v DBHost:${{ env.DB_HOST }} -v DBPort:${{ env.DB_PORT }} ${{ github.workspace }}/test/PyODBC_DB_Tests.robot
-
       - name: Upload Robot Logs
         if: always()
         uses: actions/upload-artifact@v3
