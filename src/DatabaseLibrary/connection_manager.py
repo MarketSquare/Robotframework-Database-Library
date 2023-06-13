@@ -191,6 +191,7 @@ class ConnectionManager(object):
             logger.info(log_msg)
         else:
             self._dbconnection.close()
+            self._dbconnection = None
 
     def set_auto_commit(self, autoCommit=True):
         """
