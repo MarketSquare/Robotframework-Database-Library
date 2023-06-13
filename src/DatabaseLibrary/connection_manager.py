@@ -173,16 +173,22 @@ class ConnectionManager(object):
         logger.info('Executing : Connect To Database Using Custom Params : %s.connect(%s) ' % (dbapiModuleName, db_connect_string))
         self._dbconnection = eval(db_connect_string)
 
-    def disconnect_from_database(self):
+    def disconnect_from_database(self, error_if_no_connection=False):
         """
         Disconnects from the database.
+        By default it's not an error if there was no open database connection -
+        suitable for usage as a teardown.
+        However you can enforce it using the `error_if_no_connection` parameter.
 
         For example:
         | Disconnect From Database | # disconnects from current connection to the database |
         """
         logger.info('Executing : Disconnect From Database')
-        if self._dbconnection==None:
-            return 'No open connection to close'
+        if self._dbconnection is None:
+            log_msg = "No open database connection to close"
+            if error_if_no_connection:
+                raise ConnectionError(log_msg)
+            logger.info(log_msg)
         else:
             self._dbconnection.close()
 
