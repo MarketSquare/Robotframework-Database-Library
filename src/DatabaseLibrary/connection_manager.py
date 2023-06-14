@@ -156,22 +156,43 @@ class ConnectionManager(object):
     def connect_to_database_using_custom_params(self, dbapiModuleName=None, db_connect_string=''):
         """
         Loads the DB API 2.0 module given `dbapiModuleName` then uses it to
-        connect to the database using the map string `db_custom_param_string`.
+        connect to the database using the map string `db_connect_string`
+        (parsed as a list of named arguments).
+        
+        Use `connect_to_database_using_custom_connection_string` for passing
+        all params in a single connection string or URI.
 
-        Example usage:
-        | # for psycopg2 |
+        Example usage:        
         | Connect To Database Using Custom Params | psycopg2 | database='my_db_test', user='postgres', password='s3cr3t', host='tiger.foobar.com', port=5432 |
-
-        | # for JayDeBeApi |
         | Connect To Database Using Custom Params | jaydebeapi | 'oracle.jdbc.driver.OracleDriver', 'my_db_test', 'system', 's3cr3t' |
+        | Connect To Database Using Custom Params | oracledb | user="username", password="pass", dsn="localhost/orclpdb" |
+        | Connect To Database Using Custom Params | sqlite3 | database="./my_database.db", isolation_level=None |
         """
         db_api_2 = importlib.import_module(dbapiModuleName)
-
-        db_connect_string = 'db_api_2.connect(%s)' % db_connect_string
-
         self.db_api_module_name = dbapiModuleName
+
+        db_connect_string = f'db_api_2.connect({db_connect_string})'
+
         logger.info('Executing : Connect To Database Using Custom Params : %s.connect(%s) ' % (dbapiModuleName, db_connect_string))
         self._dbconnection = eval(db_connect_string)
+
+    def connect_to_database_using_custom_connection_string(self, dbapiModuleName=None, db_connect_string=''):
+        """
+        Loads the DB API 2.0 module given `dbapiModuleName` then uses it to
+        connect to the database using the `db_connect_string`
+        (parsed as single connection connection string or URI).
+        
+        Use `connect_to_database_using_custom_params` for passing
+        connection params as named arguments.
+
+        Example usage:        
+        | Connect To Database Using Custom Connection String | psycopg2 | postgresql://postgres:s3cr3t@tiger.foobar.com:5432/my_db_test |
+        | Connect To Database Using Custom Connection String | oracledb | username/pass@localhost:1521/orclpdb" |        
+        """
+        db_api_2 = importlib.import_module(dbapiModuleName)
+        self.db_api_module_name = dbapiModuleName
+        logger.info(f"Executing : Connect To Database Using Custom Connection String : {dbapiModuleName}.connect('{db_connect_string}')")
+        self._dbconnection = db_api_2.connect(db_connect_string)
 
     def disconnect_from_database(self, error_if_no_connection=False):
         """
