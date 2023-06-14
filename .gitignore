@@ -3,9 +3,11 @@ build/
 .idea
 .py*/
 *.egg-info/
-test/log.html
-test/my_db_test.db
-test/output.xml
-test/report.html
-test/logs/
+**/my_db_test.db
+logs
+**/output.xml
+**/interactive_console_output.xml
+**/log.html
+**/report.html
 venv
+.runNumber
