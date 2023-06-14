@@ -1,32 +1,37 @@
 *** Settings ***
-Suite Setup       Connect To Database    teradata    ${DBName}    ${DBUser}    ${DBPass}    ${DBHost}    ${DBPort}
-Suite Teardown    Disconnect From Database
-Library           DatabaseLibrary
-Library           OperatingSystem
-Library           Collections
+Library             DatabaseLibrary
+Library             OperatingSystem
+Library             Collections
+
+Suite Setup         Connect To Database    teradata    ${DBName}    ${DBUser}    ${DBPass}    ${DBHost}    ${DBPort}
+Suite Teardown      Disconnect From Database
+
 
 *** Variables ***
-${DBHost}         192.168.10.45
-${DBName}         ADRIAN
-${DBPass}         dbc
-${DBPort}         1025
-${DBUser}         dbc
+${DBHost}       192.168.0.231
+${DBName}       db
+${DBPass}       dbc
+${DBPort}       1025
+${DBUser}       dbc
+
 
 *** Test Cases ***
 Create person table
     [Tags]    db    smoke
-    ${output} =    Execute SQL String    CREATE TABLE person (id integer not null unique,first_name varchar(20),last_name varchar(20));
+    ${output} =    Execute SQL String
+    ...    CREATE TABLE person (id integer not null unique,first_name varchar(20),last_name varchar(20));
     Log    ${output}
     Should Be Equal As Strings    ${output}    None
 
 Execute SQL Script - Insert Data person table
     Comment    ${output} =    Execute SQL Script    ./${DBName}_insertData.sql
-    ${output} =    Execute SQL Script    ./my_db_test_insertData.sql
+    ${output} =    Execute SQL Script    ${CURDIR}/my_db_test_insertData.sql
     Log    ${output}
     Should Be Equal As Strings    ${output}    None
 
 Create foobar table
-    ${output} =    Execute SQL String    create table foobar (id integer not null primary key, firstname varchar(100) not null unique)
+    ${output} =    Execute SQL String
+    ...    create table foobar (id integer not null primary key, firstname varchar(100) not null unique)
     Log    ${output}
     Should Be Equal As Strings    ${output}    None
 
@@ -90,25 +95,25 @@ Verify foobar Description
 Verify Query - Row Count person table
     ${output} =    Query    SELECT COUNT(*) FROM person;
     Log    ${output}
-    ${val}=    Get from list    ${output}    0
-    ${val}=    Convert to list    ${val}
-    ${val}=    Get from list    ${val}    0
+    ${val} =    Get from list    ${output}    0
+    ${val} =    Convert to list    ${val}
+    ${val} =    Get from list    ${val}    0
     Should be equal as Integers    ${val}    2
 
 Verify Query - Row Count foobar table
     ${output} =    Query    SELECT COUNT(*) FROM foobar;
     Log    ${output}
-    ${val}=    Get from list    ${output}    0
-    ${val}=    Convert to list    ${val}
-    ${val}=    Get from list    ${val}    0
+    ${val} =    Get from list    ${output}    0
+    ${val} =    Convert to list    ${val}
+    ${val} =    Get from list    ${val}    0
     Should be equal as Integers    ${val}    0
 
 Verify Query - Get results as a list of dictionaries
     [Tags]    db    smoke
     ${output} =    Query    SELECT * FROM person;    \    True
     Log    ${output}
-    Should Be Equal As Strings    &{output[0]}[first_name]    Franz Allan
-    Should Be Equal As Strings    &{output[1]}[first_name]    Jerry
+    Should Be Equal As Strings    ${output}[0][first_name]    Franz Allan
+    Should Be Equal As Strings    ${output}[1][first_name]    Jerry
 
 Verify Execute SQL String - Row Count person table
     ${output} =    Execute SQL String    SELECT COUNT(*) FROM person;
@@ -128,9 +133,9 @@ Insert Data Into Table foobar
 Verify Query - Row Count foobar table 1 row
     ${output} =    Query    SELECT COUNT(*) FROM foobar;
     Log    ${output}
-    ${val}=    Get from list    ${output}    0
-    ${val}=    Convert to list    ${val}
-    ${val}=    Get from list    ${val}    0
+    ${val} =    Get from list    ${output}    0
+    ${val} =    Convert to list    ${val}
+    ${val} =    Get from list    ${val}    0
     Should be equal as Integers    ${val}    1
 
 Verify Delete All Rows From Table - foobar
