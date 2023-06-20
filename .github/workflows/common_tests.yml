@@ -33,7 +33,7 @@ jobs:
           - job_name: IBM_DB2
             module_mode: standard
             py_db_module: ibm_db_dbi
-            pip_install: ibm_db_dbi
+            pip_install: ibm_db_db
             db_port: 50000
           - job_name: MySQL_pymysql
             module_mode: standard            
