@@ -6,7 +6,33 @@
     "configurations": [
         {
             "type": "robotframework-lsp",
-            "name": "Launch all tests in Dryrun mode",
+            "name": "Launch .robot file for DB",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "target": "${file}",
+            "terminal": "integrated",
+            "args": [
+                "--outputdir", "logs",
+                "--loglevel", "DEBUG:INFO",
+                "-v GLOBAL_DB_SELECTOR:${input:DB}",
+            ],
+        },
+        {
+            "type": "robotframework-lsp",
+            "name": "Run all common tests for DB",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "target": "${workspaceFolder}/test/tests/common_tests",
+            "terminal": "integrated",
+            "args": [
+                "--outputdir", "logs",
+                "--loglevel", "DEBUG:INFO",
+                "-v GLOBAL_DB_SELECTOR:${input:DB}",
+            ],
+        },
+        {
+            "type": "robotframework-lsp",
+            "name": "dryrun all tests",
             "request": "launch",
             "cwd": "${workspaceFolder}",
             "target": "${workspaceFolder}/test",
@@ -19,7 +45,7 @@
         },
         {
             "type": "robotframework-lsp",
-            "name": "Launch .robot file in Dryrun mode",
+            "name": "dryrun .robot file",
             "request": "launch",
             "cwd": "${workspaceFolder}",
             "target": "${file}",
@@ -28,19 +54,6 @@
                 "--outputdir", "logs",
                 "--loglevel", "DEBUG:INFO",
                 "--dryrun"
-            ],
-        },
-        {
-            "type": "robotframework-lsp",
-            "name": "Launch .robot file for DB",
-            "request": "launch",
-            "cwd": "${workspaceFolder}",
-            "target": "${file}",
-            "terminal": "integrated",
-            "args": [
-                "--outputdir", "logs",
-                "--loglevel", "DEBUG:INFO",
-                "-v DB_MODULE:${input:DB_MODULE}",
             ],
         },
         {
@@ -59,10 +72,10 @@
     "inputs": [
         {
             "type": "pickString",
-            "id": "DB_MODULE",
+            "id": "DB",
             "description": "Database to run the tests for",
-            "options": ["oracledb"],
-            "default": "oracledb"
+            "options": ["PostgreSQL", "Oracle_Custom", "SQLite", "IBM_DB2", "Teradata", "MySQL_pymysql", "MySQL_pyodbc", "MSSQL", "Excel", "Excel_RW"],
+            "default": "PostgreSQL"
         }
     ]
 }
