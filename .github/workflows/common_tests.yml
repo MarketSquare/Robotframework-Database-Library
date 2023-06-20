@@ -19,25 +19,31 @@ jobs:
           - job_name: PostgreSQL
             module_mode: standard
             py_db_module: psycopg2
+            pip_install: psycopg2
             db_port: 5432
           - job_name: Oracle_Custom
             module_mode: custom
             py_db_module: oracledb
+            pip_install: oracledb
             db_port: 1521
           - job_name: SQLite
             module_mode: custom
             py_db_module: sqlite3
+            pip_install: none
           - job_name: IBM_DB2
             module_mode: standard
             py_db_module: ibm_db_dbi
+            pip_install: ibm_db_dbi
             db_port: 50000
           - job_name: MySQL_pymysql
             module_mode: standard            
             py_db_module: pymysql
+            pip_install: pymysql
             db_port: 3306
           - job_name: MySQL_pyodbc
             module_mode: standard            
             py_db_module: pyodbc
+            pip_install: pyodbc
             db_port: 3306
 
     services:
@@ -149,8 +155,10 @@ jobs:
           pip install -e ${{ github.workspace }}
 
       - name: Setup Python DB module
+        if: matrix.pip_install != 'none'
+
         run: |
-          pip install ${{ matrix.py_db_module }}
+          pip install ${{ matrix.pip_install }}
 
       - name: Run Robot Framework tests using ${{ matrix.job_name }}
         working-directory: ./test
