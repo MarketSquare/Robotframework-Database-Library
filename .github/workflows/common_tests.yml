@@ -8,6 +8,10 @@ env:
   DB_PASS: pass
   DB_HOST: 127.0.0.1
   # port is set in the job
+  
+  # options for pyodbc only
+  DB_CHARSET: utf8mb4
+  DB_DRIVER: "{MySQL ODBC 8.0 ANSI Driver}"
 
 jobs:
   tests:
@@ -177,6 +181,8 @@ jobs:
             -v DB_PASS:${{ env.DB_PASS }}
             -v DB_HOST:${{ env.DB_HOST }}
             -v DB_PORT:${{ matrix.db_port }}
+            -v DB_CHARSET: ${{env.DB_CHARSET}}
+            -v DB_DRIVER: ${{env.DB_DRIVER}}
             tests/common_tests            
       
       - name: Upload Robot Logs

@@ -16,6 +16,10 @@ ${DB_PASS}              pass
 ${DB_PORT}              5432
 ${DB_USER}              db_user
 
+# used for MySQL via PyODBC only
+${DB_CHARSET}           ${None}
+${DB_DRIVER}            ODBC Driver 18 for SQL Server
+
 
 *** Keywords ***
 Connect To DB
@@ -29,14 +33,26 @@ Connect To DB
             ${Connection String}=    Build Connection String
             Connect To Database Using Custom Connection String    ${DB_MODULE}    ${Connection String}
         END
-    ELSE IF    "${DB_MODULE_MODE}" == "standard"        
-        Connect To Database
-        ...    ${DB_MODULE}
-        ...    ${DB_NAME}
-        ...    ${DB_USER}
-        ...    ${DB_PASS}
-        ...    ${DB_HOST}
-        ...    ${DB_PORT}
+    ELSE IF    "${DB_MODULE_MODE}" == "standard"
+        IF    "${DB_MODULE}" == "pyodbc"
+            Connect To Database
+            ...    ${DB_MODULE}
+            ...    ${DB_NAME}
+            ...    ${DB_USER}
+            ...    ${DB_PASS}
+            ...    ${DB_HOST}
+            ...    ${DB_PORT}
+            ...    ${DB_CHARSET}
+            ...    ${DB_DRIVER}
+        ELSE
+            Connect To Database
+            ...    ${DB_MODULE}
+            ...    ${DB_NAME}
+            ...    ${DB_USER}
+            ...    ${DB_PASS}
+            ...    ${DB_HOST}
+            ...    ${DB_PORT}
+        END
     ELSE
         Fail    Unexpected mode - ${DB_MODULE_MODE}
     END
@@ -51,7 +67,7 @@ Build Connection String
         ${Result}=    Set Variable
         ...    postgresql://${DB_USER}:${DB_PASS}@${DB_HOST}:${DB_PORT}/${DB_NAME}
     ELSE
-        Fail    Don't know how to build a connection string for '${DB_MODULE}'!
+        Skip    Don't know how to build a connection string for '${DB_MODULE}'
     END
     RETURN    ${Result}
 
