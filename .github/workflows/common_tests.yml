@@ -170,7 +170,7 @@ jobs:
             -v DB_HOST:${{ env.DB_HOST }}
             -v DB_PORT:${{ matrix.db_port }}
             -v DB_CHARSET:${{env.DB_CHARSET}}
-            -v DB_DRIVER:${{env.DB_DRIVER}}
+            -v DB_DRIVER:"${{env.DB_DRIVER}}"
             tests/common_tests            
       
       - name: Upload Robot Logs
