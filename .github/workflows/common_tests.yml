@@ -160,7 +160,7 @@ jobs:
         run: |
           pip install ${{ matrix.pip_install }}
 
-      - name: Run Robot Framework tests using ${{ matrix.job_name }}
+      - name: Tests for ${{ matrix.job_name }}
         working-directory: ./test
         run: >-
             robot
