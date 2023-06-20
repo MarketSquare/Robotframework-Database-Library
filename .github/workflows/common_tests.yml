@@ -43,7 +43,7 @@ jobs:
             py_db_module: ibm_db_dbi
             pip_install: ibm_db
             container_image: ibmcom/db2            
-            # container_options: !!!!!!!!!!!
+            container_options: none
             db_port: 50000
           - job_name: MySQL_pymysql
             module_mode: standard            
@@ -51,14 +51,14 @@ jobs:
             pip_install: pymysql[rsa]
             db_port: 3306
             container_image: mysql            
-            # container_options: !!!!!!!!!!!!!
+            container_options: none
           - job_name: MySQL_pyodbc
             module_mode: standard            
             py_db_module: pyodbc
             pip_install: pyodbc
             db_port: 3306
             container_image: mysql            
-            # container_options: !!!!!!!!!!!!!!!!!!!!!
+            container_options: none
 
     services:
       db_container:
@@ -169,8 +169,8 @@ jobs:
             -v DB_PASS:${{ env.DB_PASS }}
             -v DB_HOST:${{ env.DB_HOST }}
             -v DB_PORT:${{ matrix.db_port }}
-            -v DB_CHARSET: ${{env.DB_CHARSET}}
-            -v DB_DRIVER: ${{env.DB_DRIVER}}
+            -v DB_CHARSET:${{env.DB_CHARSET}}
+            -v DB_DRIVER:${{env.DB_DRIVER}}
             tests/common_tests            
       
       - name: Upload Robot Logs
