@@ -8,13 +8,13 @@ Library           Collections
 *** Variables ***
 ${DBHost}         localhost
 ${DBName}         db
-${DBPass}         postgres
+${DBPass}         pass
 ${DBPort}         5432
-${DBUser}         postgres
+${DBUser}         db_user
 
 *** Test Cases ***
 Create person table
-    ${output} =    Execute SQL String    CREATE TABLE person (id integer unique,first_name varchar,last_name varchar);
+    ${output} =    Execute SQL String    CREATE TABLE person (id integer not null unique,first_name varchar(20),last_name varchar(20));
     Log    ${output}
     Should Be Equal As Strings    ${output}    None
 
