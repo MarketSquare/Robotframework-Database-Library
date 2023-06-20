@@ -38,7 +38,7 @@ jobs:
           - job_name: MySQL_pymysql
             module_mode: standard            
             py_db_module: pymysql
-            pip_install: pymysql
+            pip_install: pymysql[rsa]
             db_port: 3306
           - job_name: MySQL_pyodbc
             module_mode: standard            
