@@ -1,0 +1,49 @@
+name: Excel DB Tests
+
+on: [push, pull_request]
+
+jobs:
+  tests_excel:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.8.14'
+
+      - name: Setup Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Install Development/Checked out version of DatabaseLibrary
+        run: |
+          pip install -e ${{ github.workspace }}
+
+      - name: Setup Python DB module
+        run: |
+          pip install pyodbc
+
+      - name: Tests for ${{ matrix.job_name }}
+        working-directory: ./test
+        run: >-
+            robot
+            -d results
+            --xunit result.xml
+            --loglevel DEBUG:INFO
+            --output output_${{ matrix.job_name }}.xml
+            --log log_${{ matrix.job_name }}.html
+            --report report_${{ matrix.job_name }}.html
+            tests/custom_db_tests/excel.robot
+      
+      - name: Upload Robot Logs
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: log-files
+          path: ./test/results/
