@@ -8,7 +8,7 @@ Test Teardown       Disconnect From Database
 
 
 *** Variables ***
-${CONNECTION_STRING}    ${EMPTY}    # the variable is set dynamically depending on the currend DB module
+${CONNECTION_STRING}    ${EMPTY}    # the variable is set dynamically depending on the current DB module
 
 
 *** Test Cases ***
@@ -19,4 +19,12 @@ Connect Using Custom Connection String
     Connect To Database Using Custom Connection String    ${DB_MODULE}    ${Connection String}
 
 Connect Using Custom Params
-    Fail    implement me!
+    ${Params}=    Catenate
+    ...    database='${DB_NAME}',
+    ...    user='${DB_USER}',
+    ...    password='${DB_USER}',
+    ...    host='${DB_HOST}',
+    ...    port=${DB_PORT}
+    Connect To Database Using Custom Params
+    ...    ${DB_MODULE}
+    ...    ${Params}
