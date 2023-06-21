@@ -94,7 +94,7 @@ jobs:
           DB2INST1_PASSWORD: ${{ env.DB_PASS }}
         ports:
           - 50000:50000
-        options: --name mydb2
+        options: --name mydb2 -v ${{ github.workspace }}/test/myibmdb:/database
         
     steps:
       - name: Install ODBC driver for PostgreSQL
