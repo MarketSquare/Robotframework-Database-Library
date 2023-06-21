@@ -19,12 +19,19 @@ Connect Using Custom Connection String
     Connect To Database Using Custom Connection String    ${DB_MODULE}    ${Connection String}
 
 Connect Using Custom Params
-    ${Params}=    Catenate
-    ...    database='${DB_NAME}',
-    ...    user='${DB_USER}',
-    ...    password='${DB_PASS}',
-    ...    host='${DB_HOST}',
-    ...    port=${DB_PORT}
+    IF    "${DB_MODULE}" == "oracledb"
+        ${Params}=    Catenate
+        ...    user='${DB_USER}',
+        ...    password='${DB_PASS}',
+        ...    dsn='${DB_HOST}:${DB_PORT}/${DB_NAME}'
+    ELSE
+        ${Params}=    Catenate
+        ...    database='${DB_NAME}',
+        ...    user='${DB_USER}',
+        ...    password='${DB_PASS}',
+        ...    host='${DB_HOST}',
+        ...    port=${DB_PORT}
+    END
     Connect To Database Using Custom Params
     ...    ${DB_MODULE}
     ...    ${Params}
