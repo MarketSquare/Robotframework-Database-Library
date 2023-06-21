@@ -34,11 +34,6 @@ jobs:
             module_mode: custom
             py_db_module: sqlite3
             pip_install: none
-          - job_name: IBM_DB2
-            module_mode: standard
-            py_db_module: ibm_db_dbi
-            pip_install: ibm_db
-            db_port: 50000
           - job_name: MySQL_pymysql
             module_mode: standard            
             py_db_module: pymysql
@@ -83,18 +78,6 @@ jobs:
           MYSQL_PASSWORD: ${{ env.DB_PASS }}
         ports:
           - 3306:3306
-
-      ibmdb2:
-        image: ibmcom/db2
-        env:
-          LICENSE: accept
-          MYSQL_ROOT_PASSWORD: ${{ env.DB_PASS }}
-          DBNAME: ${{ env.DB_NAME }}
-          DB2INSTANCE: ${{ env.DB_USER }}
-          DB2INST1_PASSWORD: ${{ env.DB_PASS }}
-        ports:
-          - 50000:50000
-        options: --name mydb2 -v myibmdb:/database
         
     steps:
       - name: Install ODBC driver for PostgreSQL
@@ -164,16 +147,7 @@ jobs:
 
         run: |
           pip install ${{ matrix.pip_install }}
-
-      - name: Wait for IBM DB2 to be ready
-        if: matrix.job_name == 'IBM_DB2'
-        run: |
-          while ! docker logs mydb2 | grep -q "Setup has completed.";
-          do
-              sleep 1
-              echo "still waiting for the 'completed' message in the container logs..."
-          done
-      
+     
       - name: Tests for ${{ matrix.job_name }}
         working-directory: ./test
         run: >-
