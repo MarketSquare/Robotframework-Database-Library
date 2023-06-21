@@ -34,6 +34,7 @@ jobs:
             module_mode: custom
             py_db_module: sqlite3
             pip_install: none
+            db_port: 0000
           - job_name: MySQL_pymysql
             module_mode: standard            
             py_db_module: pymysql
