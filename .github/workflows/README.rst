@@ -30,18 +30,28 @@ chart is intended to keep track of those implemented and resources around them.
 ==================================  ===========  ==========================  =======================================
     Database Systems                    module       Status                      Workflow
 ==================================  ===========  ==========================  =======================================
-MySQL                               pymysql      Completed                   MySQL-tests.yml
-\                                   pyodbc       Completed                   MySQL-tests.yml
-PostgreSQL                          psycopg2     Completed                   PostgreSQL-tests.yml
+MySQL                               pymysql      Completed                   common_tests.yml
+\                                   pyodbc       Completed                   common_tests.yml
+PostgreSQL                          psycopg2     Completed                   common_tests.yml
 \                                   psycopg3     Not Yet Implemented
 \                                   pyodbc       Not Yet Implemented
-SQLite                              sqlite3      Completed                   SQLite-tests.yml
-Oracle - "custom params"            oracledb     Workflow is done,           Oracle-tests.yml
+SQLite                              sqlite3      Completed                   common_tests.yml
+Oracle - "custom params"            oracledb     Workflow is done,           common_tests.yml
                                                  but some tests are failing
                                                  bugs have to be fixed
                                                  in the library,
                                                  tests are to be checked
                                                  and probably extended
+Teradata                            Teradata     Can be tested locally only,    local only
+                                                 as it requires a VM
+Excel                               pyodbc       Currentyl local tests only,    local only
+                                                 as I wasn't able to install
+                                                 the ODBC driver for Excel
+                                                 in the container
+IBM DB2                             ibmdb        Currently local tests only,    local only
+                                                 as I wasn't able to get
+                                                 the container working in
+                                                 the workflow                                                  
 ==================================  ===========  ==========================  =======================================
 
 
