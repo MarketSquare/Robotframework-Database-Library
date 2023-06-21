@@ -50,8 +50,8 @@ Verify Person Description
         Should Be Equal As Strings    ${queryResults}[2]    ('LAST_NAME', 253, None, 80, 80, 0, True)
     ELSE IF    "${DB_MODULE}" == "pyodbc"
         Should Be Equal As Strings    ${queryResults}[0]    ('id', <class 'int'>, None, 10, 10, 0, False)
-        Should Be Equal As Strings    ${queryResults}[1]    ('FIRST_NAME', 253, None, 80, 80, 0, True)
-        Should Be Equal As Strings    ${queryResults}[2]    ('LAST_NAME', 253, None, 80, 80, 0, True)
+        Should Be Equal As Strings    ${queryResults}[1]    ('FIRST_NAME', <class 'str'>, None, 20, 20, 0, True)
+        Should Be Equal As Strings    ${queryResults}[2]    ('LAST_NAME', <class 'str'>, None, 20, 20, 0, True)
     ELSE IF    "${DB_MODULE}" == "pymssql"
         Should Be Equal As Strings    ${queryResults}[0]    ('id', 3, None, None, None, None, None)
         Should Be Equal As Strings    ${queryResults}[1]    ('FIRST_NAME', 1, None, None, None, None, None)
@@ -92,7 +92,7 @@ Verify Foobar Description
         Should Be Equal As Strings    ${queryResults}[1]    ('FIRST_NAME', 253, None, 120, 120, 0, False)
     ELSE IF    "${DB_MODULE}" in "pyodbc"
         Should Be Equal As Strings    ${queryResults}[0]    ('id', <class 'int'>, None, 10, 10, 0, False)
-        Should Be Equal As Strings    ${queryResults}[1]    ('FIRST_NAME', 1, None, None, None, None, None)
+        Should Be Equal As Strings    ${queryResults}[1]    ('FIRST_NAME', <class 'str'>, None, 30, 30, 0, False)
     ELSE IF    "${DB_MODULE}" == "pymssql"
         Should Be Equal As Strings    ${queryResults}[0]    ('id', 3, None, None, None, None, None)
         Should Be Equal As Strings    ${queryResults}[1]    ('FIRST_NAME', 1, None, None, None, None, None)
