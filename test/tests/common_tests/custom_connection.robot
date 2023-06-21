@@ -33,6 +33,10 @@ Connect Using Custom Params
         ...    password='${DB_PASS}',
         ...    host='${DB_HOST}',
         ...    port=${DB_PORT}
+    ELSE IF    "${DB_MODULE}" == "sqlite3"
+        ${Params}=    Catenate
+        ...    database="./${DBName}.db",
+        ...    isolation_level=None
     ELSE
         ${Params}=    Catenate
         ...    database='${DB_NAME}',
