@@ -22,7 +22,7 @@ Connect Using Custom Params
     ${Params}=    Catenate
     ...    database='${DB_NAME}',
     ...    user='${DB_USER}',
-    ...    password='${DB_USER}',
+    ...    password='${DB_PASS}',
     ...    host='${DB_HOST}',
     ...    port=${DB_PORT}
     Connect To Database Using Custom Params
