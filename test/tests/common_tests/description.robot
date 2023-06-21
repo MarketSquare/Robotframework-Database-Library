@@ -44,8 +44,12 @@ Verify Person Description
         Should Be Equal As Strings    ${queryResults}[0]    Column(name='id', type_code=23)
         Should Be Equal As Strings    ${queryResults}[1]    Column(name='first_name', type_code=1043)
         Should Be Equal As Strings    ${queryResults}[2]    Column(name='last_name', type_code=1043)
-    ELSE IF    "${DB_MODULE}" in ["pymysql", "pyodbc"]
+    ELSE IF    "${DB_MODULE}" == "pymysql"
         Should Be Equal As Strings    ${queryResults}[0]    ('id', 3, None, 11, 11, 0, False)
+        Should Be Equal As Strings    ${queryResults}[1]    ('FIRST_NAME', 253, None, 80, 80, 0, True)
+        Should Be Equal As Strings    ${queryResults}[2]    ('LAST_NAME', 253, None, 80, 80, 0, True)
+    ELSE IF    "${DB_MODULE}" == "pyodbc"
+        Should Be Equal As Strings    ${queryResults}[0]    ('id', <class 'int'>, None, 10, 10, 0, False)
         Should Be Equal As Strings    ${queryResults}[1]    ('FIRST_NAME', 253, None, 80, 80, 0, True)
         Should Be Equal As Strings    ${queryResults}[2]    ('LAST_NAME', 253, None, 80, 80, 0, True)
     ELSE IF    "${DB_MODULE}" == "pymssql"
@@ -83,9 +87,12 @@ Verify Foobar Description
     ELSE IF    "${DB_MODULE}" == "psycopg2"
         Should Be Equal As Strings    ${queryResults}[0]    Column(name='id', type_code=23)
         Should Be Equal As Strings    ${queryResults}[1]    Column(name='first_name', type_code=1043)
-    ELSE IF    "${DB_MODULE}" in ["pymysql", "pyodbc"]
+    ELSE IF    "${DB_MODULE}" == "pymysql"
         Should Be Equal As Strings    ${queryResults}[0]    ('id', 3, None, 11, 11, 0, False)
         Should Be Equal As Strings    ${queryResults}[1]    ('FIRST_NAME', 253, None, 120, 120, 0, False)
+    ELSE IF    "${DB_MODULE}" in "pyodbc"
+        Should Be Equal As Strings    ${queryResults}[0]    ('id', <class 'int'>, None, 10, 10, 0, False)
+        Should Be Equal As Strings    ${queryResults}[1]    ('FIRST_NAME', 1, None, None, None, None, None)
     ELSE IF    "${DB_MODULE}" == "pymssql"
         Should Be Equal As Strings    ${queryResults}[0]    ('id', 3, None, None, None, None, None)
         Should Be Equal As Strings    ${queryResults}[1]    ('FIRST_NAME', 1, None, None, None, None, None)
