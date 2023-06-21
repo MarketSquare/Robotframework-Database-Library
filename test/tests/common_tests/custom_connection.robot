@@ -26,8 +26,8 @@ Connect Using Custom Params
         ...    dsn='${DB_HOST}:${DB_PORT}/${DB_NAME}'
     ELSE IF    "${DB_MODULE}" == "pyodbc"
         ${Params}=    Catenate
-        ...    driver='${DB_DRIVER}'
-        ...    charset='${DB_CHARSET}'
+        ...    driver='${DB_DRIVER}',
+        ...    charset='${DB_CHARSET}',
         ...    database='${DB_NAME}',
         ...    user='${DB_USER}',
         ...    password='${DB_PASS}',
