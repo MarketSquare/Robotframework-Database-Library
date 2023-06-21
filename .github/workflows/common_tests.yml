@@ -94,6 +94,7 @@ jobs:
           DB2INST1_PASSWORD: ${{ env.DB_PASS }}
         ports:
           - 50000:50000
+        options: --name mydb2
         
     steps:
       - name: Install ODBC driver for PostgreSQL
@@ -164,6 +165,15 @@ jobs:
         run: |
           pip install ${{ matrix.pip_install }}
 
+      - name: Wait for IBM DB2 to be ready
+        if: matrix.job_name == 'IBM_DB2'
+        run: |
+          while ! docker logs mydb2 | grep -q "Setup has completed.";
+          do
+              sleep 1
+              echo "still waiting for the 'completed' message in the container logs..."
+          done
+      
       - name: Tests for ${{ matrix.job_name }}
         working-directory: ./test
         run: >-
