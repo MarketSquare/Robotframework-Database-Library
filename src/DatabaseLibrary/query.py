@@ -368,4 +368,5 @@ class Query(object):
                     self._dbconnection.rollback()
 
     def __execute_sql(self, cur, sqlStatement):
+        sqlStatement = sqlStatement.rstrip(";")
         return cur.execute(sqlStatement)
