@@ -12,8 +12,10 @@
             "target": "${file}",
             "terminal": "integrated",
             "args": [
-                "--outputdir", "logs",
-                "--loglevel", "DEBUG:INFO",
+                "--outputdir",
+                "logs",
+                "--loglevel",
+                "DEBUG:INFO",
                 "-v GLOBAL_DB_SELECTOR:${input:DB}",
             ],
         },
@@ -25,8 +27,10 @@
             "target": "${workspaceFolder}/test/tests/common_tests",
             "terminal": "integrated",
             "args": [
-                "--outputdir", "logs",
-                "--loglevel", "DEBUG:INFO",
+                "--outputdir",
+                "logs",
+                "--loglevel",
+                "DEBUG:INFO",
                 "-v GLOBAL_DB_SELECTOR:${input:DB}",
             ],
         },
@@ -38,8 +42,10 @@
             "target": "${workspaceFolder}/test",
             "terminal": "integrated",
             "args": [
-                "--outputdir", "logs",
-                "--loglevel", "DEBUG:INFO",
+                "--outputdir",
+                "logs",
+                "--loglevel",
+                "DEBUG:INFO",
                 "--dryrun"
             ],
         },
@@ -51,8 +57,10 @@
             "target": "${file}",
             "terminal": "integrated",
             "args": [
-                "--outputdir", "logs",
-                "--loglevel", "DEBUG:INFO",
+                "--outputdir",
+                "logs",
+                "--loglevel",
+                "DEBUG:INFO",
                 "--dryrun"
             ],
         },
@@ -64,8 +72,10 @@
             "target": "^\"\\${file}\"",
             "terminal": "integrated",
             "args": [
-                "--outputdir", "logs",
-                "--loglevel", "DEBUG:INFO",
+                "--outputdir",
+                "logs",
+                "--loglevel",
+                "DEBUG:INFO",
             ],
         },
     ],
@@ -74,7 +84,19 @@
             "type": "pickString",
             "id": "DB",
             "description": "Database to run the tests for",
-            "options": ["PostgreSQL", "Oracle_Custom", "SQLite", "IBM_DB2", "Teradata", "MySQL_pymysql", "MySQL_pyodbc", "MSSQL", "Excel", "Excel_RW"],
+            "options": [
+                "PostgreSQL",
+                "Oracle_Custom",
+                "cx_Oracle",
+                "SQLite",
+                "IBM_DB2",
+                "Teradata",
+                "MySQL_pymysql",
+                "MySQL_pyodbc",
+                "MSSQL",
+                "Excel",
+                "Excel_RW",
+            ],
             "default": "PostgreSQL"
         }
     ]

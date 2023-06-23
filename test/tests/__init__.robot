@@ -30,6 +30,14 @@ Set DB Variables
         Set Global Variable    ${DB_NAME}    db
         Set Global Variable    ${DB_USER}    db_user
         Set Global Variable    ${DB_PASS}    pass
+    ELSE IF    "${GLOBAL_DB_SELECTOR}" == "cx_Oracle"
+        Set Global Variable    ${DB_MODULE_MODE}    standard
+        Set Global Variable    ${DB_MODULE}    cx_Oracle
+        Set Global Variable    ${DB_HOST}    127.0.0.1
+        Set Global Variable    ${DB_PORT}    1521
+        Set Global Variable    ${DB_NAME}    db
+        Set Global Variable    ${DB_USER}    db_user
+        Set Global Variable    ${DB_PASS}    pass
     ELSE IF    "${GLOBAL_DB_SELECTOR}" == "SQLite"
         Set Global Variable    ${DB_MODULE_MODE}    custom
         Set Global Variable    ${DB_MODULE}    sqlite3
