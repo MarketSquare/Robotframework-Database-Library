@@ -1,0 +1,178 @@
+name: Common DB Tests
+
+on: [push, pull_request]
+
+env:
+  DB_NAME: db
+  DB_USER: db_user
+  DB_PASS: pass
+  DB_HOST: 127.0.0.1
+  # port is set in the job
+  
+  # options for pyodbc only
+  DB_CHARSET: utf8mb4
+  DB_DRIVER: "{MySQL ODBC 8.0 ANSI Driver}"
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - job_name: PostgreSQL
+            module_mode: standard
+            py_db_module: psycopg2
+            pip_install: psycopg2
+            db_port: 5432
+          - job_name: oracledb
+            module_mode: standard
+            py_db_module: oracledb
+            pip_install: oracledb
+            db_port: 1521
+          - job_name: SQLite
+            module_mode: custom
+            py_db_module: sqlite3
+            pip_install: none
+            db_port: 0000
+          - job_name: MySQL_pymysql
+            module_mode: standard            
+            py_db_module: pymysql
+            pip_install: pymysql[rsa]
+            db_port: 3306
+          - job_name: MySQL_pyodbc
+            module_mode: standard            
+            py_db_module: pyodbc
+            pip_install: pyodbc
+            db_port: 3306
+
+    services:
+      postgres:
+        image: postgres:11
+        env:
+          POSTGRES_DB: ${{ env.DB_NAME }}
+          POSTGRES_USER: ${{ env.DB_USER }}
+          POSTGRES_PASSWORD: ${{ env.DB_PASS }}
+        ports:
+          - 5432:5432
+        # needed because the postgres container does not provide a healthcheck
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+
+      oracle:
+        image: gvenzl/oracle-free:latest
+        env:
+          ORACLE_PASSWORD: ${{ env.DB_PASS }}
+          ORACLE_DATABASE: ${{ env.DB_NAME }}
+          APP_USER: ${{ env.DB_USER }}
+          APP_USER_PASSWORD: ${{ env.DB_PASS }}
+        ports:
+          - 1521:1521
+          # Provide healthcheck script options for startup
+        options: --health-cmd healthcheck.sh --health-interval 10s --health-timeout 5s --health-retries 10
+
+      mysql:
+        image: mysql
+        env:
+          MYSQL_ROOT_PASSWORD: ${{ env.DB_PASS }}
+          MYSQL_DATABASE: ${{ env.DB_NAME }}
+          MYSQL_USER: ${{ env.DB_USER }}
+          MYSQL_PASSWORD: ${{ env.DB_PASS }}
+        ports:
+          - 3306:3306
+        
+    steps:
+      - name: Install ODBC driver for PostgreSQL
+        if: matrix.py_db_module == 'pyodbc'
+        run: |
+          echo "*** apt-get install the driver"
+          sudo apt-get install --yes odbc-postgresql
+          echo '*** ls -l /usr/lib/x86_64-linux-gnu/odbc'
+          ls -l /usr/lib/x86_64-linux-gnu/odbc || true
+          echo '*** add full paths to Postgres .so files in /etc/odbcinst.ini'
+          sudo sed -i 's|Driver=psqlodbca.so|Driver=/usr/lib/x86_64-linux-gnu/odbc/psqlodbca.so|g' /etc/odbcinst.ini
+          sudo sed -i 's|Driver=psqlodbcw.so|Driver=/usr/lib/x86_64-linux-gnu/odbc/psqlodbcw.so|g' /etc/odbcinst.ini
+          sudo sed -i 's|Setup=libodbcpsqlS.so|Setup=/usr/lib/x86_64-linux-gnu/odbc/libodbcpsqlS.so|g' /etc/odbcinst.ini
+
+      - name: Install ODBC driver for MySQL
+        if: matrix.py_db_module == 'pyodbc'
+        run: |
+          cd "$RUNNER_TEMP"
+          echo "*** download driver zip file"
+          curl --silent --show-error --write-out "$CURL_OUTPUT_FORMAT" -O "https://www.mirrorservice.org/sites/ftp.mysql.com/Downloads/Connector-ODBC/8.0/${MYSQL_DRIVER}.tar.gz"
+          ls -l "${MYSQL_DRIVER}.tar.gz"
+          tar -xz -f "${MYSQL_DRIVER}.tar.gz"
+          echo "*** copy driver file to /usr/lib"
+          sudo cp -v "${MYSQL_DRIVER}/lib/libmyodbc8a.so" /usr/lib/x86_64-linux-gnu/odbc/
+          sudo chmod a+r /usr/lib/x86_64-linux-gnu/odbc/libmyodbc8a.so
+          echo "*** create odbcinst.ini entry"
+          echo '[MySQL ODBC 8.0 ANSI Driver]' > mysql_odbcinst.ini
+          echo 'Driver     = /usr/lib/x86_64-linux-gnu/odbc/libmyodbc8a.so' >> mysql_odbcinst.ini
+          echo 'UsageCount = 1' >> mysql_odbcinst.ini
+          echo 'Threading  = 2' >> mysql_odbcinst.ini
+          sudo odbcinst -i -d -f mysql_odbcinst.ini
+        env:
+          CURL_OUTPUT_FORMAT: '%{http_code} %{filename_effective} %{size_download} %{time_total}\n'
+          MYSQL_DRIVER: mysql-connector-odbc-8.0.22-linux-glibc2.12-x86-64bit
+
+      - name: Check ODBC setup
+        run: |
+          echo "*** odbcinst -j"
+          odbcinst -j
+          echo "*** cat /etc/odbcinst.ini"
+          cat /etc/odbcinst.ini
+          echo "*** cat /etc/odbc.ini"
+          cat /etc/odbc.ini
+          echo '*** ls -l /opt/microsoft/msodbcsql17/lib64'
+          ls -l /opt/microsoft/msodbcsql17/lib64 || true
+          echo '*** ls -l /usr/lib/x86_64-linux-gnu/odbc'
+          ls -l /usr/lib/x86_64-linux-gnu/odbc || true
+
+      - name: Check out repository code
+        uses: actions/checkout@v3
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.8.14'
+
+      - name: Setup Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Install Development/Checked out version of DatabaseLibrary
+        run: |
+          pip install -e ${{ github.workspace }}
+
+      - name: Setup Python DB module
+        if: matrix.pip_install != 'none'
+
+        run: |
+          pip install ${{ matrix.pip_install }}
+     
+      - name: Tests for ${{ matrix.job_name }}
+        working-directory: ./test
+        run: >-
+            robot
+            -d results
+            --xunit result.xml
+            --loglevel DEBUG:INFO
+            --output output_${{ matrix.job_name }}.xml
+            --log log_${{ matrix.job_name }}.html
+            --report report_${{ matrix.job_name }}.html
+            -v DB_MODULE_MODE:${{ matrix.module_mode }}
+            -v DB_MODULE:${{ matrix.py_db_module }}
+            -v DB_NAME:${{ env.DB_NAME }}
+            -v DB_USER:${{ env.DB_USER }}
+            -v DB_PASS:${{ env.DB_PASS }}
+            -v DB_HOST:${{ env.DB_HOST }}
+            -v DB_PORT:${{ matrix.db_port }}
+            -v DB_CHARSET:${{env.DB_CHARSET}}
+            -v DB_DRIVER:"${{env.DB_DRIVER}}"
+            tests/common_tests            
+      
+      - name: Upload Robot Logs
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: log-files
+          path: ./test/results/

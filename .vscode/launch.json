@@ -1,0 +1,103 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "robotframework-lsp",
+            "name": "Launch .robot file for DB",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "target": "${file}",
+            "terminal": "integrated",
+            "args": [
+                "--outputdir",
+                "logs",
+                "--loglevel",
+                "DEBUG:INFO",
+                "-v GLOBAL_DB_SELECTOR:${input:DB}",
+            ],
+        },
+        {
+            "type": "robotframework-lsp",
+            "name": "Run all common tests for DB",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "target": "${workspaceFolder}/test/tests/common_tests",
+            "terminal": "integrated",
+            "args": [
+                "--outputdir",
+                "logs",
+                "--loglevel",
+                "DEBUG:INFO",
+                "-v GLOBAL_DB_SELECTOR:${input:DB}",
+            ],
+        },
+        {
+            "type": "robotframework-lsp",
+            "name": "dryrun all tests",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "target": "${workspaceFolder}/test",
+            "terminal": "integrated",
+            "args": [
+                "--outputdir",
+                "logs",
+                "--loglevel",
+                "DEBUG:INFO",
+                "--dryrun"
+            ],
+        },
+        {
+            "type": "robotframework-lsp",
+            "name": "dryrun .robot file",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "target": "${file}",
+            "terminal": "integrated",
+            "args": [
+                "--outputdir",
+                "logs",
+                "--loglevel",
+                "DEBUG:INFO",
+                "--dryrun"
+            ],
+        },
+        {
+            "type": "robotframework-lsp",
+            "name": "Robot Framework: Launch template",
+            "request": "launch",
+            "cwd": "^\"\\${workspaceFolder}\"",
+            "target": "^\"\\${file}\"",
+            "terminal": "integrated",
+            "args": [
+                "--outputdir",
+                "logs",
+                "--loglevel",
+                "DEBUG:INFO",
+            ],
+        },
+    ],
+    "inputs": [
+        {
+            "type": "pickString",
+            "id": "DB",
+            "description": "Database to run the tests for",
+            "options": [
+                "PostgreSQL",
+                "oracledb",
+                "cx_Oracle",
+                "SQLite",
+                "IBM_DB2",
+                "Teradata",
+                "MySQL_pymysql",
+                "MySQL_pyodbc",
+                "MSSQL",
+                "Excel",
+                "Excel_RW",
+            ],
+            "default": "PostgreSQL"
+        }
+    ]
+}

@@ -15,7 +15,7 @@ ${DBUser}         dummy
 *** Test Cases ***
 Create person table
     [Tags]    db    smoke
-    ${output} =    Execute SQL String    CREATE TABLE [person] (id integer,first_name varchar(20),last_name varchar(20));
+    ${output} =    Execute SQL String    CREATE TABLE person (id integer,first_name varchar(20),last_name varchar(20));
     Log    ${output}
     Should Be Equal As Strings    ${output}    None
 
@@ -286,7 +286,7 @@ Drop person and foobar tables
 *** Keywords ***
 
 Setup testing excel
-    Create Excel Workbook     Test_Excel
+    Create Excel Document     Test_Excel
     Connect To Database  excelrw   ${DBName}    ${DBUser}    ${DBPass}    ${DBHost}    ${DBPort}
 
 Cleanup testing excel

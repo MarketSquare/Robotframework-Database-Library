@@ -1,32 +1,33 @@
 *** Settings ***
-Suite Setup       Connect To Database    teradata    ${DBName}    ${DBUser}    ${DBPass}    ${DBHost}    ${DBPort}
+Suite Setup       Connect To Database    ${DBModule}    ${DBName}    ${DBUser}    ${DBPass}    dbHost=${DBHost}    dbPort=${DBPort}    dbCharset=${DBCharset}    dbDriver=${dbDriver}
 Suite Teardown    Disconnect From Database
 Library           DatabaseLibrary
-Library           OperatingSystem
 Library           Collections
+Library           OperatingSystem
 
 *** Variables ***
-${DBHost}         192.168.10.45
-${DBName}         ADRIAN
-${DBPass}         dbc
-${DBPort}         1025
-${DBUser}         dbc
+${DBModule}       pyodbc
+${DBHost}         ${EMPTY}
+${DBName}         ${EMPTY}
+${DBPass}         ${EMPTY}
+${DBPort}         ${EMPTY}
+${DBUser}         ${EMPTY}
+${DBCharset}      ${None}
+#${dbDriver}       ${EMPTY}
 
 *** Test Cases ***
 Create person table
-    [Tags]    db    smoke
-    ${output} =    Execute SQL String    CREATE TABLE person (id integer not null unique,first_name varchar(20),last_name varchar(20));
+    ${output} =    Execute SQL String    CREATE TABLE person (id integer unique, first_name varchar(20), last_name varchar(20));
     Log    ${output}
     Should Be Equal As Strings    ${output}    None
 
 Execute SQL Script - Insert Data person table
-    Comment    ${output} =    Execute SQL Script    ./${DBName}_insertData.sql
     ${output} =    Execute SQL Script    ./my_db_test_insertData.sql
     Log    ${output}
     Should Be Equal As Strings    ${output}    None
 
-Create foobar table
-    ${output} =    Execute SQL String    create table foobar (id integer not null primary key, firstname varchar(100) not null unique)
+Execute SQL String - Create Table
+    ${output} =    Execute SQL String    create table foobar (id integer primary key, firstname varchar(20) unique)
     Log    ${output}
     Should Be Equal As Strings    ${output}    None
 
@@ -62,53 +63,44 @@ Retrieve records from person table
     Should Be Equal As Strings    ${output}    None
 
 Verify person Description
-    [Tags]    db    smoke
     Comment    Query db for table column descriptions
-    @{queryResults} =    Description    SELECT * FROM person SAMPLE 1;
+    @{queryResults} =    Description    SELECT * FROM person LIMIT 1;
     Log Many    @{queryResults}
     ${output} =    Set Variable    ${queryResults[0]}
-    Should Be Equal As Strings    ${output}    ('id', <class 'decimal.Decimal'>, None, 10, 0, None, 0)
+    Should Be Equal As Strings    ${output}    ('id', <class 'int'>, None, 10, 10, 0, True)
     ${output} =    Set Variable    ${queryResults[1]}
-    Should Be Equal As Strings    ${output}    ('first_name', <class 'str'>, None, 20, 0, None, 1)
+    Should Be Equal As Strings    ${output}    ('first_name', <class 'str'>, None, 20, 20, 0, True)
     ${output} =    Set Variable    ${queryResults[2]}
-    Should Be Equal As Strings    ${output}    ('last_name', <class 'str'>, None, 20, 0, None, 1)
+    Should Be Equal As Strings    ${output}    ('last_name', <class 'str'>, None, 20, 20, 0, True)
     ${NumColumns} =    Get Length    ${queryResults}
     Should Be Equal As Integers    ${NumColumns}    3
 
 Verify foobar Description
-    [Tags]    db    smoke
     Comment    Query db for table column descriptions
-    @{queryResults} =    Description    SELECT * FROM foobar SAMPLE 1;
+    @{queryResults} =    Description    SELECT * FROM foobar LIMIT 1;
     Log Many    @{queryResults}
     ${output} =    Set Variable    ${queryResults[0]}
-    Should Be Equal As Strings    ${output}    ('id', <class 'decimal.Decimal'>, None, 10, 0, None, 0)
+    Should Be Equal As Strings    ${output}    ('id', <class 'int'>, None, 10, 10, 0, False)
     ${output} =    Set Variable    ${queryResults[1]}
-    Should Be Equal As Strings    ${output}    ('firstname', <class 'str'>, None, 100, 0, None, 0)
+    Should Be Equal As Strings    ${output}    ('firstname', <class 'str'>, None, 20, 20, 0, True)
     ${NumColumns} =    Get Length    ${queryResults}
     Should Be Equal As Integers    ${NumColumns}    2
 
 Verify Query - Row Count person table
     ${output} =    Query    SELECT COUNT(*) FROM person;
     Log    ${output}
-    ${val}=    Get from list    ${output}    0
-    ${val}=    Convert to list    ${val}
-    ${val}=    Get from list    ${val}    0
-    Should be equal as Integers    ${val}    2
+    Should Be Equal As Strings    ${output}    [(2,)]
 
 Verify Query - Row Count foobar table
     ${output} =    Query    SELECT COUNT(*) FROM foobar;
     Log    ${output}
-    ${val}=    Get from list    ${output}    0
-    ${val}=    Convert to list    ${val}
-    ${val}=    Get from list    ${val}    0
-    Should be equal as Integers    ${val}    0
+    Should Be Equal As Strings    ${output}    [(0,)]
 
 Verify Query - Get results as a list of dictionaries
-    [Tags]    db    smoke
     ${output} =    Query    SELECT * FROM person;    \    True
     Log    ${output}
-    Should Be Equal As Strings    &{output[0]}[first_name]    Franz Allan
-    Should Be Equal As Strings    &{output[1]}[first_name]    Jerry
+    Should Be Equal As Strings    ${output}[0][first_name]    Franz Allan
+    Should Be Equal As Strings    ${output}[1][first_name]    Jerry
 
 Verify Execute SQL String - Row Count person table
     ${output} =    Execute SQL String    SELECT COUNT(*) FROM person;
@@ -128,10 +120,7 @@ Insert Data Into Table foobar
 Verify Query - Row Count foobar table 1 row
     ${output} =    Query    SELECT COUNT(*) FROM foobar;
     Log    ${output}
-    ${val}=    Get from list    ${output}    0
-    ${val}=    Convert to list    ${val}
-    ${val}=    Get from list    ${val}    0
-    Should be equal as Integers    ${val}    1
+    Should Be Equal As Strings    ${output}    [(1,)]
 
 Verify Delete All Rows From Table - foobar
     Delete All Rows From Table    foobar
@@ -139,16 +128,53 @@ Verify Delete All Rows From Table - foobar
 
 Verify Query - Row Count foobar table 0 row
     Row Count Is 0    SELECT * FROM foobar;
-    Comment    ${output} =    Query    SELECT COUNT(*) FROM foobar;
-    Comment    Log    ${output}
-    Comment    Should Be Equal As Strings    ${output}    [(0,)]
 
-Drop person table
-    ${output} =    Execute SQL String    DROP TABLE person;
+Begin first transaction
+    ${output} =    Execute SQL String    SAVEPOINT first    True
     Log    ${output}
     Should Be Equal As Strings    ${output}    None
 
-Drop foobar table
-    ${output} =    Execute SQL String    DROP TABLE foobar;
+Add person in first transaction
+    ${output} =    Execute SQL String    INSERT INTO person VALUES(101,'Bilbo','Baggins');    True
+    Log    ${output}
+    Should Be Equal As Strings    ${output}    None
+
+Verify person in first transaction
+    Row Count is Equal to X    SELECT * FROM person WHERE last_name = 'Baggins';    1    True
+
+Begin second transaction
+    ${output} =    Execute SQL String    SAVEPOINT second    True
+    Log    ${output}
+    Should Be Equal As Strings    ${output}    None
+
+Add person in second transaction
+    ${output} =    Execute SQL String    INSERT INTO person VALUES(102,'Frodo','Baggins');    True
+    Log    ${output}
+    Should Be Equal As Strings    ${output}    None
+
+Verify persons in first and second transactions
+    Row Count is Equal to X    SELECT * FROM person WHERE last_name = 'Baggins';    2    True
+
+Rollback second transaction
+    ${output} =    Execute SQL String    ROLLBACK TO second    True
+    Log    ${output}
+    Should Be Equal As Strings    ${output}    None
+
+Verify second transaction rollback
+    Row Count is Equal to X    SELECT * FROM person WHERE last_name = 'Baggins';    1    True
+
+Rollback first transaction
+    ${output} =    Execute SQL String    ROLLBACK TO first    True
+    Log    ${output}
+    Should Be Equal As Strings    ${output}    None
+
+Verify first transaction rollback
+    Row Count is 0    SELECT * FROM person WHERE last_name = 'Baggins';    True
+
+Drop person and foobar tables
+    ${output} =    Execute SQL String    DROP TABLE IF EXISTS person;
+    Log    ${output}
+    Should Be Equal As Strings    ${output}    None
+    ${output} =    Execute SQL String    DROP TABLE IF EXISTS foobar;
     Log    ${output}
     Should Be Equal As Strings    ${output}    None

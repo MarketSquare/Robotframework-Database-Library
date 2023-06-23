@@ -1,0 +1,38 @@
+name: SQLite (sqlite3) Tests
+
+on: [push, pull_request]
+
+jobs:
+  run-robotframework-tests-sqlite:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.8.14'
+
+      - name: Setup Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Install Development/Checked out version of DatabaseLibrary
+        run: |
+          pip install -e ${{ github.workspace }}
+
+      - name: Run Robot Framework tests using SQLite3
+        working-directory: ./test
+        run: |
+          robot -T --xunit result.xml -d results/ ${{ github.workspace }}/test/SQLite3_DB_Tests.robot
+
+      - name: Upload Robot Logs
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: log-files
+          path: ./test/results/

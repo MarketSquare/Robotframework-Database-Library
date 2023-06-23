@@ -1,0 +1,61 @@
+name: Oracle Tests
+
+on: [push, pull_request]
+
+env:
+  DB_DATABASE: FREEPDB1
+  DB_USER: db_user
+  DB_PASSWORD: pass  
+  DB_MODULE: oracledb
+
+jobs:
+  run-robotframework-tests-psycopg2:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+
+    services:
+      oracle:
+        image: gvenzl/oracle-free:latest
+        env:
+          ORACLE_PASSWORD: pass
+          APP_USER: db_user
+          APP_USER_PASSWORD: pass
+        ports:
+          - 1521:1521
+         # Provide healthcheck script options for startup
+        options: >-
+          --health-cmd healthcheck.sh
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.8.14'
+
+      - name: Setup Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install ${{ env.DB_MODULE }}
+
+      - name: Install Development/Checked out version of DatabaseLibrary
+        run: |
+          pip install -e ${{ github.workspace }}
+
+      - name: Run Robot Framework tests using oracledb
+        working-directory: ./test
+        run: |
+          robot -T --xunit result.xml -d results/ -v DBName:${{ env.DB_DATABASE }} -v DBUser:${{ env.DB_USER }} -v DBPass:${{ env.DB_PASSWORD }} ${{ github.workspace }}/test/Oracle_Custom_Params_Tests.robot
+
+      - name: Upload Robot Logs
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: log-files
+          path: ./test/results/

@@ -1,0 +1,71 @@
+name: PostgreSQL (psycopg2) Tests
+
+on: [push, pull_request]
+
+env:
+  DB_DATABASE: db
+  DB_USER: postgres
+  DB_PASSWORD: postgres
+  DB_HOST: postgres
+  DB_PORT: 5432
+  DB_MODULE: psycopg2
+
+jobs:
+  run-robotframework-tests-psycopg2:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+
+    services:
+      postgres:
+        image: postgres:11
+        env:
+          POSTGRES_DB: db
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - '5432'
+        # needed because the postgres container does not provide a healthcheck
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.8.14'
+
+      - name: Setup Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install ${{ env.DB_MODULE }}
+
+      - name: Install Development/Checked out version of DatabaseLibrary
+        run: |
+          pip install -e ${{ github.workspace }}
+
+      - name: Set DB options if in ACT
+        if: ${{ env.ACT }}
+        run: |
+          echo "DB_HOST=${{ env.ACT_DB_HOST }}" >> $GITHUB_ENV
+          echo "DB_PORT=${{ env.ACT_POSTGRES_DB_PORT }}" >> $GITHUB_ENV
+
+      - name: Set DB options if not in ACT
+        if: ${{ !env.ACT }}
+        run: |
+          echo "DB_HOST=localhost" >> $GITHUB_ENV
+          echo "DB_PORT=${{ job.services.postgres.ports[5432] }}" >> $GITHUB_ENV
+
+      - name: Run Robot Framework tests using psycopg2
+        working-directory: ./test
+        run: |
+          robot -T --xunit result.xml -d results/ -v DBModule:${{ env.DB_MODULE }} -v DBName:${{ env.DB_DATABASE }} -v DBUser:${{ env.DB_USER }} -v DBPass:${{ env.DB_PASSWORD }} -v DBHost:${{ env.DB_HOST }} -v DBPort:${{ env.DB_PORT }} ${{ github.workspace }}/test/PostgreSQL_DB_Tests.robot
+
+      - name: Upload Robot Logs
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: log-files
+          path: ./test/results/
