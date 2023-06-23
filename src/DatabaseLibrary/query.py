@@ -345,10 +345,10 @@ class Query(object):
             spParams = []
         cur = None
         try:
-            if self.db_api_module_name in ["cx_Oracle", "oracledb"]:
-                cur = self._dbconnection.cursor()
-            else:
+            if self.db_api_module_name == "pymssql":
                 cur = self._dbconnection.cursor(as_dict=False)
+            else:
+                cur = self._dbconnection.cursor()
             PY3K = sys.version_info >= (3, 0)
             if not PY3K:
                 spName = spName.encode('ascii', 'ignore')
