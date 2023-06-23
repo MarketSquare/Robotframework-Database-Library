@@ -224,7 +224,7 @@ class Assertion(object):
         | Table Must Exist | first_name | msg=my error message |
         """
         logger.info('Executing : Table Must Exist  |  %s ' % tableName)
-        if self.db_api_module_name in ["cx_Oracle"]:
+        if self.db_api_module_name in ["cx_Oracle", "oracledb"]:
             selectStatement = ("SELECT * FROM all_objects WHERE object_type IN ('TABLE','VIEW') AND owner = SYS_CONTEXT('USERENV', 'SESSION_USER') AND object_name = UPPER('%s')" % tableName)
             table_exists = self.row_count(selectStatement, sansTran) > 0
         elif self.db_api_module_name in ["sqlite3"]:

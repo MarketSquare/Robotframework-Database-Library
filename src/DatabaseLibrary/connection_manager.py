@@ -130,6 +130,11 @@ class ConnectionManager(object):
             oracle_dsn =  db_api_2.makedsn(host=dbHost, port=dbPort, service_name=dbName)
             logger.info('Connecting using: %s.connect(user=%s, password=%s, dsn=%s) ' % (dbapiModuleName, dbUsername, dbPassword, oracle_dsn))
             self._dbconnection = db_api_2.connect(user=dbUsername, password=dbPassword, dsn=oracle_dsn)
+        elif dbapiModuleName in ["oracledb"]:
+            dbPort = dbPort or 1521
+            oracle_connection_params =  db_api_2.ConnectParams(host=dbHost, port=dbPort, service_name=dbName)
+            logger.info('Connecting using: %s.connect(user=%s, password=%s, params=%s) ' % (dbapiModuleName, dbUsername, dbPassword, oracle_connection_params))
+            self._dbconnection = db_api_2.connect(user=dbUsername, password=dbPassword, params=oracle_connection_params)
         elif dbapiModuleName in ["teradata"]:
             dbPort = dbPort or 1025
             teradata_udaExec = db_api_2.UdaExec(appName="RobotFramework", version="1.0", logConsole=False)

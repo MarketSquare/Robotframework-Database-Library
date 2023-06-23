@@ -86,7 +86,7 @@
             "description": "Database to run the tests for",
             "options": [
                 "PostgreSQL",
-                "Oracle_Custom",
+                "oracledb",
                 "cx_Oracle",
                 "SQLite",
                 "IBM_DB2",

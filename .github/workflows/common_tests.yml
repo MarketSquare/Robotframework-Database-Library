@@ -25,8 +25,8 @@ jobs:
             py_db_module: psycopg2
             pip_install: psycopg2
             db_port: 5432
-          - job_name: Oracle_Custom
-            module_mode: custom
+          - job_name: oracledb
+            module_mode: standard
             py_db_module: oracledb
             pip_install: oracledb
             db_port: 1521
