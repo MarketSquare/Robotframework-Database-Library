@@ -17,7 +17,6 @@ ${DB_PORT}              5432
 ${DB_USER}              db_user
 
 # used for MySQL via PyODBC only
-${DB_CHARSET}           ${None}
 ${DB_DRIVER}            ODBC Driver 18 for SQL Server
 
 
@@ -42,8 +41,7 @@ Connect To DB
             ...    ${DB_PASS}
             ...    ${DB_HOST}
             ...    ${DB_PORT}
-            ...    ${DB_CHARSET}
-            ...    ${DB_DRIVER}
+            ...    dbDriver=${DB_DRIVER}
         ELSE
             Connect To Database
             ...    ${DB_MODULE}

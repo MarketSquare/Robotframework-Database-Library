@@ -10,7 +10,7 @@ Test Teardown       Drop Tables Person And Foobar
 
 
 *** Test Cases ***
-Character In Values
+Non ASCII Characters In Values
     Execute Sql String    INSERT INTO person VALUES(1,'Jürgen','Gernegroß')
     ${results}=    Query
     ...    SELECT LAST_NAME FROM person WHERE FIRST_NAME='Jürgen'

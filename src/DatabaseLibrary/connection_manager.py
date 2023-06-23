@@ -97,7 +97,7 @@ class ConnectionManager(object):
         if dbapiModuleName in ["MySQLdb", "pymysql"]:
             dbPort = dbPort or 3306
             logger.info('Connecting using : %s.connect(db=%s, user=%s, passwd=%s, host=%s, port=%s, charset=%s) ' % (dbapiModuleName, dbName, dbUsername, dbPassword, dbHost, dbPort, dbCharset))
-            self._dbconnection = db_api_2.connect(db=dbName, user=dbUsername, passwd=dbPassword, host=dbHost, port=dbPort, charset=dbCharset)
+            self._dbconnection = db_api_2.connect(db=dbName, user=dbUsername, passwd=dbPassword, host=dbHost, port=dbPort, charset='utf8mb4' or dbCharset)
         elif dbapiModuleName in ["psycopg2"]:
             dbPort = dbPort or 5432
             logger.info('Connecting using : %s.connect(database=%s, user=%s, password=%s, host=%s, port=%s) ' % (dbapiModuleName, dbName, dbUsername, dbPassword, dbHost, dbPort))
@@ -106,7 +106,7 @@ class ConnectionManager(object):
             dbPort = dbPort or 1433
             dbDriver = dbDriver or "{SQL Server}"
             logger.info('Connecting using : %s.connect(DRIVER=%s;SERVER=%s:%s;DATABASE=%s;UID=%s;PWD=%s)' % (dbapiModuleName, dbDriver,  dbHost, dbPort, dbName, dbUsername, dbPassword))
-            self._dbconnection = db_api_2.connect('DRIVER=%s;SERVER=%s:%s;DATABASE=%s;UID=%s;PWD=%s' % ( dbDriver, dbHost, dbPort, dbName, dbUsername, dbPassword))
+            self._dbconnection = db_api_2.connect('DRIVER=%s;SERVER=%s:%s;DATABASE=%s;UID=%s;PWD=%s;charset=%s' % (dbDriver, dbHost, dbPort, dbName, dbUsername, dbPassword, 'utf8mb4' or dbCharset))
         elif dbapiModuleName in ["excel"]:
             logger.info(
                 'Connecting using : %s.connect(DRIVER={Microsoft Excel Driver (*.xls, *.xlsx, *.xlsm, *.xlsb)};DBQ=%s;ReadOnly=1;Extended Properties="Excel 8.0;HDR=YES";)' % (
