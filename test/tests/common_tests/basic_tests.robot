@@ -15,7 +15,6 @@ SQL Statement Ending With Semicolon Works
 
 SQL Statement Ending Without Semicolon Works
     Query    SELECT * FROM person;
-    # ToDo: fix for oracle
 
 Create Person Table
     [Setup]    Log    No setup for this test

@@ -1,5 +1,6 @@
 *** Settings ***
-Documentation       Tests which work with the same input params across all databases.
+Documentation       Simulate keyword fails and check that
+...                 using custom and starndard error messages work as expected
 
 Resource            ../../resources/common.resource
 
