@@ -19,9 +19,8 @@ ${Existing Select}          SELECT id FROM person WHERE first_name = 'Franz Alla
 *** Test Cases ***
 Check If Exists In DB Fails
     ${expected error}=    Catenate
-    ...    Expected to have have at least one row from
+    ...    Expected to have have at least one row, but got 0 rows from:
     ...    '${Non Existing Select}'
-    ...    but got 0 rows.
     Run Keyword And Expect Error    ${expected error}
     ...    Check If Exists In Database    ${Non Existing Select}
 
@@ -33,8 +32,8 @@ Check If Exists In DB Fails With Message
 Check If Not Exists In DB Fails
     ${expected error}=    Catenate
     ...    Expected to have have no rows from
-    ...    '${Existing Select}'
-    ...    but got some rows : *
+    ...    '${Existing Select}',
+    ...    but got some rows: *
     Run Keyword And Expect Error    ${expected error}
     ...    Check If Not Exists In Database    ${Existing Select}
 
@@ -56,9 +55,8 @@ Table Must Exist Fails With Message
 
 Verify Row Count Is 0 Fails
     ${expected error}=    Catenate
-    ...    Expected zero rows to be returned from
+    ...    Expected 0 rows, but 1 were returned from:
     ...    '${Existing Select}'
-    ...    but got rows back. Number of rows returned was 1
     Run Keyword And Expect Error    ${expected error}
     ...    Row Count Is 0    ${Existing Select}
 
@@ -69,9 +67,8 @@ Verify Row Count Is 0 Fails With Message
 
 Verify Row Count Is Equal To X Fails
     ${expected error}=    Catenate
-    ...    Expected same number of rows to be returned from
+    ...    Expected 9 rows, but 1 were returned from:
     ...    '${Existing Select}'
-    ...    than the returned rows of 1
     Run Keyword And Expect Error    ${expected error}
     ...    Row Count Is Equal To X    ${Existing Select}    9
 
@@ -82,9 +79,8 @@ Verify Row Count Is Equal To X Fails With Message
 
 Verify Row Count Is Less Than X Fails
     ${expected error}=    Catenate
-    ...    Expected less rows to be returned from
+    ...    Expected less than 1 rows, but 1 were returned from
     ...    '${Existing Select}'
-    ...    than the returned rows of 1
     Run Keyword And Expect Error    ${expected error}
     ...    Row Count Is Less Than X
     ...    ${Existing Select}    1
@@ -96,9 +92,8 @@ Verify Row Count Is Less Than X Fails With Message
 
 Verify Row Count Is Greater Than X Fails
     ${expected error}=    Catenate
-    ...    Expected more rows to be returned from
+    ...    Expected more than 1 rows, but 1 were returned from
     ...    '${Existing Select}'
-    ...    than the returned rows of 1
     Run Keyword And Expect Error    ${expected error}
     ...    Row Count Is Greater Than X
     ...    ${Existing Select}    1
