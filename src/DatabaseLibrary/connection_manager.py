@@ -96,16 +96,16 @@ class ConnectionManager(object):
 
         if dbapiModuleName in ["MySQLdb", "pymysql"]:
             dbPort = dbPort or 3306
-            logger.info('Connecting using : %s.connect(db=%s, user=%s, passwd=%s, host=%s, port=%s, charset=%s) ' % (dbapiModuleName, dbName, dbUsername, dbPassword, dbHost, dbPort, dbCharset))
+            logger.info('Connecting using : %s.connect(db=%s, user=%s, passwd=***, host=%s, port=%s, charset=%s) ' % (dbapiModuleName, dbName, dbUsername, dbHost, dbPort, dbCharset))
             self._dbconnection = db_api_2.connect(db=dbName, user=dbUsername, passwd=dbPassword, host=dbHost, port=dbPort, charset='utf8mb4' or dbCharset)
         elif dbapiModuleName in ["psycopg2"]:
             dbPort = dbPort or 5432
-            logger.info('Connecting using : %s.connect(database=%s, user=%s, password=%s, host=%s, port=%s) ' % (dbapiModuleName, dbName, dbUsername, dbPassword, dbHost, dbPort))
+            logger.info('Connecting using : %s.connect(database=%s, user=%s, password=***, host=%s, port=%s) ' % (dbapiModuleName, dbName, dbUsername, dbHost, dbPort))
             self._dbconnection = db_api_2.connect(database=dbName, user=dbUsername, password=dbPassword, host=dbHost, port=dbPort)
         elif dbapiModuleName in ["pyodbc", "pypyodbc"]:
             dbPort = dbPort or 1433
             dbDriver = dbDriver or "{SQL Server}"
-            logger.info('Connecting using : %s.connect(DRIVER=%s;SERVER=%s:%s;DATABASE=%s;UID=%s;PWD=%s)' % (dbapiModuleName, dbDriver,  dbHost, dbPort, dbName, dbUsername, dbPassword))
+            logger.info('Connecting using : %s.connect(DRIVER=%s;SERVER=%s:%s;DATABASE=%s;UID=%s;PWD=***)' % (dbapiModuleName, dbDriver,  dbHost, dbPort, dbName, dbUsername))
             self._dbconnection = db_api_2.connect('DRIVER=%s;SERVER=%s:%s;DATABASE=%s;UID=%s;PWD=%s;charset=%s' % (dbDriver, dbHost, dbPort, dbName, dbUsername, dbPassword, 'utf8mb4' or dbCharset))
         elif dbapiModuleName in ["excel"]:
             logger.info(
@@ -123,22 +123,24 @@ class ConnectionManager(object):
                     dbName), autocommit=True)
         elif dbapiModuleName in ["ibm_db", "ibm_db_dbi"]:
             dbPort = dbPort or 50000
-            logger.info('Connecting using : %s.connect(DATABASE=%s;HOSTNAME=%s;PORT=%s;PROTOCOL=TCPIP;UID=%s;PWD=%s;) ' % (dbapiModuleName, dbName, dbHost, dbPort, dbUsername, dbPassword))
+            logger.info('Connecting using : %s.connect(DATABASE=%s;HOSTNAME=%s;PORT=%s;PROTOCOL=TCPIP;UID=%s;PWD=***;) ' % (dbapiModuleName, dbName, dbHost, dbPort, dbUsername))
             self._dbconnection = db_api_2.connect('DATABASE=%s;HOSTNAME=%s;PORT=%s;PROTOCOL=TCPIP;UID=%s;PWD=%s;' % (dbName, dbHost, dbPort, dbUsername, dbPassword), '', '')
         elif dbapiModuleName in ["cx_Oracle"]:
             dbPort = dbPort or 1521
             oracle_dsn =  db_api_2.makedsn(host=dbHost, port=dbPort, service_name=dbName)
             logger.info('Connecting using: %s.connect(user=%s, password=%s, dsn=%s) ' % (dbapiModuleName, dbUsername, dbPassword, oracle_dsn))
             self._dbconnection = db_api_2.connect(user=dbUsername, password=dbPassword, dsn=oracle_dsn)
+            self.omit_trailing_semicolon = True
         elif dbapiModuleName in ["oracledb"]:
             dbPort = dbPort or 1521
             oracle_connection_params =  db_api_2.ConnectParams(host=dbHost, port=dbPort, service_name=dbName)
-            logger.info('Connecting using: %s.connect(user=%s, password=%s, params=%s) ' % (dbapiModuleName, dbUsername, dbPassword, oracle_connection_params))
+            logger.info('Connecting using: %s.connect(user=%s, password=***, params=%s) ' % (dbapiModuleName, dbUsername, oracle_connection_params))
             self._dbconnection = db_api_2.connect(user=dbUsername, password=dbPassword, params=oracle_connection_params)
+            self.omit_trailing_semicolon = True
         elif dbapiModuleName in ["teradata"]:
             dbPort = dbPort or 1025
             teradata_udaExec = db_api_2.UdaExec(appName="RobotFramework", version="1.0", logConsole=False)
-            logger.info('Connecting using : %s.connect(database=%s, user=%s, password=%s, host=%s, port=%s) ' % (dbapiModuleName, dbName, dbUsername, dbPassword, dbHost, dbPort))
+            logger.info('Connecting using : %s.connect(database=%s, user=%s, password=***, host=%s, port=%s) ' % (dbapiModuleName, dbName, dbUsername, dbHost, dbPort))
             self._dbconnection = teradata_udaExec.connect(
                 method="odbc",
                 system=dbHost,
