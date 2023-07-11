@@ -31,6 +31,12 @@ Execute SQL String - Create Foobar Table
     ${output}=    Create Foobar Table
     Should Be Equal As Strings    ${output}    None
 
+Simple Select With Multiple Rows
+    ${output}=    Query    select LAST_NAME from person
+    Length Should Be    ${output}    2
+    Should Be Equal    ${output}[0][0]    See
+    Should Be Equal    ${output}[1][0]    Schneider
+
 Check If Exists In DB - Franz Allan
     Check If Exists In Database    SELECT id FROM person WHERE FIRST_NAME= 'Franz Allan'
 
