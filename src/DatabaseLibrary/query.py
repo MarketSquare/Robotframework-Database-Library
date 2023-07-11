@@ -13,6 +13,7 @@
 #  limitations under the License.
 
 import sys
+import inspect
 from robot.api import logger
 
 
@@ -340,48 +341,136 @@ class Query(object):
 
     def call_stored_procedure(self, spName, spParams=None, sansTran=False):
         """
-        Uses the inputs of `spName` and 'spParams' to call a stored procedure. Set optional input `sansTran` to
-        True to run command without an explicit transaction commit or rollback.
+        Calls a stored procedure `spName` with the `spParams` - a *list* of parameters the procedure requires.
+        Use the special *CURSOR* value for OUT params, which should receive result sets -
+        they will be converted to appropriate DB variables before calling the procedure.
+        This is necessary only for some databases (e.g. Oracle or PostgreSQL).
 
-        spName should be the stored procedure name itself
-        spParams [Optional] should be a List of the parameters being sent in.  The list can be one or multiple items.
+        The keywords always *returns two lists*:
+        - *Param values* - the copy of procedure parameters (modified, if the procedure changes the OUT params).
+        The list is empty, if procedures receives no params.
+        - *Result sets* - the list of lists, each of them containing results of some query, if the procedure
+        returns them or put them in the OUT params of type *CURSOR* (like in Oracle or PostgreSQL).
 
-        The return from this keyword will always be a list.
+        It also depends on the database, how the procedure returns the values - as params or as result sets.
+        E.g. calling a procedure in *PostgreSQL* returns even a single value of an OUT param as a result set.
 
-        Example:
-        | @{ParamList} = | Create List | FirstParam | SecondParam | ThirdParam |
-        | @{QueryResults} = | Call Stored Procedure | DBName.SchemaName.StoredProcName | List of Parameters |
+        Set optional input `sansTran` to True to run command without an explicit transaction commit or rollback.
+        
+        Simple example:
+        | @{Params} = | Create List | Jerry | out_second_name |
+        | @{Param values}    @{Result sets} = | Call Stored Procedure | Get_second_name | ${Params} |
+        | # ${Param values} = ['Jerry', 'Schneider'] |
+        | # ${result sets} = [] |
 
-        Example:
-        | @{ParamList} = | Create List | Testing | LastName |
-        | Set Test Variable | ${SPName} = | DBTest.DBSchema.MyStoredProc |
-        | @{QueryResults} = | Call Stored Procedure | ${SPName} | ${ParamList} |
-        | Log List | @{QueryResults} |
+        Example with a single CURSOR parameter (Oracle DB):
+        | @{Params} = | Create List | CURSOR |
+        | @{Param values}    @{Result sets} = | Call Stored Procedure | Get_all_second_names | ${Params} |
+        | # ${Param values} = [<oracledb.Cursor on <oracledb.Connection ...>>] |
+        | # ${result sets} = [[('See',), ('Schneider',)]] |
+
+        Example with multiple CURSOR parameters (Oracle DB):
+        | @{Params} = | Create List | CURSOR | CURSOR |
+        | @{Param values}    @{Result sets} = | Call Stored Procedure | Get_all_first_and_second_names | ${Params} |
+        | # ${Param values} = [<oracledb.Cursor on <oracledb.Connection ...>>, <oracledb.Cursor on <oracledb.Connection ...>>] |
+        | # ${result sets} = [[('Franz Allan',), ('Jerry',)], [('See',), ('Schneider',)]] |
 
         Using optional `sansTran` to run command without an explicit transaction commit or rollback:
-        | @{QueryResults} = | Call Stored Procedure | DBName.SchemaName.StoredProcName | List of Parameters | True |
+        | @{Param values}    @{Result sets} = | Call Stored Procedure | DBName.SchemaName.StoredProcName | ${Params} | True |
         """
         if spParams is None:
             spParams = []
         cur = None
         try:
+            logger.info('Executing : Call Stored Procedure  |  %s  |  %s ' % (spName, spParams))
             if self.db_api_module_name == "pymssql":
                 cur = self._dbconnection.cursor(as_dict=False)
             else:
                 cur = self._dbconnection.cursor()
-            PY3K = sys.version_info >= (3, 0)
-            if not PY3K:
-                spName = spName.encode('ascii', 'ignore')
-            logger.info('Executing : Call Stored Procedure  |  %s  |  %s ' % (spName, spParams))
-            cur.callproc(spName, spParams)
-            cur.nextset()
-            retVal=list()
-            for row in cur:
-                #logger.info ( ' %s ' % (row))
-                retVal.append(row)
+            
+            param_values = []
+            result_sets = []
+            
+            if self.db_api_module_name == "pymysql":
+                cur.callproc(spName, spParams)
+
+                # first proceed the result sets if available
+                result_sets_available = True
+                while result_sets_available:
+                    result_sets.append(list(cur.fetchall()))
+                    result_sets_available = cur.nextset()
+                # last result set is always empty
+                # https://pymysql.readthedocs.io/en/latest/modules/cursors.html#pymysql.cursors.Cursor.callproc
+                result_sets.pop()
+
+                # now go on with single values - modified input params
+                for i in range(0, len(spParams)):
+                    cur.execute(f"select @_{spName}_{i}")
+                    param_values.append(cur.fetchall()[0][0])
+
+            elif self.db_api_module_name in ["oracledb", "cx_Oracle"]:
+                # check if "CURSOR" params were passed - they will be replaced
+                # with cursor variables for storing the result sets
+                params_substituted= spParams.copy()
+                cursor_params = []
+                for i in range(0, len(spParams)):
+                    if spParams[i] == "CURSOR":
+                        cursor_param = self._dbconnection.cursor()
+                        params_substituted[i] = cursor_param
+                        cursor_params.append(cursor_param)
+                param_values = cur.callproc(spName, params_substituted)
+                for result_set in cursor_params:
+                    result_sets.append(list(result_set))
+
+            elif self.db_api_module_name in ["psycopg2", "psycopg3"]:
+                cur = self._dbconnection.cursor()
+                # check if "CURSOR" params were passed - they will be replaced
+                # with cursor variables for storing the result sets
+                params_substituted= spParams.copy()
+                cursor_params = []
+                for i in range(0, len(spParams)):
+                    if spParams[i] == "CURSOR":
+                        cursor_param = f"CURSOR_{i}"
+                        params_substituted[i] = cursor_param
+                        cursor_params.append(cursor_param)
+                param_values = cur.callproc(spName, params_substituted)
+                if cursor_params:
+                    for cursor_param in cursor_params:
+                        cur.execute(f'FETCH ALL IN "{cursor_param}"')
+                        result_set = cur.fetchall()
+                        result_sets.append(list(result_set))
+                else:
+                    if self.db_api_module_name in ["psycopg3"]:
+                        result_sets_available = True
+                        while result_sets_available:
+                            result_sets.append(list(cur.fetchall()))
+                            result_sets_available = cur.nextset()
+                    else:                        
+                        result_set = cur.fetchall()
+                        result_sets.append(list(result_set))
+
+            else:
+                logger.info(f"CAUTION! Calling a stored procedure for '{self.db_api_module_name}' is not tested, "
+                            "results might be invalid!")
+                cur = self._dbconnection.cursor()
+                param_values = cur.callproc(spName, spParams)
+                logger.info("Reading the procedure results..")
+                result_sets_available = True
+                while result_sets_available:
+                    result_set = []
+                    for row in cur:
+                        result_set.append(row)
+                    if result_set:
+                        result_sets.append(list(result_set))
+                    if hasattr(cur, 'nextset') and inspect.isroutine(cur.nextset):
+                        result_sets_available = cur.nextset()
+                    else:
+                        result_sets_available = False
+                
             if not sansTran:
                 self._dbconnection.commit()
-            return retVal
+
+            return param_values, result_sets
         finally:
             if cur:
                 if not sansTran:
