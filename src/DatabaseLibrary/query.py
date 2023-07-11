@@ -367,6 +367,17 @@ class Query(object):
                 if not sansTran:
                     self._dbconnection.rollback()
 
-    def __execute_sql(self, cur, sqlStatement):
-        sqlStatement = sqlStatement.rstrip(";")
-        return cur.execute(sqlStatement)
+    def __execute_sql(self, cur, sql_statement, omit_trailing_semicolon=None):
+        """
+        Runs the `sql_statement` using `cur` as Cursor object.
+        Use `omit_trailing_semicolon` parameter (bool) for explicite instruction,
+        if the trailing semicolon (;) should be removed - otherwise the statement
+        won't be executed by some databases (e.g. Oracle).
+        Otherwise it's decided based on the current database module in use.
+        """
+        if omit_trailing_semicolon is None:
+            omit_trailing_semicolon = self.omit_trailing_semicolon
+        if omit_trailing_semicolon:
+            sql_statement = sql_statement.rstrip(";")
+        logger.debug(f"Executing sql: {sql_statement}")
+        return cur.execute(sql_statement)
