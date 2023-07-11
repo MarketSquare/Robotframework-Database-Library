@@ -1,9 +1,13 @@
 DROP ROUTINE IF EXISTS no_params;
 CREATE FUNCTION no_params()
 RETURNS VOID
-BEGIN ATOMIC
+LANGUAGE plpgsql
+AS
+'
+BEGIN
 -- Do nothing
-END;
+END
+';
 
 DROP ROUTINE IF EXISTS get_second_name;
 CREATE FUNCTION

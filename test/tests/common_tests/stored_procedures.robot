@@ -13,7 +13,7 @@ Procedure Takes No Params
     Length Should Be    ${param values}    0
     IF    "${DB_MODULE}" in ["psycopg2", "psycopg3"]
         Length Should Be    ${result sets}    1
-        Should Be Equal As Strings    ${result sets}[0][0][0]    None
+        Should Be Equal As Strings    ${result sets}[0][0][0]    ${EMPTY}
     ELSE
         Length Should Be    ${result sets}    0
     END
