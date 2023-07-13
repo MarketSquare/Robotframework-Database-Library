@@ -181,7 +181,16 @@ class ConnectionManager(object):
 
         db_connect_string = f'db_api_2.connect({db_connect_string})'
 
-        logger.info('Executing : Connect To Database Using Custom Params : %s.connect(%s) ' % (dbapiModuleName, db_connect_string))
+        connection_string_with_hidden_pass = db_connect_string
+        for pass_param_name in ['pass', 'passwd', 'password', 'pwd', 'PWD']:
+            splitted = connection_string_with_hidden_pass.split(pass_param_name + '=')
+            if len(splitted) < 2:
+                continue
+            splitted = splitted[1].split(',')
+            value_to_hide = splitted[0]
+            connection_string_with_hidden_pass = connection_string_with_hidden_pass.replace(value_to_hide, "***")
+        logger.info('Executing : Connect To Database Using Custom Params : %s.connect(%s) ' % (dbapiModuleName, connection_string_with_hidden_pass))
+
         self._dbconnection = eval(db_connect_string)
 
     def connect_to_database_using_custom_connection_string(self, dbapiModuleName=None, db_connect_string=''):
