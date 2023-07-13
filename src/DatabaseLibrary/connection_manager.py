@@ -129,7 +129,7 @@ class ConnectionManager(object):
         elif dbapiModuleName in ["cx_Oracle"]:
             dbPort = dbPort or 1521
             oracle_dsn =  db_api_2.makedsn(host=dbHost, port=dbPort, service_name=dbName)
-            logger.info('Connecting using: %s.connect(user=%s, password=%s, dsn=%s) ' % (dbapiModuleName, dbUsername, dbPassword, oracle_dsn))
+            logger.info('Connecting using: %s.connect(user=%s, password=***, dsn=%s) ' % (dbapiModuleName, dbUsername, oracle_dsn))
             self._dbconnection = db_api_2.connect(user=dbUsername, password=dbPassword, dsn=oracle_dsn)
             self.omit_trailing_semicolon = True
         elif dbapiModuleName in ["oracledb"]:
@@ -153,12 +153,12 @@ class ConnectionManager(object):
             )
         elif dbapiModuleName in ["ksycopg2"]:
             dbPort = dbPort or 54321
-            logger.info('Connecting using : %s.connect(database=%s, user=%s, password=%s, host=%s, port=%s) ' % (
-            dbapiModuleName, dbName, dbUsername, dbPassword, dbHost, dbPort))
+            logger.info('Connecting using : %s.connect(database=%s, user=%s, password=***, host=%s, port=%s) ' % (
+            dbapiModuleName, dbName, dbUsername, dbHost, dbPort))
             self._dbconnection = db_api_2.connect(database=dbName, user=dbUsername, password=dbPassword, host=dbHost,
                                                   port=dbPort)
         else:
-            logger.info('Connecting using : %s.connect(database=%s, user=%s, password=%s, host=%s, port=%s) ' % (dbapiModuleName, dbName, dbUsername, dbPassword, dbHost, dbPort))
+            logger.info('Connecting using : %s.connect(database=%s, user=%s, password=***, host=%s, port=%s) ' % (dbapiModuleName, dbName, dbUsername, dbHost, dbPort))
             self._dbconnection = db_api_2.connect(database=dbName, user=dbUsername, password=dbPassword, host=dbHost, port=dbPort)
 
     def connect_to_database_using_custom_params(self, dbapiModuleName=None, db_connect_string=''):
