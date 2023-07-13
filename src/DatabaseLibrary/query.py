@@ -272,16 +272,14 @@ class Query(object):
                     # semicolons inside the line? use them to separate statements
                     # ... but not if they are inside a begin/end block (aka. statements group)
                     sqlFragments = line.split(';')
-                    
                     # no semicolons
                     if len(sqlFragments) == 1:
                         current_statement += line + ' '
                         continue
-                    
+                    quotes = 0
                     # "select * from person;" -> ["select..", ""]
                     for sqlFragment in sqlFragments:
-                        sqlFragment = sqlFragment.strip()
-                        if len(sqlFragment) == 0:
+                        if len(sqlFragment.strip()) == 0:
                             continue
                         if inside_statements_group:
                             # if statements inside a begin/end block have semicolns,
@@ -291,10 +289,20 @@ class Query(object):
                             inside_statements_group = False
                         elif sqlFragment.lower().startswith("begin"):
                             inside_statements_group = True
+                        
+                        # check if the semicolon is a part of the value (quoted string)
+                        quotes += sqlFragment.count("'")
+                        quotes -= sqlFragment.count("\\'")
+                        quotes -= sqlFragment.count("''")
+                        inside_quoted_string = quotes % 2 != 0
+                        if inside_quoted_string:
+                            sqlFragment += ";"  # restore the semicolon
+                        
                         current_statement += sqlFragment
-                        if not inside_statements_group:
+                        if not inside_statements_group and not inside_quoted_string:
                             statements_to_execute.append(current_statement.strip())
                             current_statement = ''
+                            quotes = 0
 
                 current_statement = current_statement.strip()
                 if len(current_statement) != 0:
