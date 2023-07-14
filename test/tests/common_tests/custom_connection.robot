@@ -12,7 +12,6 @@ ${CONNECTION_STRING}    ${EMPTY}    # the variable is set dynamically depending 
 
 
 *** Test Cases ***
-# ToDo: custom tests for params and string for oracle and psycopg2 and sqlite (this one supports params only)
 Connect Using Custom Connection String
     [Documentation]    Connection string provided without additional quotes should work properly.
     ${Connection String}=    Build Connection String
