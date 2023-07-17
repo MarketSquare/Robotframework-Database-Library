@@ -15,7 +15,7 @@ Here you can find the [keyword docs](http://marketsquare.github.io/Robotframewor
 pip install robotframework-databaselibrary
 ```
 # Usage example
-```
+```RobotFramework
 *** Settings ***
 Library       DatabaseLibrary
 Test Setup    Connect To My Oracle DB
