@@ -1,0 +1,33 @@
+[build-system]
+requires = [
+    "setuptools>=61.0",
+    "robotframework",
+    "robotframework-excellib"
+    ]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "robotframework-databaselibrary"
+authors = [{name="Franz Allan Valencia See", email="franz.see@gmail.com"},
+]
+description = "Database Library for Robot Framework"
+readme = "README.md"
+requires-python = ">=3.7"
+dependencies = [
+    "robotframework",
+    "robotframework-excellib"
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+]
+license = {file = "LICENSE"}
+dynamic = ["version"]
+
+[project.urls]
+"Homepage" = "https://github.com/MarketSquare/Robotframework-Database-Library"
+"Keyword docs" = "http://marketsquare.github.io/Robotframework-Database-Library/"
+
+[tool.setuptools.dynamic]
+version = {attr = "DatabaseLibrary.__version__"}

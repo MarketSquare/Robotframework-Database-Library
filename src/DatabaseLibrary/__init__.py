@@ -19,7 +19,7 @@ from DatabaseLibrary.query import Query
 from DatabaseLibrary.assertion import Assertion
 from DatabaseLibrary.version import VERSION
 
-_version_ = VERSION
+__version__ = VERSION
 
 class DatabaseLibrary(ConnectionManager, Query, Assertion):
     """
