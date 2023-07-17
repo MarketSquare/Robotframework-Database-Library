@@ -23,46 +23,54 @@ _version_ = VERSION
 
 class DatabaseLibrary(ConnectionManager, Query, Assertion):
     """
-    Database Library contains utilities meant for Robot Framework's usage.
+    The Database Library for [https://robotframework.org|Robot Framework] allows you to query a database and verify the results.
+    It requires an appropriate *Python module to be installed separately* - depending on your database, like e.g. `oracledb` or `pymysql`. 
 
-    This can allow you to query your database after an action has been made to verify the results.
+    == Requirements ==
+    - Python
+    - Robot Framework
+    - Python database module you're going to use - e.g. `oracledb`
 
-    This is `compatible*` with any Database API Specification 2.0 module.
+    == Installation ==
+    | pip install robotframework-databaselibrary
+    Don't forget to install the required Python database module!
 
+    == Usage example ==
+    
+    | *** Settings ***
+    | Library       DatabaseLibrary
+    | Test Setup    Connect To My Oracle DB
+    | 
+    | *** Keywords ***
+    | Connect To My Oracle DB
+    |     Connect To Database
+    |     ...    oracledb
+    |     ...    dbName=db
+    |     ...    dbUsername=my_user
+    |     ...    dbPassword=my_pass
+    |     ...    dbHost=127.0.0.1
+    |     ...    dbPort=1521
+    | 
+    | *** Test Cases ***
+    | Person Table Contains Expected Records
+    |     ${output}=    Query    select LAST_NAME from person
+    |     Length Should Be    ${output}    2
+    |     Should Be Equal    ${output}[0][0]    See
+    |     Should Be Equal    ${output}[1][0]    Schneider
+    | 
+    | Person Table Contains No Joe
+    |     ${sql}=    Catenate    SELECT id FROM person
+    |     ...                    WHERE FIRST_NAME= 'Joe'    
+    |     Check If Not Exists In Database    ${sql}
+    | 
 
+    == Database modules compatibility ==
+    The library is basically compatible with any [https://peps.python.org/pep-0249|Python Database API Specification 2.0] module.
 
-    References:
+    However, the actual implementation in existing Python modules is sometimes quite different, which requires custom handling in the library.
+    Therefore there are some modules, which are "natively" supported in the library - and others, which may work and may not.
 
-     + Database API Specification 2.0 - http://www.python.org/dev/peps/pep-0249/
-
-     + Lists of DB API 2.0 - http://wiki.python.org/moin/DatabaseInterfaces
-
-     + Python Database Programming - http://wiki.python.org/moin/DatabaseProgramming/
-
-    Notes:
-
-
-
-    `compatible* - or at least theoretically it should be compatible. Currently tested only with postgresql
-    (using psycopg2).`
-
-    Example Usage:
-    | # Setup |
-    | Connect to Database |
-    | # Guard assertion (verify that test started in expected state). |
-    | Check if not exists in database | select id from person where first_name = 'Franz Allan' and last_name = 'See' |
-    | # Drive UI to do some action |
-    | Go To | http://localhost/person/form.html | | # From selenium library |
-    | Input Text |  name=first_name | Franz Allan | # From selenium library |
-    | Input Text |  name=last_name | See | # From selenium library |
-    | Click Button | Save | | # From selenium library |
-    | # Log results |
-    | @{queryResults} | Query | select * from person |
-    | Log Many | @{queryResults} |
-    | # Verify if persisted in the database |
-    | Check if exists in database | select id from person where first_name = 'Franz Allan' and last_name = 'See' |
-    | # Teardown |
-    | Disconnect from Database |
+    See more on the [https://github.com/MarketSquare/Robotframework-Database-Library|project page on GitHub].
     """
 
     ROBOT_LIBRARY_SCOPE = 'GLOBAL'

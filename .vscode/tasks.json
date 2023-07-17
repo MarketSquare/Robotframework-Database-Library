@@ -1,0 +1,35 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "type": "shell",
+            "label": "Run Oracle DB in Docker",
+            "command": "docker run --rm --name oracle -d -p 1521:1521 -e ORACLE_PASSWORD=pass -e ORACLE_DATABASE=db -e APP_USER=db_user -e APP_USER_PASSWORD=pass gvenzl/oracle-free",
+            "problemMatcher": []
+        },
+        {
+            "type": "shell",
+            "label": "Run PostreSQL DB in Docker",
+            "command": "docker run --rm --name postgres -e POSTGRES_USER=db_user -e POSTGRES_PASSWORD=pass -e POSTGRES_DB=db -p 5432:5432 -d postgres",
+            "problemMatcher": []
+        },
+        {
+            "type": "shell",
+            "label": "Run IBM DB2 in Docker",
+            "command": "docker run --rm -itd --name mydb2 --privileged=true -p 50000:50000 -e LICENSE=accept -e DB2INSTANCE=db_user -e DB2INST1_PASSWORD=pass -e DBNAME=db ibmcom/db2",
+            "problemMatcher": []
+        },
+        {
+            "type": "shell",
+            "label": "Run MySQL in Docker",
+            "command": "docker run --rm --name mysql -e MYSQL_ROOT_PASSWORD=pass -e MYSQL_DATABASE=db -e MYSQL_USER=db_user -e MYSQL_PASSWORD=pass -p 3306:3306 -d mysql",
+            "problemMatcher": []
+        },
+        {
+            "type": "shell",
+            "label": "Run MS SQL in Docker (don't forget the DB init!)",
+            "command": "docker run --rm --name mssql -e ACCEPT_EULA=Y -e MSSQL_SA_PASSWORD=MyPass1234! -p 1433:1433 -d mcr.microsoft.com/mssql/server",
+            "problemMatcher": []
+        },
+    ]
+  }

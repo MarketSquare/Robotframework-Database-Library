@@ -1,0 +1,125 @@
+name: MySQL (pymysql, pyodbc) Tests
+
+on: [push, pull_request]
+
+env:
+  DB_DATABASE: my_db_test
+  DB_USER: root
+  DB_PASSWORD: root
+  DB_HOST: 127.0.0.1
+  DB_PORT: 3306
+
+jobs:
+  dbsetup:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # py-db-module: ["pymysql", "pyodbc", "pymssql", "MySQLdb"]
+        include:
+          - db-name: PyMySQL
+            py-db-module: pymysql
+            pip-install: pymysql
+          - db-name: PyODBC
+            py-db-module: pyodbc
+            pip-install: pyodbc     
+          - db-name: MySQLdb
+            py-db-module: MySQLdb
+            pip-install: mysqlclient
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up MySQL
+        run: |
+          sudo /etc/init.d/mysql start
+          mysql -e 'CREATE DATABASE ${{ matrix.py-db-module }};' -u${{ env.DB_USER }} -p${{ env.DB_PASSWORD }}
+
+      - name: Verify MySQL Setup
+        run: |
+          mysql -e "SHOW DATABASES;" -u${{ env.DB_USER }} -p${{ env.DB_PASSWORD }}
+          netstat -ano
+
+      - name: Install ODBC driver for PostgreSQL
+        run: |
+          echo "*** apt-get install the driver"
+          sudo apt-get install --yes odbc-postgresql
+          echo '*** ls -l /usr/lib/x86_64-linux-gnu/odbc'
+          ls -l /usr/lib/x86_64-linux-gnu/odbc || true
+          echo '*** add full paths to Postgres .so files in /etc/odbcinst.ini'
+          sudo sed -i 's|Driver=psqlodbca.so|Driver=/usr/lib/x86_64-linux-gnu/odbc/psqlodbca.so|g' /etc/odbcinst.ini
+          sudo sed -i 's|Driver=psqlodbcw.so|Driver=/usr/lib/x86_64-linux-gnu/odbc/psqlodbcw.so|g' /etc/odbcinst.ini
+          sudo sed -i 's|Setup=libodbcpsqlS.so|Setup=/usr/lib/x86_64-linux-gnu/odbc/libodbcpsqlS.so|g' /etc/odbcinst.ini
+  
+      - name: Install ODBC driver for MySQL
+        run: |
+          cd "$RUNNER_TEMP"
+          echo "*** download driver zip file"
+          curl --silent --show-error --write-out "$CURL_OUTPUT_FORMAT" -O "https://www.mirrorservice.org/sites/ftp.mysql.com/Downloads/Connector-ODBC/8.0/${MYSQL_DRIVER}.tar.gz"
+          ls -l "${MYSQL_DRIVER}.tar.gz"
+          tar -xz -f "${MYSQL_DRIVER}.tar.gz"
+          echo "*** copy driver file to /usr/lib"
+          sudo cp -v "${MYSQL_DRIVER}/lib/libmyodbc8a.so" /usr/lib/x86_64-linux-gnu/odbc/
+          sudo chmod a+r /usr/lib/x86_64-linux-gnu/odbc/libmyodbc8a.so
+          echo "*** create odbcinst.ini entry"
+          echo '[MySQL ODBC 8.0 ANSI Driver]' > mysql_odbcinst.ini
+          echo 'Driver     = /usr/lib/x86_64-linux-gnu/odbc/libmyodbc8a.so' >> mysql_odbcinst.ini
+          echo 'UsageCount = 1' >> mysql_odbcinst.ini
+          echo 'Threading  = 2' >> mysql_odbcinst.ini
+          sudo odbcinst -i -d -f mysql_odbcinst.ini
+        env:
+          CURL_OUTPUT_FORMAT: '%{http_code} %{filename_effective} %{size_download} %{time_total}\n'
+          MYSQL_DRIVER: mysql-connector-odbc-8.0.22-linux-glibc2.12-x86-64bit
+  
+      - name: Check ODBC setup
+        run: |
+          echo "*** odbcinst -j"
+          odbcinst -j
+          echo "*** cat /etc/odbcinst.ini"
+          cat /etc/odbcinst.ini
+          echo "*** cat /etc/odbc.ini"
+          cat /etc/odbc.ini
+          echo '*** ls -l /opt/microsoft/msodbcsql17/lib64'
+          ls -l /opt/microsoft/msodbcsql17/lib64 || true
+          echo '*** ls -l /usr/lib/x86_64-linux-gnu/odbc'
+          ls -l /usr/lib/x86_64-linux-gnu/odbc || true
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.8.16'
+
+      - name: Setup Python Packaging and Pip
+        run: |
+          python -m pip install --upgrade pip
+          pip install wheel
+
+      - name: Setup Robot Framework
+        run: |
+          pip install robotframework
+
+      - name: Install Development/Checked out version of DatabaseLibrary
+        run: |
+          pip install ${{ github.workspace }}/.
+
+      - name: Setup Python DB module
+        run: |
+          pip install ${{ matrix.pip-install }}
+
+      - name: Run Robot Framework tests using PyMySQL
+        if: matrix.py-db-module == 'pymysql'
+        working-directory: ./test
+        run: |
+          robot -d pymysql/ -v DBModule:${{ matrix.py-db-module }} -v DBName:${{ matrix.py-db-module }} -v DBUser:${{ env.DB_USER }} -v DBPass:${{ env.DB_PASSWORD }} -v DBHost:${{ env.DB_HOST }} -v DBPort:${{ env.DB_PORT }} ${{ github.workspace }}/test/MySQL_DB_Tests.robot
+
+      - name: Run Robot Framework tests using PyODBC
+        if: matrix.py-db-module == 'pyodbc'
+        working-directory: ./test
+        run: |
+          python3 -c "import pyodbc; print(pyodbc.drivers())"
+          robot --loglevel TRACE -d pyodbc/ -v DBName:${{ matrix.py-db-module }} -v DBUser:${{ env.DB_USER }} -v DBPass:${{ env.DB_PASSWORD }} -v DBHost:localhost -v DBPort:${{ env.DB_PORT }} -v DBCharset:utf8mb4 -v dbDriver:"{MySQL ODBC 8.0 ANSI Driver}" ${{ github.workspace }}/test/PyODBC_DB_Tests.robot
+
+      - name: Upload Robot Logs
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: log-files
+          path: ./test/

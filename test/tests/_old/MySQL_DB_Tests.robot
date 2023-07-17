@@ -1,5 +1,5 @@
 *** Settings ***
-Suite Setup       Connect To Database    pymysql    ${DBName}    ${DBUser}    ${DBPass}    ${DBHost}    ${DBPort}
+Suite Setup       Connect To Database    ${DBModule}    ${DBName}    ${DBUser}    ${DBPass}    ${DBHost}    ${DBPort}
 Suite Teardown    Disconnect From Database
 Library           DatabaseLibrary
 Library           OperatingSystem
@@ -77,11 +77,11 @@ Verify person Description
     @{queryResults} =    Description    SELECT * FROM person LIMIT 1;
     Log Many    @{queryResults}
     ${output} =    Set Variable    ${queryResults[0]}
-    Should Be Equal As Strings    ${output}    (u'id', 3, None, 11, 11, 0, True)
+    Should Be Equal As Strings    ${output}    ('id', 3, None, 11, 11, 0, True)
     ${output} =    Set Variable    ${queryResults[1]}
-    Should Be Equal As Strings    ${output}    (u'first_name', 253, None, 20, 20, 0, True)
+    Should Be Equal As Strings    ${output}    ('first_name', 253, None, 80, 80, 0, True)
     ${output} =    Set Variable    ${queryResults[2]}
-    Should Be Equal As Strings    ${output}    (u'last_name', 253, None, 20, 20, 0, True)
+    Should Be Equal As Strings    ${output}    ('last_name', 253, None, 80, 80, 0, True)
     ${NumColumns} =    Get Length    ${queryResults}
     Should Be Equal As Integers    ${NumColumns}    3
 
@@ -91,9 +91,9 @@ Verify foobar Description
     @{queryResults} =    Description    SELECT * FROM foobar LIMIT 1;
     Log Many    @{queryResults}
     ${output} =    Set Variable    ${queryResults[0]}
-    Should Be Equal As Strings    ${output}    (u'id', 3, None, 11, 11, 0, False)
+    Should Be Equal As Strings    ${output}    ('id', 3, None, 11, 11, 0, False)
     ${output} =    Set Variable    ${queryResults[1]}
-    Should Be Equal As Strings    ${output}    (u'firstname', 253, None, 20, 20, 0, True)
+    Should Be Equal As Strings    ${output}    ('firstname', 253, None, 80, 80, 0, True)
     ${NumColumns} =    Get Length    ${queryResults}
     Should Be Equal As Integers    ${NumColumns}    2
 
@@ -113,8 +113,8 @@ Verify Query - Get results as a list of dictionaries
     [Tags]    db    smoke
     ${output} =    Query    SELECT * FROM person;    \    True
     Log    ${output}
-    Should Be Equal As Strings    &{output[0]}[first_name]    Franz Allan
-    Should Be Equal As Strings    &{output[1]}[first_name]    Jerry
+    Should Be Equal As Strings    ${output[0]}[first_name]    Franz Allan
+    Should Be Equal As Strings    ${output[1]}[first_name]    Jerry
 
 Verify Execute SQL String - Row Count person table
     [Tags]    db    smoke
