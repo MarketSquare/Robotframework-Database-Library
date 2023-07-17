@@ -4,7 +4,7 @@ The Database Library for [Robot Framework](https://robotframework.org) allows yo
 It requires an appropriate **Python module to be installed separately** - depending on your database, like e.g. `oracledb` or `pymysql`. 
 
 The library consists of some keywords designed to perform different checks on your database.
-Here you can find the [keyword docs](LINK).
+Here you can find the [keyword docs](http://marketsquare.github.io/Robotframework-Database-Library/).
 
 # Requirements
 - Python
