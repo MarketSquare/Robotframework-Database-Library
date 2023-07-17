@@ -1,8 +1,9 @@
+dist/
 build/
+*.egg-info/
 *.pyc
 .idea
 .py*/
-*.egg-info/
 **/my_db_test.db
 logs
 **/output.xml
