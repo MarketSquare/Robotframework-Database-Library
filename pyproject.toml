@@ -1,8 +1,7 @@
 [build-system]
 requires = [
     "setuptools>=61.0",
-    "robotframework",
-    "robotframework-excellib"
+    "robotframework"
     ]
 build-backend = "setuptools.build_meta"
 
