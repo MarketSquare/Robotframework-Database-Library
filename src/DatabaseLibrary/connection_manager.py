@@ -106,7 +106,7 @@ class ConnectionManager(object):
         elif dbapiModuleName in ["pyodbc", "pypyodbc"]:
             dbPort = dbPort or 1433
             dbDriver = dbDriver or "{SQL Server}"
-            logger.info('Connecting using : %s.connect(DRIVER=%s;SERVER=%s:%s;DATABASE=%s;UID=%s;PWD=***)' % (dbapiModuleName, dbDriver,  dbHost, dbPort, dbName, dbUsername))
+            logger.info('Connecting using : %s.connect(DRIVER=%s;SERVER=%s;PORT=%s;DATABASE=%s;UID=%s;PWD=***;charset=%s)' % (dbapiModuleName, dbDriver,  dbHost, dbPort, dbName, dbUsername))
             self._dbconnection = db_api_2.connect('DRIVER=%s;SERVER=%s;PORT=%s;DATABASE=%s;UID=%s;PWD=%s;charset=%s' % (dbDriver, dbHost, dbPort, dbName, dbUsername, dbPassword, 'utf8mb4' or dbCharset))
         elif dbapiModuleName in ["excel"]:
             logger.info(
