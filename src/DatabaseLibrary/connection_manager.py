@@ -107,7 +107,7 @@ class ConnectionManager(object):
             dbPort = dbPort or 1433
             dbDriver = dbDriver or "{SQL Server}"
             logger.info('Connecting using : %s.connect(DRIVER=%s;SERVER=%s:%s;DATABASE=%s;UID=%s;PWD=***)' % (dbapiModuleName, dbDriver,  dbHost, dbPort, dbName, dbUsername))
-            self._dbconnection = db_api_2.connect('DRIVER=%s;SERVER=%s:%s;DATABASE=%s;UID=%s;PWD=%s;charset=%s' % (dbDriver, dbHost, dbPort, dbName, dbUsername, dbPassword, 'utf8mb4' or dbCharset))
+            self._dbconnection = db_api_2.connect('DRIVER=%s;SERVER=%s;PORT=%s;DATABASE=%s;UID=%s;PWD=%s;charset=%s' % (dbDriver, dbHost, dbPort, dbName, dbUsername, dbPassword, 'utf8mb4' or dbCharset))
         elif dbapiModuleName in ["excel"]:
             logger.info(
                 'Connecting using : %s.connect(DRIVER={Microsoft Excel Driver (*.xls, *.xlsx, *.xlsm, *.xlsb)};DBQ=%s;ReadOnly=1;Extended Properties="Excel 8.0;HDR=YES";)' % (
