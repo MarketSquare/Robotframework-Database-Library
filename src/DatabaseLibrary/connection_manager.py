@@ -105,10 +105,15 @@ class ConnectionManager(object):
             self._dbconnection = db_api_2.connect(database=dbName, user=dbUsername, password=dbPassword, host=dbHost, port=dbPort)
         elif dbapiModuleName in ["pyodbc", "pypyodbc"]:
             dbPort = dbPort or 1433
-            dbDriver = dbDriver or "{SQL Server}"
             dbCharset = dbCharset or 'utf8mb4'
-            logger.info('Connecting using : %s.connect(DRIVER=%s;SERVER=%s,%s;DATABASE=%s;UID=%s;PWD=***;charset=%s)' % (dbapiModuleName, dbDriver,  dbHost, dbPort, dbName, dbUsername, dbCharset))
-            self._dbconnection = db_api_2.connect('DRIVER=%s;SERVER=%s,%s;DATABASE=%s;UID=%s;PWD=%s;charset=%s' % (dbDriver, dbHost, dbPort, dbName, dbUsername, dbPassword, dbCharset))
+            dbDriver = dbDriver or "{SQL Server}"
+            con_str = f"DRIVER={dbDriver};DATABASE={dbName};UID={dbUsername};PWD={dbPassword};charset={dbCharset};"
+            if "mysql" in dbDriver.lower():
+                con_str += f"SERVER={dbHost}:{dbPort}"
+            else:
+                con_str += f"SERVER={dbHost},{dbPort}"
+            logger.info(f'Connecting using : {dbapiModuleName}.connect({con_str.replace(dbPassword, "***")})')
+            self._dbconnection = db_api_2.connect(con_str)
         elif dbapiModuleName in ["excel"]:
             logger.info(
                 'Connecting using : %s.connect(DRIVER={Microsoft Excel Driver (*.xls, *.xlsx, *.xlsm, *.xlsb)};DBQ=%s;ReadOnly=1;Extended Properties="Excel 8.0;HDR=YES";)' % (
