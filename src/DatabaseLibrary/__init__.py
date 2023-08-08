@@ -14,17 +14,18 @@
 
 import os
 
+from DatabaseLibrary.assertion import Assertion
 from DatabaseLibrary.connection_manager import ConnectionManager
 from DatabaseLibrary.query import Query
-from DatabaseLibrary.assertion import Assertion
 from DatabaseLibrary.version import VERSION
 
 __version__ = VERSION
 
+
 class DatabaseLibrary(ConnectionManager, Query, Assertion):
     """
     The Database Library for [https://robotframework.org|Robot Framework] allows you to query a database and verify the results.
-    It requires an appropriate *Python module to be installed separately* - depending on your database, like e.g. `oracledb` or `pymysql`. 
+    It requires an appropriate *Python module to be installed separately* - depending on your database, like e.g. `oracledb` or `pymysql`.
 
     == Requirements ==
     - Python
@@ -36,11 +37,11 @@ class DatabaseLibrary(ConnectionManager, Query, Assertion):
     Don't forget to install the required Python database module!
 
     == Usage example ==
-    
+
     | *** Settings ***
     | Library       DatabaseLibrary
     | Test Setup    Connect To My Oracle DB
-    | 
+    |
     | *** Keywords ***
     | Connect To My Oracle DB
     |     Connect To Database
@@ -50,19 +51,19 @@ class DatabaseLibrary(ConnectionManager, Query, Assertion):
     |     ...    dbPassword=my_pass
     |     ...    dbHost=127.0.0.1
     |     ...    dbPort=1521
-    | 
+    |
     | *** Test Cases ***
     | Person Table Contains Expected Records
     |     ${output}=    Query    select LAST_NAME from person
     |     Length Should Be    ${output}    2
     |     Should Be Equal    ${output}[0][0]    See
     |     Should Be Equal    ${output}[1][0]    Schneider
-    | 
+    |
     | Person Table Contains No Joe
     |     ${sql}=    Catenate    SELECT id FROM person
-    |     ...                    WHERE FIRST_NAME= 'Joe'    
+    |     ...                    WHERE FIRST_NAME= 'Joe'
     |     Check If Not Exists In Database    ${sql}
-    | 
+    |
 
     == Database modules compatibility ==
     The library is basically compatible with any [https://peps.python.org/pep-0249|Python Database API Specification 2.0] module.
@@ -73,4 +74,4 @@ class DatabaseLibrary(ConnectionManager, Query, Assertion):
     See more on the [https://github.com/MarketSquare/Robotframework-Database-Library|project page on GitHub].
     """
 
-    ROBOT_LIBRARY_SCOPE = 'GLOBAL'
+    ROBOT_LIBRARY_SCOPE = "GLOBAL"

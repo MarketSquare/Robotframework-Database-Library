@@ -15,7 +15,7 @@
 from robot.api import logger
 
 
-class Assertion(object):
+class Assertion:
     """
     Assertion handles all the assertions of Database Library.
     """
@@ -44,10 +44,11 @@ class Assertion(object):
         Using optional `msg` to override the default error message:
         | Check If Exists In Database | SELECT id FROM person WHERE first_name = 'John' | msg=my error message |
         """
-        logger.info (f"Executing : Check If Exists In Database  |  {selectStatement}")
+        logger.info(f"Executing : Check If Exists In Database  |  {selectStatement}")
         if not self.query(selectStatement, sansTran):
-            raise AssertionError(msg or f"Expected to have have at least one row, "
-                                 f"but got 0 rows from: '{selectStatement}'")
+            raise AssertionError(
+                msg or f"Expected to have have at least one row, " f"but got 0 rows from: '{selectStatement}'"
+            )
 
     def check_if_not_exists_in_database(self, selectStatement, sansTran=False, msg=None):
         """
@@ -78,8 +79,9 @@ class Assertion(object):
         logger.info(f"Executing : Check If Not Exists In Database  |  {selectStatement}")
         queryResults = self.query(selectStatement, sansTran)
         if queryResults:
-            raise AssertionError(msg or f"Expected to have have no rows from '{selectStatement}', "
-                                        f"but got some rows: {queryResults}")
+            raise AssertionError(
+                msg or f"Expected to have have no rows from '{selectStatement}', but got some rows: {queryResults}"
+            )
 
     def row_count_is_0(self, selectStatement, sansTran=False, msg=None):
         """
@@ -137,9 +139,10 @@ class Assertion(object):
         """
         logger.info(f"Executing : Row Count Is Equal To X  |  {selectStatement}  |  {numRows}")
         num_rows = self.row_count(selectStatement, sansTran)
-        if num_rows != int(numRows.encode('ascii')):
-            raise AssertionError(msg or f"Expected {numRows} rows, "
-                                 f"but {num_rows} were returned from: '{selectStatement}'")
+        if num_rows != int(numRows.encode("ascii")):
+            raise AssertionError(
+                msg or f"Expected {numRows} rows, but {num_rows} were returned from: '{selectStatement}'"
+            )
 
     def row_count_is_greater_than_x(self, selectStatement, numRows, sansTran=False, msg=None):
         """
@@ -168,9 +171,10 @@ class Assertion(object):
         """
         logger.info(f"Executing : Row Count Is Greater Than X  |  {selectStatement}  |  {numRows}")
         num_rows = self.row_count(selectStatement, sansTran)
-        if num_rows <= int(numRows.encode('ascii')):
-            raise AssertionError(msg or f"Expected more than {numRows} rows, "
-                                 f"but {num_rows} were returned from '{selectStatement}'")
+        if num_rows <= int(numRows.encode("ascii")):
+            raise AssertionError(
+                msg or f"Expected more than {numRows} rows, but {num_rows} were returned from '{selectStatement}'"
+            )
 
     def row_count_is_less_than_x(self, selectStatement, numRows, sansTran=False, msg=None):
         """
@@ -199,9 +203,10 @@ class Assertion(object):
         """
         logger.info(f"Executing : Row Count Is Less Than X  |  {selectStatement}  |  {numRows}")
         num_rows = self.row_count(selectStatement, sansTran)
-        if num_rows >= int(numRows.encode('ascii')):
-            raise AssertionError(msg or f"Expected less than {numRows} rows, "
-                                 f"but {num_rows} were returned from '{selectStatement}'")
+        if num_rows >= int(numRows.encode("ascii")):
+            raise AssertionError(
+                msg or f"Expected less than {numRows} rows, but {num_rows} were returned from '{selectStatement}'"
+            )
 
     def table_must_exist(self, tableName, sansTran=False, msg=None):
         """
@@ -223,30 +228,34 @@ class Assertion(object):
         Using optional `msg` to override the default error message:
         | Table Must Exist | first_name | msg=my error message |
         """
-        logger.info('Executing : Table Must Exist  |  %s ' % tableName)
+        logger.info("Executing : Table Must Exist  |  %s " % tableName)
         if self.db_api_module_name in ["cx_Oracle", "oracledb"]:
-            selectStatement = ("SELECT * FROM all_objects WHERE object_type IN ('TABLE','VIEW') AND owner = SYS_CONTEXT('USERENV', 'SESSION_USER') AND object_name = UPPER('%s')" % tableName)
+            selectStatement = (
+                "SELECT * FROM all_objects WHERE object_type IN ('TABLE','VIEW') AND "
+                "owner = SYS_CONTEXT('USERENV', 'SESSION_USER') AND object_name = UPPER('%s')" % tableName
+            )
             table_exists = self.row_count(selectStatement, sansTran) > 0
         elif self.db_api_module_name in ["sqlite3"]:
-            selectStatement = ("SELECT name FROM sqlite_master WHERE type='table' AND name='%s' COLLATE NOCASE" % tableName)
+            selectStatement = (
+                "SELECT name FROM sqlite_master WHERE type='table' AND name='%s' COLLATE NOCASE" % tableName
+            )
             table_exists = self.row_count(selectStatement, sansTran) > 0
         elif self.db_api_module_name in ["ibm_db", "ibm_db_dbi"]:
-            selectStatement = ("SELECT name FROM SYSIBM.SYSTABLES WHERE type='T' AND name=UPPER('%s')" % tableName)
+            selectStatement = "SELECT name FROM SYSIBM.SYSTABLES WHERE type='T' AND name=UPPER('%s')" % tableName
             table_exists = self.row_count(selectStatement, sansTran) > 0
         elif self.db_api_module_name in ["teradata"]:
-            selectStatement = ("SELECT TableName FROM DBC.TablesV WHERE TableKind='T' AND TableName='%s'" % tableName)
+            selectStatement = "SELECT TableName FROM DBC.TablesV WHERE TableKind='T' AND TableName='%s'" % tableName
             table_exists = self.row_count(selectStatement, sansTran) > 0
         else:
             try:
-                selectStatement = (f"SELECT * FROM information_schema.tables WHERE table_name='{tableName}'")
+                selectStatement = f"SELECT * FROM information_schema.tables WHERE table_name='{tableName}'"
                 table_exists = self.row_count(selectStatement, sansTran) > 0
             except:
                 logger.info("Database doesn't support information schema, try using a simple SQL request")
                 try:
-                    selectStatement = (f"SELECT 1 from {tableName} where 1=0")
+                    selectStatement = f"SELECT 1 from {tableName} where 1=0"
                     num_rows = self.row_count(selectStatement, sansTran)
                     table_exists = True
                 except:
                     table_exists = False
         assert table_exists, msg or f"Table '{tableName}' does not exist in the db"
-
