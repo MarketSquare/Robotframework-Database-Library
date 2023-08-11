@@ -60,7 +60,7 @@ class Query(object):
         try:
             cur = self._dbconnection.cursor()
             logger.info('Executing : Query  |  %s ' % selectStatement)
-            self.__execute_sql(cur, selectStatement)
+            self.__execute_sql(cur, selectStatement, parameters=parameters)
             allRows = cur.fetchall()
 
             if returnAsDict:
@@ -111,7 +111,7 @@ class Query(object):
         try:
             cur = self._dbconnection.cursor()
             logger.info('Executing : Row Count  |  %s ' % selectStatement)
-            self.__execute_sql(cur, selectStatement)
+            self.__execute_sql(cur, selectStatement, parameters=parameters)
             data = cur.fetchall()
             if self.db_api_module_name in ["sqlite3", "ibm_db", "ibm_db_dbi", "pyodbc"]:
                 rowCount = len(data)
@@ -148,7 +148,7 @@ class Query(object):
         try:
             cur = self._dbconnection.cursor()
             logger.info('Executing : Description  |  %s ' % selectStatement)
-            self.__execute_sql(cur, selectStatement)
+            self.__execute_sql(cur, selectStatement, parameters=parameters)
             description = list(cur.description)
             if sys.version_info[0] < 3:
                 for row in range(0, len(description)):
@@ -339,7 +339,7 @@ class Query(object):
         try:
             cur = self._dbconnection.cursor()
             logger.info('Executing : Execute SQL String  |  %s ' % sqlString)
-            self.__execute_sql(cur, sqlString)
+            self.__execute_sql(cur, sqlString, parameters=parameters)
             if not sansTran:
                 self._dbconnection.commit()
         finally:
