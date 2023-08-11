@@ -69,7 +69,7 @@ class Query:
         try:
             cur = db_connection.client.cursor()
             logger.info(f"Executing : Query  |  {selectStatement} ")
-            self.__execute_sql(cur, selectStatement)
+            self.__execute_sql(cur, selectStatement, parameters=parameters)
             all_rows = cur.fetchall()
             if returnAsDict:
                 col_names = [c[0] for c in cur.description]
@@ -115,7 +115,7 @@ class Query:
         try:
             cur = db_connection.client.cursor()
             logger.info(f"Executing : Row Count  |  {selectStatement}")
-            self.__execute_sql(cur, selectStatement)
+            self.__execute_sql(cur, selectStatement, parameters=parameters)
             data = cur.fetchall()
             if db_connection.module_name in ["sqlite3", "ibm_db", "ibm_db_dbi", "pyodbc"]:
                 return len(data)
@@ -154,7 +154,7 @@ class Query:
         try:
             cur = db_connection.client.cursor()
             logger.info("Executing : Description  |  {selectStatement}")
-            self.__execute_sql(cur, selectStatement)
+            self.__execute_sql(cur, selectStatement, parameters=parameters)
             description = list(cur.description)
             if sys.version_info[0] < 3:
                 for row in range(0, len(description)):
@@ -356,7 +356,7 @@ class Query:
         try:
             cur = db_connection.client.cursor()
             logger.info(f"Executing : Execute SQL String  |  {sqlString}")
-            self.__execute_sql(cur, sqlString)
+            self.__execute_sql(cur, sqlString, parameters=parameters)
             if not sansTran:
                 db_connection.client.commit()
         finally:
