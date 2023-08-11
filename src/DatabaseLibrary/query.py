@@ -25,7 +25,7 @@ class Query:
     """
 
     def query(
-        self, selectStatement: str, sansTran: bool = False, returnAsDict: bool = False, alias: Optional[str] = None
+        self, selectStatement: str, sansTran: bool = False, returnAsDict: bool = False, alias: Optional[str] = None, parameters: Optional[List] = None
     ):
         """
         Uses the input ``selectStatement`` to query for the values that will be returned as a list of tuples. Set
@@ -79,7 +79,7 @@ class Query:
             if cur and not sansTran:
                 db_connection.client.rollback()
 
-    def row_count(self, selectStatement: str, sansTran: bool = False, alias: Optional[str] = None):
+    def row_count(self, selectStatement: str, sansTran: bool = False, alias: Optional[str] = None, parameters: Optional[List] = None):
         """
         Uses the input ``selectStatement`` to query the database and returns the number of rows from the query. Set
         optional input ``sansTran`` to True to run command without an explicit transaction commit or rollback.
@@ -124,7 +124,7 @@ class Query:
             if cur and not sansTran:
                 db_connection.client.rollback()
 
-    def description(self, selectStatement: str, sansTran: bool = False, alias: Optional[str] = None):
+    def description(self, selectStatement: str, sansTran: bool = False, alias: Optional[str] = None, parameters: Optional[List] = None):
         """
         Uses the input ``selectStatement`` to query a table in the db which will be used to determine the description. Set
         optional input ``sansTran` to True to run command without an explicit transaction commit or rollback.
@@ -331,7 +331,7 @@ class Query:
                 if cur and not sansTran:
                     db_connection.client.rollback()
 
-    def execute_sql_string(self, sqlString: str, sansTran: bool = False, alias: Optional[str] = None):
+    def execute_sql_string(self, sqlString: str, sansTran: bool = False, alias: Optional[str] = None, parameters: Optional[List] = None):
         """
         Executes the sqlString as SQL commands. Useful to pass arguments to your sql. Set optional input `sansTran` to
         True to run command without an explicit transaction commit or rollback.
@@ -507,7 +507,7 @@ class Query:
             if cur and not sansTran:
                 db_connection.client.rollback()
 
-    def __execute_sql(self, cur, sql_statement: str, omit_trailing_semicolon: Optional[bool] = None):
+    def __execute_sql(self, cur, sql_statement: str, omit_trailing_semicolon: Optional[bool] = None, parameters: Optional[List] = None):
         """
         Runs the `sql_statement` using `cur` as Cursor object.
         Use `omit_trailing_semicolon` parameter (bool) for explicit instruction,
@@ -519,5 +519,7 @@ class Query:
             omit_trailing_semicolon = self.omit_trailing_semicolon
         if omit_trailing_semicolon:
             sql_statement = sql_statement.rstrip(";")
+        if parameters is None:
+            parameters = []
         logger.debug(f"Executing sql: {sql_statement}")
-        return cur.execute(sql_statement)
+        return cur.execute(sql_statement, parameters)
