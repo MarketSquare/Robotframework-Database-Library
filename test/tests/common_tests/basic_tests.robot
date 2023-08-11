@@ -16,6 +16,10 @@ SQL Statement Ending With Semicolon Works
 SQL Statement Ending Without Semicolon Works
     Query    SELECT * FROM person;
 
+SQL Statement With Parameters Works
+    ${output}=    Query    SELECT * FROM person WHERE id < ?    parameters=[1]
+    Length Should Be    ${output}    1    
+
 Create Person Table
     [Setup]    Log    No setup for this test
     ${output}=    Create Person Table
