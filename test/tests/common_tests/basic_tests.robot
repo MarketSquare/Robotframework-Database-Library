@@ -18,11 +18,15 @@ SQL Statement Ending Without Semicolon Works
 
 SQL Statement With Parameters Works
     @{params}=    Create List    2
-    TRY
-        ${output}=    Query    SELECT * FROM person WHERE id < ?    parameters=${params}
-    EXCEPT
+    
+    IF  "${DB_MODULE}" in ["oracledb"]
         ${output}=    Query    SELECT * FROM person WHERE id < :id    parameters=${params}
+    ELSE IF  "${DB_MODULE}" in ["sqlite3", "pyodbc"]
+        ${output}=    Query    SELECT * FROM person WHERE id < ?    parameters=${params}
+    ELSE
+        ${output}=    Query    SELECT * FROM person WHERE id < %s    parameters=${params}    
     END
+    
     Length Should Be    ${output}    1    
 
 Create Person Table
