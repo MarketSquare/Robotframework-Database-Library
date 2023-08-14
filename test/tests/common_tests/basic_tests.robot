@@ -18,7 +18,11 @@ SQL Statement Ending Without Semicolon Works
 
 SQL Statement With Parameters Works
     @{params}=    Create List    2
-    ${output}=    Query    SELECT * FROM person WHERE id < ?    parameters=${params}
+    TRY
+        ${output}=    Query    SELECT * FROM person WHERE id < ?    parameters=${params}
+    EXCEPT
+        ${output}=    Query    SELECT * FROM person WHERE id < :id    parameters=${params}
+    END
     Length Should Be    ${output}    1    
 
 Create Person Table
