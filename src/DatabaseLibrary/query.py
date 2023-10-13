@@ -12,12 +12,13 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import sys
 import inspect
+import sys
+
 from robot.api import logger
 
 
-class Query(object):
+class Query:
     """
     Query handles all the querying done by the Database Library.
     """
@@ -59,7 +60,7 @@ class Query(object):
         cur = None
         try:
             cur = self._dbconnection.cursor()
-            logger.info('Executing : Query  |  %s ' % selectStatement)
+            logger.info("Executing : Query  |  %s " % selectStatement)
             self.__execute_sql(cur, selectStatement)
             allRows = cur.fetchall()
 
@@ -110,7 +111,7 @@ class Query(object):
         cur = None
         try:
             cur = self._dbconnection.cursor()
-            logger.info('Executing : Row Count  |  %s ' % selectStatement)
+            logger.info("Executing : Row Count  |  %s " % selectStatement)
             self.__execute_sql(cur, selectStatement)
             data = cur.fetchall()
             if self.db_api_module_name in ["sqlite3", "ibm_db", "ibm_db_dbi", "pyodbc"]:
@@ -147,12 +148,12 @@ class Query(object):
         cur = None
         try:
             cur = self._dbconnection.cursor()
-            logger.info('Executing : Description  |  %s ' % selectStatement)
+            logger.info("Executing : Description  |  %s " % selectStatement)
             self.__execute_sql(cur, selectStatement)
             description = list(cur.description)
             if sys.version_info[0] < 3:
                 for row in range(0, len(description)):
-                    description[row] = (description[row][0].encode('utf-8'),) + description[row][1:]
+                    description[row] = (description[row][0].encode("utf-8"),) + description[row][1:]
             return description
         finally:
             if cur:
@@ -179,10 +180,10 @@ class Query(object):
         | Delete All Rows From Table | person | True |
         """
         cur = None
-        selectStatement = ("DELETE FROM %s" % tableName)
+        selectStatement = "DELETE FROM %s" % tableName
         try:
             cur = self._dbconnection.cursor()
-            logger.info('Executing : Delete All Rows From Table  |  %s ' % selectStatement)
+            logger.info("Executing : Delete All Rows From Table  |  %s " % selectStatement)
             result = self.__execute_sql(cur, selectStatement)
             if result is not None:
                 if not sansTran:
@@ -201,7 +202,7 @@ class Query(object):
         state before running your tests, or clearing out your test data after running each a test. Set optional input
         `sansTran` to True to run command without an explicit transaction commit or rollback.
 
-        
+
         Sample usage :
         | Execute Sql Script | ${EXECDIR}${/}resources${/}DDL-setup.sql |
         | Execute Sql Script | ${EXECDIR}${/}resources${/}DML-setup.sql |
@@ -253,28 +254,28 @@ class Query(object):
         Using optional `sansTran` to run command without an explicit transaction commit or rollback:
         | Execute Sql Script | ${EXECDIR}${/}resources${/}DDL-setup.sql | True |
         """
-        with open(sqlScriptFileName, encoding='UTF-8') as sql_file:
+        with open(sqlScriptFileName, encoding="UTF-8") as sql_file:
             cur = None
             try:
                 statements_to_execute = []
                 cur = self._dbconnection.cursor()
-                logger.info('Executing : Execute SQL Script  |  %s ' % sqlScriptFileName)
-                current_statement = ''
+                logger.info("Executing : Execute SQL Script  |  %s " % sqlScriptFileName)
+                current_statement = ""
                 inside_statements_group = False
 
                 for line in sql_file:
                     line = line.strip()
-                    if line.startswith('#') or line.startswith('--') or line == "/":
+                    if line.startswith("#") or line.startswith("--") or line == "/":
                         continue
                     if line.lower().startswith("begin"):
                         inside_statements_group = True
-                    
+
                     # semicolons inside the line? use them to separate statements
                     # ... but not if they are inside a begin/end block (aka. statements group)
-                    sqlFragments = line.split(';')
+                    sqlFragments = line.split(";")
                     # no semicolons
                     if len(sqlFragments) == 1:
-                        current_statement += line + ' '
+                        current_statement += line + " "
                         continue
                     quotes = 0
                     # "select * from person;" -> ["select..", ""]
@@ -289,7 +290,7 @@ class Query(object):
                             inside_statements_group = False
                         elif sqlFragment.lower().startswith("begin"):
                             inside_statements_group = True
-                        
+
                         # check if the semicolon is a part of the value (quoted string)
                         quotes += sqlFragment.count("'")
                         quotes -= sqlFragment.count("\\'")
@@ -297,17 +298,17 @@ class Query(object):
                         inside_quoted_string = quotes % 2 != 0
                         if inside_quoted_string:
                             sqlFragment += ";"  # restore the semicolon
-                        
+
                         current_statement += sqlFragment
                         if not inside_statements_group and not inside_quoted_string:
                             statements_to_execute.append(current_statement.strip())
-                            current_statement = ''
+                            current_statement = ""
                             quotes = 0
 
                 current_statement = current_statement.strip()
                 if len(current_statement) != 0:
                     statements_to_execute.append(current_statement)
-                    
+
                 for statement in statements_to_execute:
                     logger.info(f"Executing statement from script file: {statement}")
                     omit_semicolon = not statement.lower().endswith("end;")
@@ -338,7 +339,7 @@ class Query(object):
         cur = None
         try:
             cur = self._dbconnection.cursor()
-            logger.info('Executing : Execute SQL String  |  %s ' % sqlString)
+            logger.info("Executing : Execute SQL String  |  %s " % sqlString)
             self.__execute_sql(cur, sqlString)
             if not sansTran:
                 self._dbconnection.commit()
@@ -364,7 +365,7 @@ class Query(object):
         E.g. calling a procedure in *PostgreSQL* returns even a single value of an OUT param as a result set.
 
         Set optional input `sansTran` to True to run command without an explicit transaction commit or rollback.
-        
+
         Simple example:
         | @{Params} = | Create List | Jerry | out_second_name |
         | @{Param values}    @{Result sets} = | Call Stored Procedure | Get_second_name | ${Params} |
@@ -390,15 +391,15 @@ class Query(object):
             spParams = []
         cur = None
         try:
-            logger.info('Executing : Call Stored Procedure  |  %s  |  %s ' % (spName, spParams))
+            logger.info("Executing : Call Stored Procedure  |  %s  |  %s " % (spName, spParams))
             if self.db_api_module_name == "pymssql":
                 cur = self._dbconnection.cursor(as_dict=False)
             else:
                 cur = self._dbconnection.cursor()
-            
+
             param_values = []
             result_sets = []
-            
+
             if self.db_api_module_name == "pymysql":
                 cur.callproc(spName, spParams)
 
@@ -419,7 +420,7 @@ class Query(object):
             elif self.db_api_module_name in ["oracledb", "cx_Oracle"]:
                 # check if "CURSOR" params were passed - they will be replaced
                 # with cursor variables for storing the result sets
-                params_substituted= spParams.copy()
+                params_substituted = spParams.copy()
                 cursor_params = []
                 for i in range(0, len(spParams)):
                     if spParams[i] == "CURSOR":
@@ -434,7 +435,7 @@ class Query(object):
                 cur = self._dbconnection.cursor()
                 # check if "CURSOR" params were passed - they will be replaced
                 # with cursor variables for storing the result sets
-                params_substituted= spParams.copy()
+                params_substituted = spParams.copy()
                 cursor_params = []
                 for i in range(0, len(spParams)):
                     if spParams[i] == "CURSOR":
@@ -453,13 +454,15 @@ class Query(object):
                         while result_sets_available:
                             result_sets.append(list(cur.fetchall()))
                             result_sets_available = cur.nextset()
-                    else:                        
+                    else:
                         result_set = cur.fetchall()
                         result_sets.append(list(result_set))
 
             else:
-                logger.info(f"CAUTION! Calling a stored procedure for '{self.db_api_module_name}' is not tested, "
-                            "results might be invalid!")
+                logger.info(
+                    f"CAUTION! Calling a stored procedure for '{self.db_api_module_name}' is not tested, "
+                    "results might be invalid!"
+                )
                 cur = self._dbconnection.cursor()
                 param_values = cur.callproc(spName, spParams)
                 logger.info("Reading the procedure results..")
@@ -470,11 +473,11 @@ class Query(object):
                         result_set.append(row)
                     if result_set:
                         result_sets.append(list(result_set))
-                    if hasattr(cur, 'nextset') and inspect.isroutine(cur.nextset):
+                    if hasattr(cur, "nextset") and inspect.isroutine(cur.nextset):
                         result_sets_available = cur.nextset()
                     else:
                         result_sets_available = False
-                
+
             if not sansTran:
                 self._dbconnection.commit()
 
