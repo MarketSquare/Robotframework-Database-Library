@@ -62,20 +62,20 @@ class Query:
             cur = self._dbconnection.cursor()
             logger.info(f"Executing : Query  |  {selectStatement}")
             self.__execute_sql(cur, selectStatement)
-            allRows = cur.fetchall()
+            all_rows = cur.fetchall()
 
             if returnAsDict:
-                mappedRows = []
+                mapped_rows = []
                 col_names = [c[0] for c in cur.description]
 
-                for rowIdx in range(len(allRows)):
+                for rowIdx in range(len(all_rows)):
                     d = {}
-                    for colIdx in range(len(allRows[rowIdx])):
-                        d[col_names[colIdx]] = allRows[rowIdx][colIdx]
-                    mappedRows.append(d)
-                return mappedRows
+                    for colIdx in range(len(all_rows[rowIdx])):
+                        d[col_names[colIdx]] = all_rows[rowIdx][colIdx]
+                    mapped_rows.append(d)
+                return mapped_rows
 
-            return allRows
+            return all_rows
         finally:
             if cur:
                 if not sansTran:
@@ -115,10 +115,8 @@ class Query:
             self.__execute_sql(cur, selectStatement)
             data = cur.fetchall()
             if self.db_api_module_name in ["sqlite3", "ibm_db", "ibm_db_dbi", "pyodbc"]:
-                rowCount = len(data)
-            else:
-                rowCount = cur.rowcount
-            return rowCount
+                return len(data)
+            return cur.rowcount
         finally:
             if cur:
                 if not sansTran:
@@ -180,11 +178,11 @@ class Query:
         | Delete All Rows From Table | person | True |
         """
         cur = None
-        selectStatement = f"DELETE FROM {tableName}"
+        query = f"DELETE FROM {tableName}"
         try:
             cur = self._dbconnection.cursor()
-            logger.info(f"Executing : Delete All Rows From Table  |  {selectStatement}")
-            result = self.__execute_sql(cur, selectStatement)
+            logger.info(f"Executing : Delete All Rows From Table  |  {query}")
+            result = self.__execute_sql(cur, query)
             if result is not None:
                 if not sansTran:
                     self._dbconnection.commit()

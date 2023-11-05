@@ -77,10 +77,10 @@ class Assertion:
         | Check If Not Exists In Database | SELECT id FROM person WHERE first_name = 'Franz Allan' | msg=my error message |
         """
         logger.info(f"Executing : Check If Not Exists In Database  |  {selectStatement}")
-        queryResults = self.query(selectStatement, sansTran)
-        if queryResults:
+        query_results = self.query(selectStatement, sansTran)
+        if query_results:
             raise AssertionError(
-                msg or f"Expected to have have no rows from '{selectStatement}', but got some rows: {queryResults}"
+                msg or f"Expected to have have no rows from '{selectStatement}', but got some rows: {query_results}"
             )
 
     def row_count_is_0(self, selectStatement, sansTran=False, msg=None):
@@ -230,29 +230,29 @@ class Assertion:
         """
         logger.info(f"Executing : Table Must Exist  |  {tableName}")
         if self.db_api_module_name in ["cx_Oracle", "oracledb"]:
-            selectStatement = (
+            query = (
                 "SELECT * FROM all_objects WHERE object_type IN ('TABLE','VIEW') AND "
                 f"owner = SYS_CONTEXT('USERENV', 'SESSION_USER') AND object_name = UPPER('{tableName}')"
             )
-            table_exists = self.row_count(selectStatement, sansTran) > 0
+            table_exists = self.row_count(query, sansTran) > 0
         elif self.db_api_module_name in ["sqlite3"]:
-            selectStatement = f"SELECT name FROM sqlite_master WHERE type='table' AND name='{tableName}' COLLATE NOCASE"
-            table_exists = self.row_count(selectStatement, sansTran) > 0
+            query = f"SELECT name FROM sqlite_master WHERE type='table' AND name='{tableName}' COLLATE NOCASE"
+            table_exists = self.row_count(query, sansTran) > 0
         elif self.db_api_module_name in ["ibm_db", "ibm_db_dbi"]:
-            selectStatement = f"SELECT name FROM SYSIBM.SYSTABLES WHERE type='T' AND name=UPPER('{tableName}')"
-            table_exists = self.row_count(selectStatement, sansTran) > 0
+            query = f"SELECT name FROM SYSIBM.SYSTABLES WHERE type='T' AND name=UPPER('{tableName}')"
+            table_exists = self.row_count(query, sansTran) > 0
         elif self.db_api_module_name in ["teradata"]:
-            selectStatement = f"SELECT TableName FROM DBC.TablesV WHERE TableKind='T' AND TableName='{tableName}'"
-            table_exists = self.row_count(selectStatement, sansTran) > 0
+            query = f"SELECT TableName FROM DBC.TablesV WHERE TableKind='T' AND TableName='{tableName}'"
+            table_exists = self.row_count(query, sansTran) > 0
         else:
             try:
-                selectStatement = f"SELECT * FROM information_schema.tables WHERE table_name='{tableName}'"
-                table_exists = self.row_count(selectStatement, sansTran) > 0
+                query = f"SELECT * FROM information_schema.tables WHERE table_name='{tableName}'"
+                table_exists = self.row_count(query, sansTran) > 0
             except:
                 logger.info("Database doesn't support information schema, try using a simple SQL request")
                 try:
-                    selectStatement = f"SELECT 1 from {tableName} where 1=0"
-                    num_rows = self.row_count(selectStatement, sansTran)
+                    query = f"SELECT 1 from {tableName} where 1=0"
+                    num_rows = self.row_count(query, sansTran)
                     table_exists = True
                 except:
                     table_exists = False
