@@ -8,8 +8,5 @@
     "robot.interactiveConsole.arguments": [
         "--output", "${workspaceRoot}/logs/interactive_console.xml"
     ],
-    "python.linting.pylintEnabled": true,
-    "python.linting.enabled": true,
-    "python.formatting.provider": "black",
     "python.analysis.completeFunctionParens": true,
 }
