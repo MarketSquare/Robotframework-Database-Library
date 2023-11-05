@@ -63,7 +63,6 @@ class Query:
             logger.info(f"Executing : Query  |  {selectStatement}")
             self.__execute_sql(cur, selectStatement)
             all_rows = cur.fetchall()
-
             if returnAsDict:
                 mapped_rows = []
                 col_names = [c[0] for c in cur.description]
@@ -204,7 +203,7 @@ class Query:
         | Execute Sql Script | ${EXECDIR}${/}resources${/}DML-teardown.sql |
         | Execute Sql Script | ${EXECDIR}${/}resources${/}DDL-teardown.sql |
 
-        SQL commands are expected to be delimited by a semi-colon (';') - they will be executed separately.
+        SQL commands are expected to be delimited by a semicolon (';') - they will be executed separately.
 
         For example:
         DELETE FROM person_employee_table;
@@ -318,7 +317,7 @@ class Query:
         Executes the sqlString as SQL commands. Useful to pass arguments to your sql. Set optional input `sansTran` to
         True to run command without an explicit transaction commit or rollback.
 
-        SQL commands are expected to be delimited by a semi-colon (';').
+        SQL commands are expected to be delimited by a semicolon (';').
 
         For example:
         | Execute Sql String | DELETE FROM person_employee_table; DELETE FROM person_table |
