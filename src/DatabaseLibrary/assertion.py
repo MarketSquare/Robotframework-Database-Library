@@ -228,23 +228,21 @@ class Assertion:
         Using optional `msg` to override the default error message:
         | Table Must Exist | first_name | msg=my error message |
         """
-        logger.info("Executing : Table Must Exist  |  %s " % tableName)
+        logger.info(f"Executing : Table Must Exist  |  {tableName}")
         if self.db_api_module_name in ["cx_Oracle", "oracledb"]:
             selectStatement = (
                 "SELECT * FROM all_objects WHERE object_type IN ('TABLE','VIEW') AND "
-                "owner = SYS_CONTEXT('USERENV', 'SESSION_USER') AND object_name = UPPER('%s')" % tableName
+                f"owner = SYS_CONTEXT('USERENV', 'SESSION_USER') AND object_name = UPPER('{tableName}')"
             )
             table_exists = self.row_count(selectStatement, sansTran) > 0
         elif self.db_api_module_name in ["sqlite3"]:
-            selectStatement = (
-                "SELECT name FROM sqlite_master WHERE type='table' AND name='%s' COLLATE NOCASE" % tableName
-            )
+            selectStatement = f"SELECT name FROM sqlite_master WHERE type='table' AND name='{tableName}' COLLATE NOCASE"
             table_exists = self.row_count(selectStatement, sansTran) > 0
         elif self.db_api_module_name in ["ibm_db", "ibm_db_dbi"]:
-            selectStatement = "SELECT name FROM SYSIBM.SYSTABLES WHERE type='T' AND name=UPPER('%s')" % tableName
+            selectStatement = f"SELECT name FROM SYSIBM.SYSTABLES WHERE type='T' AND name=UPPER('{tableName}')"
             table_exists = self.row_count(selectStatement, sansTran) > 0
         elif self.db_api_module_name in ["teradata"]:
-            selectStatement = "SELECT TableName FROM DBC.TablesV WHERE TableKind='T' AND TableName='%s'" % tableName
+            selectStatement = f"SELECT TableName FROM DBC.TablesV WHERE TableKind='T' AND TableName='{tableName}'"
             table_exists = self.row_count(selectStatement, sansTran) > 0
         else:
             try:

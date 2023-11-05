@@ -60,7 +60,7 @@ class Query:
         cur = None
         try:
             cur = self._dbconnection.cursor()
-            logger.info("Executing : Query  |  %s " % selectStatement)
+            logger.info(f"Executing : Query  |  {selectStatement}")
             self.__execute_sql(cur, selectStatement)
             allRows = cur.fetchall()
 
@@ -111,7 +111,7 @@ class Query:
         cur = None
         try:
             cur = self._dbconnection.cursor()
-            logger.info("Executing : Row Count  |  %s " % selectStatement)
+            logger.info(f"Executing : Row Count  |  {selectStatement}")
             self.__execute_sql(cur, selectStatement)
             data = cur.fetchall()
             if self.db_api_module_name in ["sqlite3", "ibm_db", "ibm_db_dbi", "pyodbc"]:
@@ -148,7 +148,7 @@ class Query:
         cur = None
         try:
             cur = self._dbconnection.cursor()
-            logger.info("Executing : Description  |  %s " % selectStatement)
+            logger.info("Executing : Description  |  {selectStatement}")
             self.__execute_sql(cur, selectStatement)
             description = list(cur.description)
             if sys.version_info[0] < 3:
@@ -180,10 +180,10 @@ class Query:
         | Delete All Rows From Table | person | True |
         """
         cur = None
-        selectStatement = "DELETE FROM %s" % tableName
+        selectStatement = f"DELETE FROM {tableName}"
         try:
             cur = self._dbconnection.cursor()
-            logger.info("Executing : Delete All Rows From Table  |  %s " % selectStatement)
+            logger.info(f"Executing : Delete All Rows From Table  |  {selectStatement}")
             result = self.__execute_sql(cur, selectStatement)
             if result is not None:
                 if not sansTran:
@@ -259,7 +259,7 @@ class Query:
             try:
                 statements_to_execute = []
                 cur = self._dbconnection.cursor()
-                logger.info("Executing : Execute SQL Script  |  %s " % sqlScriptFileName)
+                logger.info(f"Executing : Execute SQL Script  |  {sqlScriptFileName}")
                 current_statement = ""
                 inside_statements_group = False
 
@@ -339,7 +339,7 @@ class Query:
         cur = None
         try:
             cur = self._dbconnection.cursor()
-            logger.info("Executing : Execute SQL String  |  %s " % sqlString)
+            logger.info(f"Executing : Execute SQL String  |  {sqlString}")
             self.__execute_sql(cur, sqlString)
             if not sansTran:
                 self._dbconnection.commit()
@@ -391,7 +391,7 @@ class Query:
             spParams = []
         cur = None
         try:
-            logger.info("Executing : Call Stored Procedure  |  %s  |  %s " % (spName, spParams))
+            logger.info(f"Executing : Call Stored Procedure  |  {spName}  |  {spParams}")
             if self.db_api_module_name == "pymssql":
                 cur = self._dbconnection.cursor(as_dict=False)
             else:
