@@ -273,7 +273,7 @@ class ConnectionManager:
         """
         Loads the DB API 2.0 module given `dbapiModuleName` then uses it to
         connect to the database using the `db_connect_string`
-        (parsed as single connection connection string or URI).
+        (parsed as single connection string or URI).
 
         Use `connect_to_database_using_custom_params` for passing
         connection params as named arguments.

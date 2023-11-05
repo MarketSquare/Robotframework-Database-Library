@@ -252,7 +252,7 @@ class Assertion:
                 logger.info("Database doesn't support information schema, try using a simple SQL request")
                 try:
                     query = f"SELECT 1 from {tableName} where 1=0"
-                    num_rows = self.row_count(query, sansTran)
+                    self.row_count(query, sansTran)
                     table_exists = True
                 except:
                     table_exists = False

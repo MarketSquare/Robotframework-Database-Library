@@ -77,9 +77,8 @@ class Query:
 
             return all_rows
         finally:
-            if cur:
-                if not sansTran:
-                    self._dbconnection.rollback()
+            if cur and not sansTran:
+                self._dbconnection.rollback()
 
     def row_count(self, selectStatement, sansTran=False):
         """
@@ -118,9 +117,8 @@ class Query:
                 return len(data)
             return cur.rowcount
         finally:
-            if cur:
-                if not sansTran:
-                    self._dbconnection.rollback()
+            if cur and not sansTran:
+                self._dbconnection.rollback()
 
     def description(self, selectStatement, sansTran=False):
         """
@@ -154,9 +152,8 @@ class Query:
                     description[row] = (description[row][0].encode("utf-8"),) + description[row][1:]
             return description
         finally:
-            if cur:
-                if not sansTran:
-                    self._dbconnection.rollback()
+            if cur and not sansTran:
+                self._dbconnection.rollback()
 
     def delete_all_rows_from_table(self, tableName, sansTran=False):
         """
@@ -190,9 +187,8 @@ class Query:
             if not sansTran:
                 self._dbconnection.commit()
         finally:
-            if cur:
-                if not sansTran:
-                    self._dbconnection.rollback()
+            if cur and not sansTran:
+                self._dbconnection.rollback()
 
     def execute_sql_script(self, sqlScriptFileName, sansTran=False):
         """
@@ -314,9 +310,8 @@ class Query:
                 if not sansTran:
                     self._dbconnection.commit()
             finally:
-                if cur:
-                    if not sansTran:
-                        self._dbconnection.rollback()
+                if cur and not sansTran:
+                    self._dbconnection.rollback()
 
     def execute_sql_string(self, sqlString, sansTran=False):
         """
@@ -342,9 +337,8 @@ class Query:
             if not sansTran:
                 self._dbconnection.commit()
         finally:
-            if cur:
-                if not sansTran:
-                    self._dbconnection.rollback()
+            if cur and not sansTran:
+                self._dbconnection.rollback()
 
     def call_stored_procedure(self, spName, spParams=None, sansTran=False):
         """
@@ -481,9 +475,8 @@ class Query:
 
             return param_values, result_sets
         finally:
-            if cur:
-                if not sansTran:
-                    self._dbconnection.rollback()
+            if cur and not sansTran:
+                self._dbconnection.rollback()
 
     def __execute_sql(self, cur, sql_statement, omit_trailing_semicolon=None):
         """
