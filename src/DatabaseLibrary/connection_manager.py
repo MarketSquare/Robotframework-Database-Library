@@ -13,6 +13,7 @@
 #  limitations under the License.
 
 import importlib
+from typing import Optional
 
 try:
     import ConfigParser
@@ -37,15 +38,15 @@ class ConnectionManager:
 
     def connect_to_database(
         self,
-        dbapiModuleName=None,
-        dbName=None,
-        dbUsername=None,
-        dbPassword=None,
-        dbHost=None,
-        dbPort=None,
-        dbCharset=None,
-        dbDriver=None,
-        dbConfigFile=None,
+        dbapiModuleName: Optional[str] = None,
+        dbName: Optional[str] = None,
+        dbUsername: Optional[str] = None,
+        dbPassword: Optional[str] = None,
+        dbHost: Optional[str] = None,
+        dbPort: Optional[int] = None,
+        dbCharset: Optional[str] = None,
+        dbDriver: Optional[str] = None,
+        dbConfigFile: Optional[str] = None,
     ):
         """
         Loads the DB API 2.0 module given `dbapiModuleName` then uses it to
@@ -234,7 +235,9 @@ class ConnectionManager:
                 port=dbPort,
             )
 
-    def connect_to_database_using_custom_params(self, dbapiModuleName=None, db_connect_string=""):
+    def connect_to_database_using_custom_params(
+        self, dbapiModuleName: Optional[str] = None, db_connect_string: str = ""
+    ):
         """
         Loads the DB API 2.0 module given `dbapiModuleName` then uses it to
         connect to the database using the map string `db_connect_string`
@@ -269,7 +272,9 @@ class ConnectionManager:
 
         self._dbconnection = eval(db_connect_string)
 
-    def connect_to_database_using_custom_connection_string(self, dbapiModuleName=None, db_connect_string=""):
+    def connect_to_database_using_custom_connection_string(
+        self, dbapiModuleName: Optional[str] = None, db_connect_string: str = ""
+    ):
         """
         Loads the DB API 2.0 module given `dbapiModuleName` then uses it to
         connect to the database using the `db_connect_string`
@@ -290,7 +295,7 @@ class ConnectionManager:
         )
         self._dbconnection = db_api_2.connect(db_connect_string)
 
-    def disconnect_from_database(self, error_if_no_connection=False):
+    def disconnect_from_database(self, error_if_no_connection: bool = False):
         """
         Disconnects from the database.
 
@@ -311,7 +316,7 @@ class ConnectionManager:
             self._dbconnection.close()
             self._dbconnection = None
 
-    def set_auto_commit(self, autoCommit=True):
+    def set_auto_commit(self, autoCommit: bool = True):
         """
         Turn the autocommit on the database connection ON or OFF.
 
