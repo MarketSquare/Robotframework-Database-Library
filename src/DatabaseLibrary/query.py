@@ -14,6 +14,7 @@
 
 import inspect
 import sys
+from typing import List, Optional
 
 from robot.api import logger
 
@@ -23,7 +24,7 @@ class Query:
     Query handles all the querying done by the Database Library.
     """
 
-    def query(self, selectStatement, sansTran=False, returnAsDict=False):
+    def query(self, selectStatement: str, sansTran: bool = False, returnAsDict: bool = False):
         """
         Uses the input `selectStatement` to query for the values that will be returned as a list of tuples. Set optional
         input `sansTran` to True to run command without an explicit transaction commit or rollback.
@@ -81,7 +82,7 @@ class Query:
                 if not sansTran:
                     self._dbconnection.rollback()
 
-    def row_count(self, selectStatement, sansTran=False):
+    def row_count(self, selectStatement: str, sansTran: bool = False):
         """
         Uses the input `selectStatement` to query the database and returns the number of rows from the query. Set
         optional input `sansTran` to True to run command without an explicit transaction commit or rollback.
@@ -124,7 +125,7 @@ class Query:
                 if not sansTran:
                     self._dbconnection.rollback()
 
-    def description(self, selectStatement, sansTran=False):
+    def description(self, selectStatement: str, sansTran: bool = False):
         """
         Uses the input `selectStatement` to query a table in the db which will be used to determine the description. Set
         optional input `sansTran` to True to run command without an explicit transaction commit or rollback.
@@ -160,7 +161,7 @@ class Query:
                 if not sansTran:
                     self._dbconnection.rollback()
 
-    def delete_all_rows_from_table(self, tableName, sansTran=False):
+    def delete_all_rows_from_table(self, tableName: str, sansTran: bool = False):
         """
         Delete all the rows within a given table. Set optional input `sansTran` to True to run command without an
         explicit transaction commit or rollback.
@@ -196,7 +197,7 @@ class Query:
                 if not sansTran:
                     self._dbconnection.rollback()
 
-    def execute_sql_script(self, sqlScriptFileName, sansTran=False):
+    def execute_sql_script(self, sqlScriptFileName: str, sansTran: bool = False):
         """
         Executes the content of the `sqlScriptFileName` as SQL commands. Useful for setting the database to a known
         state before running your tests, or clearing out your test data after running each a test. Set optional input
@@ -320,7 +321,7 @@ class Query:
                     if not sansTran:
                         self._dbconnection.rollback()
 
-    def execute_sql_string(self, sqlString, sansTran=False):
+    def execute_sql_string(self, sqlString: str, sansTran: bool = False):
         """
         Executes the sqlString as SQL commands. Useful to pass arguments to your sql. Set optional input `sansTran` to
         True to run command without an explicit transaction commit or rollback.
@@ -348,7 +349,7 @@ class Query:
                 if not sansTran:
                     self._dbconnection.rollback()
 
-    def call_stored_procedure(self, spName, spParams=None, sansTran=False):
+    def call_stored_procedure(self, spName: str, spParams: Optional[List[str]] = None, sansTran: bool = False):
         """
         Calls a stored procedure `spName` with the `spParams` - a *list* of parameters the procedure requires.
         Use the special *CURSOR* value for OUT params, which should receive result sets -
@@ -487,7 +488,7 @@ class Query:
                 if not sansTran:
                     self._dbconnection.rollback()
 
-    def __execute_sql(self, cur, sql_statement, omit_trailing_semicolon=None):
+    def __execute_sql(self, cur, sql_statement: str, omit_trailing_semicolon: Optional[bool] = None):
         """
         Runs the `sql_statement` using `cur` as Cursor object.
         Use `omit_trailing_semicolon` parameter (bool) for explicite instruction,

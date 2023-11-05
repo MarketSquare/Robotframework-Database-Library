@@ -11,6 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+from typing import Optional
 
 from robot.api import logger
 
@@ -20,7 +21,7 @@ class Assertion:
     Assertion handles all the assertions of Database Library.
     """
 
-    def check_if_exists_in_database(self, selectStatement, sansTran=False, msg=None):
+    def check_if_exists_in_database(self, selectStatement: str, sansTran: bool = False, msg: Optional[str] = None):
         """
         Check if any row would be returned by given the input `selectStatement`. If there are no results, then this will
         throw an AssertionError. Set optional input `sansTran` to True to run command without an explicit transaction
@@ -50,7 +51,7 @@ class Assertion:
                 msg or f"Expected to have have at least one row, " f"but got 0 rows from: '{selectStatement}'"
             )
 
-    def check_if_not_exists_in_database(self, selectStatement, sansTran=False, msg=None):
+    def check_if_not_exists_in_database(self, selectStatement: str, sansTran: bool = False, msg: Optional[str] = None):
         """
         This is the negation of `check_if_exists_in_database`.
 
@@ -83,7 +84,7 @@ class Assertion:
                 msg or f"Expected to have have no rows from '{selectStatement}', but got some rows: {queryResults}"
             )
 
-    def row_count_is_0(self, selectStatement, sansTran=False, msg=None):
+    def row_count_is_0(self, selectStatement: str, sansTran: bool = False, msg: Optional[str] = None):
         """
         Check if any rows are returned from the submitted `selectStatement`. If there are, then this will throw an
         AssertionError. Set optional input `sansTran` to True to run command without an explicit transaction commit or
@@ -112,7 +113,9 @@ class Assertion:
         if num_rows > 0:
             raise AssertionError(msg or f"Expected 0 rows, but {num_rows} were returned from: '{selectStatement}'")
 
-    def row_count_is_equal_to_x(self, selectStatement, numRows, sansTran=False, msg=None):
+    def row_count_is_equal_to_x(
+        self, selectStatement: str, numRows: int, sansTran: bool = False, msg: Optional[str] = None
+    ):
         """
         Check if the number of rows returned from `selectStatement` is equal to the value submitted. If not, then this
         will throw an AssertionError. Set optional input `sansTran` to True to run command without an explicit
@@ -144,7 +147,9 @@ class Assertion:
                 msg or f"Expected {numRows} rows, but {num_rows} were returned from: '{selectStatement}'"
             )
 
-    def row_count_is_greater_than_x(self, selectStatement, numRows, sansTran=False, msg=None):
+    def row_count_is_greater_than_x(
+        self, selectStatement: str, numRows: int, sansTran: bool = False, msg: Optional[str] = None
+    ):
         """
         Check if the number of rows returned from `selectStatement` is greater than the value submitted. If not, then
         this will throw an AssertionError. Set optional input `sansTran` to True to run command without an explicit
@@ -176,7 +181,9 @@ class Assertion:
                 msg or f"Expected more than {numRows} rows, but {num_rows} were returned from '{selectStatement}'"
             )
 
-    def row_count_is_less_than_x(self, selectStatement, numRows, sansTran=False, msg=None):
+    def row_count_is_less_than_x(
+        self, selectStatement: str, numRows: int, sansTran: bool = False, msg: Optional[str] = None
+    ):
         """
         Check if the number of rows returned from `selectStatement` is less than the value submitted. If not, then this
         will throw an AssertionError. Set optional input `sansTran` to True to run command without an explicit
@@ -208,7 +215,7 @@ class Assertion:
                 msg or f"Expected less than {numRows} rows, but {num_rows} were returned from '{selectStatement}'"
             )
 
-    def table_must_exist(self, tableName, sansTran=False, msg=None):
+    def table_must_exist(self, tableName: str, sansTran: bool = False, msg: Optional[str] = None):
         """
         Check if the table given exists in the database. Set optional input `sansTran` to True to run command without an
         explicit transaction commit or rollback. The default error message can be overridden with the `msg` argument.
