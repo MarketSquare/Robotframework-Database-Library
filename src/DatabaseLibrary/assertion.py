@@ -107,7 +107,7 @@ class Assertion:
         Using optional `msg` to override the default error message:
         | Row Count is 0 | SELECT id FROM person WHERE first_name = 'Franz Allan' | msg=my error message |
         """
-        logger.info(f"Executing : Row Count Is 0  |  selectStatement")
+        logger.info(f"Executing : Row Count Is 0  |  {selectStatement}")
         num_rows = self.row_count(selectStatement, sansTran)
         if num_rows > 0:
             raise AssertionError(msg or f"Expected 0 rows, but {num_rows} were returned from: '{selectStatement}'")

@@ -171,7 +171,8 @@ class ConnectionManager:
             conn_str = f"DATABASE={dbName};HOSTNAME={dbHost};PORT={dbPort};PROTOCOL=TCPIP;UID={dbUsername};"
             logger.info(f"Connecting using : {dbapiModuleName}.connect(" f"{conn_str};PWD=***;)")
             self._dbconnection = db_api_2.connect(
-                f"{conn_str};PWD={dbPassword};" "",
+                f"{conn_str};PWD={dbPassword};",
+                "",
                 "",
             )
         elif dbapiModuleName in ["cx_Oracle"]:
@@ -279,7 +280,7 @@ class ConnectionManager:
 
         Example usage:
         | Connect To Database Using Custom Connection String | psycopg2 | postgresql://postgres:s3cr3t@tiger.foobar.com:5432/my_db_test |
-        | Connect To Database Using Custom Connection String | oracledb | username/pass@localhost:1521/orclpdb" |
+        | Connect To Database Using Custom Connection String | oracledb | username/pass@localhost:1521/orclpdb |
         """
         db_api_2 = importlib.import_module(dbapiModuleName)
         self.db_api_module_name = dbapiModuleName
@@ -292,11 +293,12 @@ class ConnectionManager:
     def disconnect_from_database(self, error_if_no_connection=False):
         """
         Disconnects from the database.
-        By default it's not an error if there was no open database connection -
-        suitable for usage as a teardown.
-        However you can enforce it using the `error_if_no_connection` parameter.
 
-        For example:
+        By default, it's not an error if there was no open database connection -
+        suitable for usage as a teardown.
+        However, you can enforce it using the `error_if_no_connection` parameter.
+
+        Example usage:
         | Disconnect From Database | # disconnects from current connection to the database |
         """
         logger.info("Executing : Disconnect From Database")
@@ -319,7 +321,7 @@ class ConnectionManager:
         or database snapshot. By turning on auto commit on the database connection these actions
         can be performed.
 
-        Example:
+        Example usage:
         | # Default behaviour, sets auto commit to true
         | Set Auto Commit
         | # Explicitly set the desired state
