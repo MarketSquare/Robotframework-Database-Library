@@ -63,18 +63,9 @@ class Query:
             logger.info("Executing : Query  |  %s " % selectStatement)
             self.__execute_sql(cur, selectStatement)
             allRows = cur.fetchall()
-
             if returnAsDict:
-                mappedRows = []
                 col_names = [c[0] for c in cur.description]
-
-                for rowIdx in range(len(allRows)):
-                    d = {}
-                    for colIdx in range(len(allRows[rowIdx])):
-                        d[col_names[colIdx]] = allRows[rowIdx][colIdx]
-                    mappedRows.append(d)
-                return mappedRows
-
+                return [dict(zip(col_names, row)) for row in allRows]
             return allRows
         finally:
             if cur:
