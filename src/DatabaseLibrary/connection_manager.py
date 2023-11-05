@@ -46,6 +46,7 @@ class ConnectionManager:
         dbCharset=None,
         dbDriver=None,
         dbConfigFile=None,
+        driverMode=None,
     ):
         """
         Loads the DB API 2.0 module given `dbapiModuleName` then uses it to
@@ -98,6 +99,7 @@ class ConnectionManager:
         dbPassword = dbPassword if dbPassword is not None else config.get("default", "dbPassword")
         dbHost = dbHost or config.get("default", "dbHost") or "localhost"
         dbPort = int(dbPort or config.get("default", "dbPort"))
+        driverMode = driverMode or config.get("default", "driverMode")
 
         if dbapiModuleName == "excel" or dbapiModuleName == "excelrw":
             self.db_api_module_name = "pyodbc"
@@ -192,6 +194,12 @@ class ConnectionManager:
                 "Connecting using: %s.connect(user=%s, password=***, params=%s) "
                 % (dbapiModuleName, dbUsername, oracle_connection_params)
             )
+            if "thick" in driverMode.lower():
+                mode_param = driverMode.lower().split(",lib_dir=")
+                if len(mode_param) == 2 and mode_param[0].lower() == "thick":
+                    db_api_2.init_oracle_client(lib_dir=mode_param[1])
+                else:
+                    db_api_2.init_oracle_client()
             self._dbconnection = db_api_2.connect(user=dbUsername, password=dbPassword, params=oracle_connection_params)
             self.omit_trailing_semicolon = True
         elif dbapiModuleName in ["teradata"]:
