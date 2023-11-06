@@ -4,7 +4,7 @@ Documentation    Tests of switching between thin and thick mode of oracledb clie
 ...    See more here: https://python-oracledb.readthedocs.io/en/latest/user_guide/initialization.html#initialization
 
 Resource    ../../resources/common.resource
-Test Teardown    Disconnect From Database
+Test Teardown    Drop Tables And Disconnect
 
 
 *** Variables ***
@@ -59,3 +59,8 @@ Connect And Run Simple Query
     ...    &{Extra params}
     Create Person Table
     Query    SELECT * FROM person
+
+Drop Tables And Disconnect
+    [Documentation]    Clean data and disconnect
+    Drop Tables Person And Foobar
+    Disconnect From Database
