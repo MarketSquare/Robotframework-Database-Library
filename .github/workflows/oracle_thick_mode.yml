@@ -34,6 +34,7 @@ jobs:
           sudo mkdir /opt/oracle
           sudo wget https://download.oracle.com/otn_software/linux/instantclient/214000/instantclient-basic-linux.x64-21.4.0.0.0dbru.zip
           sudo unzip instantclient-basic-linux.x64-21.4.0.0.0dbru.zip
+          export LD_LIBRARY_PATH=/opt/oracle/instantclient_21_4:$LD_LIBRARY_PATH
 
       - name: Check out repository code
         uses: actions/checkout@v3
@@ -58,8 +59,7 @@ jobs:
       - name: Launch RF Tests
         working-directory: ./test
         run: >-
-          export LD_LIBRARY_PATH=/opt/oracle/instantclient_21_4:$LD_LIBRARY_PATH
-          robot
+            robot
             -d results
             --xunit result.xml
             --loglevel DEBUG:INFO
