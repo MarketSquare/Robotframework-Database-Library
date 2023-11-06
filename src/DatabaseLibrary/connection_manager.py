@@ -106,6 +106,7 @@ class ConnectionManager:
         else:
             self.db_api_module_name = dbapiModuleName
             db_api_2 = importlib.import_module(dbapiModuleName)
+            db_api_2 = importlib.reload(dbapiModuleName)
 
         if dbapiModuleName in ["MySQLdb", "pymysql"]:
             dbPort = dbPort or 3306
@@ -274,6 +275,7 @@ class ConnectionManager:
         | Connect To Database Using Custom Params | sqlite3 | database="./my_database.db", isolation_level=None |
         """
         db_api_2 = importlib.import_module(dbapiModuleName)
+        db_api_2 = importlib.reload(dbapiModuleName)
         self.db_api_module_name = dbapiModuleName
 
         db_connect_string = f"db_api_2.connect({db_connect_string})"
@@ -307,6 +309,7 @@ class ConnectionManager:
         | Connect To Database Using Custom Connection String | oracledb | username/pass@localhost:1521/orclpdb" |
         """
         db_api_2 = importlib.import_module(dbapiModuleName)
+        db_api_2 = importlib.reload(dbapiModuleName)
         self.db_api_module_name = dbapiModuleName
         logger.info(
             f"Executing : Connect To Database Using Custom Connection String : {dbapiModuleName}.connect('{db_connect_string}')"
