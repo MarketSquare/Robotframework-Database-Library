@@ -57,20 +57,9 @@ jobs:
      
       - name: Launch RF Tests
         working-directory: ./test
-        run: >-
+        run: |
           export LD_LIBRARY_PATH=/opt/oracle/instantclient_21_4:$LD_LIBRARY_PATH
-          robot
-            -d results
-            --xunit result.xml
-            --loglevel DEBUG:INFO
-            -v DB_MODULE:${{ env.DB_MODULE }}
-            -v DB_NAME:${{ env.DB_NAME }}
-            -v DB_USER:${{ env.DB_USER }}
-            -v DB_PASS:${{ env.DB_PASS }}
-            -v DB_HOST:${{ env.DB_HOST }}
-            -v DB_PORT:${{ env.DB_PORT }}
-            -v ORACLE_LIB_DIR:"${{ env.LIB_DIR }}"
-            tests/custom_db_tests/oracle_thick_mode.robot            
+          robot -d results --xunit result.xml --loglevel DEBUG:INFO -v DB_MODULE:${{ env.DB_MODULE }} -v DB_NAME:${{ env.DB_NAME }} -v DB_USER:${{ env.DB_USER }} -v DB_PASS:${{ env.DB_PASS }} -v DB_HOST:${{ env.DB_HOST }} -v DB_PORT:${{ env.DB_PORT }} -v ORACLE_LIB_DIR:"${{ env.LIB_DIR }}" tests/custom_db_tests/oracle_thick_mode.robot            
       
       - name: Upload Robot Logs
         if: ${{ always() }}
