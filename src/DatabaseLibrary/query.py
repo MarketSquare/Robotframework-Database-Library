@@ -64,16 +64,8 @@ class Query:
             self.__execute_sql(cur, selectStatement)
             all_rows = cur.fetchall()
             if returnAsDict:
-                mapped_rows = []
                 col_names = [c[0] for c in cur.description]
-
-                for rowIdx in range(len(all_rows)):
-                    d = {}
-                    for colIdx in range(len(all_rows[rowIdx])):
-                        d[col_names[colIdx]] = all_rows[rowIdx][colIdx]
-                    mapped_rows.append(d)
-                return mapped_rows
-
+                return [dict(zip(col_names, row)) for row in all_rows]
             return all_rows
         finally:
             if cur and not sansTran:
