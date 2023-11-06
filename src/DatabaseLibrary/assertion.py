@@ -114,7 +114,7 @@ class Assertion:
             raise AssertionError(msg or f"Expected 0 rows, but {num_rows} were returned from: '{selectStatement}'")
 
     def row_count_is_equal_to_x(
-        self, selectStatement: str, numRows: int, sansTran: bool = False, msg: Optional[str] = None
+        self, selectStatement: str, numRows: str, sansTran: bool = False, msg: Optional[str] = None
     ):
         """
         Check if the number of rows returned from `selectStatement` is equal to the value submitted. If not, then this
