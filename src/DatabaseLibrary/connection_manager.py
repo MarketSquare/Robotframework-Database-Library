@@ -52,6 +52,12 @@ class ConnectionManager:
         Loads the DB API 2.0 module given `dbapiModuleName` then uses it to
         connect to the database using `dbName`, `dbUsername`, and `dbPassword`.
 
+        The `driverMode` is used to select the *oracledb* client mode.
+        Allowed values are:
+        - _thin_ (default if omitted)
+        - _thick_
+        - _thick,lib_dir=<PATH_TO_ORACLE_CLIENT>_
+
         Optionally, you can specify a `dbConfigFile` wherein it will load the
         default property values for `dbapiModuleName`, `dbName` `dbUsername`
         and `dbPassword` (note: specifying `dbapiModuleName`, `dbName`

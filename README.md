@@ -52,6 +52,8 @@ Therefore there are some modules, which are "natively" supported in the library 
 ## Python modules currently "natively" supported
 ### Oracle
 - [oracledb](https://oracle.github.io/python-oracledb/)
+    - Both thick and thin client modes are supported - you can select one using the `driverMode` parameter.
+    - However, due to current limitations of the oracledb module, **it's not possible to switch between thick and thin modes during a test execution session** - even in different suites.
 - [cx_Oracle](https://oracle.github.io/python-cx_Oracle/)
 ### MySQL
 - [pymysql](https://github.com/PyMySQL/PyMySQL)

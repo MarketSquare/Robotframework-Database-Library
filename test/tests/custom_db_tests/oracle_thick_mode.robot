@@ -2,6 +2,10 @@
 Documentation    Tests of switching between thin and thick mode of oracledb client.
 ...    Require the oracle client libraries installed.
 ...    See more here: https://python-oracledb.readthedocs.io/en/latest/user_guide/initialization.html#initialization
+...
+...    Due to current limitations of the oracledb module it's not possible to switch between thick and thin modes
+...    during a test execution session - even in different suites.
+...    So theses tests should be run separated only.
 
 Resource    ../../resources/common.resource
 Test Teardown    Drop Tables And Disconnect
