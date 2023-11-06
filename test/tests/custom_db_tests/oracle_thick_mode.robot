@@ -36,7 +36,7 @@ Thick Mode With Client Dir Specified
 
 Wrong Mode
     [Documentation]    Wrong mode --> proper error message from the library
-    Run Keyword And Expect Error    Invalid Oracle client mode provided: wrong
+    Run Keyword And Expect Error    ValueError: Invalid Oracle client mode provided: wrong
     ...    Connect And Run Simple Query    driverMode=wrong
 
 Thick Mode With Wrong Client Dir
