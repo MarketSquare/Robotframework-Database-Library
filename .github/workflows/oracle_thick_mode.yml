@@ -33,7 +33,7 @@ jobs:
           cd /opt/
           sudo mkdir /opt/oracle
           sudo wget https://download.oracle.com/otn_software/linux/instantclient/214000/instantclient-basic-linux.x64-21.4.0.0.0dbru.zip
-          sudo unzip instantclient_21_4
+          sudo unzip instantclient-basic-linux.x64-21.4.0.0.0dbru.zip
 
       - name: Check out repository code
         uses: actions/checkout@v3
