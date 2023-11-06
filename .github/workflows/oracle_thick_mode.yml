@@ -68,7 +68,7 @@ jobs:
             -v DB_PASS:${{ env.DB_PASS }}
             -v DB_HOST:${{ env.DB_HOST }}
             -v DB_PORT:${{ env.DB_PORT }}
-            -v ORACLE_LIB_DIR: ${{ env.LIB_DIR }}
+            -v ORACLE_LIB_DIR:"${{ env.LIB_DIR }}"
             tests/custom_db_tests/oracle_thick_mode.robot            
       
       - name: Upload Robot Logs
