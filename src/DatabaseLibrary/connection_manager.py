@@ -47,10 +47,17 @@ class ConnectionManager:
         dbCharset: Optional[str] = None,
         dbDriver: Optional[str] = None,
         dbConfigFile: Optional[str] = None,
+        driverMode: Optional[str] = None,
     ):
         """
         Loads the DB API 2.0 module given `dbapiModuleName` then uses it to
         connect to the database using `dbName`, `dbUsername`, and `dbPassword`.
+
+        The `driverMode` is used to select the *oracledb* client mode.
+        Allowed values are:
+        - _thin_ (default if omitted)
+        - _thick_
+        - _thick,lib_dir=<PATH_TO_ORACLE_CLIENT>_
 
         Optionally, you can specify a `dbConfigFile` wherein it will load the
         default property values for `dbapiModuleName`, `dbName` `dbUsername`
@@ -186,12 +193,33 @@ class ConnectionManager:
             self.omit_trailing_semicolon = True
         elif dbapiModuleName in ["oracledb"]:
             dbPort = dbPort or 1521
+            driverMode = driverMode or "thin"
             oracle_connection_params = db_api_2.ConnectParams(host=dbHost, port=dbPort, service_name=dbName)
+            if "thick" in driverMode.lower():
+                logger.info("Using thick Oracle client mode")
+                mode_param = driverMode.lower().split(",lib_dir=")
+                if len(mode_param) == 2 and mode_param[0].lower() == "thick":
+                    lib_dir = mode_param[1]
+                    logger.info(f"Oracle client lib dir specified: {lib_dir}")
+                    db_api_2.init_oracle_client(lib_dir=lib_dir)
+                else:
+                    logger.info("No Oracle client lib dir specified, oracledb will search it in usual places")
+                    db_api_2.init_oracle_client()
+                oracle_thin_mode = False
+            elif "thin" in driverMode.lower():
+                oracle_thin_mode = True
+                logger.info("Using thin Oracle client mode")
+            else:
+                raise ValueError(f"Invalid Oracle client mode provided: {driverMode}")
             logger.info(
                 f"Connecting using: {dbapiModuleName}.connect("
                 f"user={dbUsername}, password=***, params={oracle_connection_params})"
             )
             self._dbconnection = db_api_2.connect(user=dbUsername, password=dbPassword, params=oracle_connection_params)
+            assert self._dbconnection.thin == oracle_thin_mode, (
+                "Expected oracledb to run in thin mode: {oracle_thin_mode}, "
+                f"but the connection has thin mode: {self._dbconnection.thin}"
+            )
             self.omit_trailing_semicolon = True
         elif dbapiModuleName in ["teradata"]:
             dbPort = dbPort or 1025
