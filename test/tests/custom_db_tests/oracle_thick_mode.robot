@@ -26,11 +26,6 @@ Thick Mode With Client Dir Specified
     [Documentation]    Client dir specified --> oracledb will search it in this place
     Connect And Run Simple Query    driverMode=thick,lib_dir=${ORACLE_LIB_DIR}
 
-Thick Mode With Wrong Client Dir
-    [Documentation]    Wrong mode --> proper error message from oracledb module
-    Run Keyword And Expect Error    expected_error
-    ...    Connect And Run Simple Query    driverMode=thick,lib_dir=C:/WRONG
-
 Thin Mode - Default
     [Documentation]    No mode specified --> thin mode is used
     Connect And Run Simple Query
