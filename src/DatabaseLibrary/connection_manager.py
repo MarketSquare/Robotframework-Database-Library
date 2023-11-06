@@ -275,7 +275,7 @@ class ConnectionManager:
         | Connect To Database Using Custom Params | sqlite3 | database="./my_database.db", isolation_level=None |
         """
         db_api_2 = importlib.import_module(dbapiModuleName)
-        db_api_2 = importlib.reload(dbapiModuleName)
+        db_api_2 = importlib.reload(db_api_2)
         self.db_api_module_name = dbapiModuleName
 
         db_connect_string = f"db_api_2.connect({db_connect_string})"
