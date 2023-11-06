@@ -6,6 +6,15 @@ Documentation    Tests of switching between thin and thick mode of oracledb clie
 Resource    ../../resources/common.resource
 
 
+*** Variables ***
+${DB_MODULE}            oracledb
+${DB_HOST}              127.0.0.1
+${DB_PORT}              1521
+${DB_PASS}              pass
+${DB_USER}              db_user
+${DB_NAME}              db
+${ORACLE_LIB_DIR}       ${EMPTY}
+
 *** Test Cases ***
 Thin Mode - Default
     [Documentation]    No mode specified --> thin mode is used
@@ -21,7 +30,7 @@ Thick Mode Without Client Dir Specified
 
 Thick Mode With Client Dir Specified
     [Documentation]    Client dir specified --> oracledb will search it in this place
-    Connect And Run Simple Query    driverMode=thick,lib_dir=
+    Connect And Run Simple Query    driverMode=thick,lib_dir=${ORACLE_LIB_DIR}
 
 Wrong Mode
     [Documentation]    Wrong mode --> proper error message from the library
@@ -31,7 +40,7 @@ Wrong Mode
 Thick Mode With Wrong Client Dir
     [Documentation]    Wrong mode --> proper error message from oracledb module
     Run Keyword And Expect Error    expected_error
-    ...    Connect And Run Simple Query    driverMode=thick,lib_dir=C:\WRONG
+    ...    Connect And Run Simple Query    driverMode=thick,lib_dir=C:/WRONG
 
 
 *** Keywords ***
@@ -39,12 +48,12 @@ Connect And Run Simple Query
     [Documentation]    Connect using usual params and client mode if provided
     [Arguments]    &{Extra params}
     Connect To Database
-    ...    oracledb
-    ...    127.0.0.1
-    ...    1521
-    ...    db
-    ...    db_user
-    ...    pass
+    ...    ${DB_MODULE}
+    ...    ${DB_NAME}
+    ...    ${DB_USER}
+    ...    ${DB_PASS}
+    ...    ${DB_HOST}
+    ...    ${DB_PORT}
     ...    &{Extra params}
     Create Person Table
     Query    SELECT * FROM person
