@@ -13,6 +13,7 @@
 #  limitations under the License.
 
 import importlib
+from typing import Optional
 
 try:
     import ConfigParser
@@ -37,16 +38,16 @@ class ConnectionManager:
 
     def connect_to_database(
         self,
-        dbapiModuleName=None,
-        dbName=None,
-        dbUsername=None,
-        dbPassword=None,
-        dbHost=None,
-        dbPort=None,
-        dbCharset=None,
-        dbDriver=None,
-        dbConfigFile=None,
-        driverMode=None,
+        dbapiModuleName: Optional[str] = None,
+        dbName: Optional[str] = None,
+        dbUsername: Optional[str] = None,
+        dbPassword: Optional[str] = None,
+        dbHost: Optional[str] = None,
+        dbPort: Optional[int] = None,
+        dbCharset: Optional[str] = None,
+        dbDriver: Optional[str] = None,
+        dbConfigFile: Optional[str] = None,
+        driverMode: Optional[str] = None,
     ):
         """
         Loads the DB API 2.0 module given `dbapiModuleName` then uses it to
@@ -116,8 +117,8 @@ class ConnectionManager:
         if dbapiModuleName in ["MySQLdb", "pymysql"]:
             dbPort = dbPort or 3306
             logger.info(
-                "Connecting using : %s.connect(db=%s, user=%s, passwd=***, host=%s, port=%s, charset=%s) "
-                % (dbapiModuleName, dbName, dbUsername, dbHost, dbPort, dbCharset)
+                f"Connecting using : {dbapiModuleName}.connect("
+                f"db={dbName}, user={dbUsername}, passwd=***, host={dbHost}, port={dbPort}, charset={dbCharset})"
             )
             self._dbconnection = db_api_2.connect(
                 db=dbName,
@@ -130,8 +131,8 @@ class ConnectionManager:
         elif dbapiModuleName in ["psycopg2"]:
             dbPort = dbPort or 5432
             logger.info(
-                "Connecting using : %s.connect(database=%s, user=%s, password=***, host=%s, port=%s) "
-                % (dbapiModuleName, dbName, dbUsername, dbHost, dbPort)
+                f"Connecting using : {dbapiModuleName}.connect("
+                f"database={dbName}, user={dbUsername}, password=***, host={dbHost}, port={dbPort})"
             )
             self._dbconnection = db_api_2.connect(
                 database=dbName,
@@ -153,33 +154,32 @@ class ConnectionManager:
             self._dbconnection = db_api_2.connect(con_str)
         elif dbapiModuleName in ["excel"]:
             logger.info(
-                'Connecting using : %s.connect(DRIVER={Microsoft Excel Driver (*.xls, *.xlsx, *.xlsm, *.xlsb)};DBQ=%s;ReadOnly=1;Extended Properties="Excel 8.0;HDR=YES";)'
-                % (dbapiModuleName, dbName)
+                f"Connecting using : {dbapiModuleName}.connect("
+                f"DRIVER={{Microsoft Excel Driver (*.xls, *.xlsx, *.xlsm, *.xlsb)}};DBQ={dbName};"
+                f'ReadOnly=1;Extended Properties="Excel 8.0;HDR=YES";)'
             )
             self._dbconnection = db_api_2.connect(
-                'DRIVER={Microsoft Excel Driver (*.xls, *.xlsx, *.xlsm, *.xlsb)};DBQ=%s;ReadOnly=1;Extended Properties="Excel 8.0;HDR=YES";)'
-                % (dbName),
+                f"DRIVER={{Microsoft Excel Driver (*.xls, *.xlsx, *.xlsm, *.xlsb)}};DBQ={dbName};"
+                f'ReadOnly=1;Extended Properties="Excel 8.0;HDR=YES";)',
                 autocommit=True,
             )
         elif dbapiModuleName in ["excelrw"]:
             logger.info(
-                'Connecting using : %s.connect(DRIVER={Microsoft Excel Driver (*.xls, *.xlsx, *.xlsm, *.xlsb)};DBQ=%s;ReadOnly=0;Extended Properties="Excel 8.0;HDR=YES";)'
-                % (dbapiModuleName, dbName)
+                f"Connecting using : {dbapiModuleName}.connect("
+                f"DRIVER={{Microsoft Excel Driver (*.xls, *.xlsx, *.xlsm, *.xlsb)}};DBQ={dbName};"
+                f'ReadOnly=0;Extended Properties="Excel 8.0;HDR=YES";)',
             )
             self._dbconnection = db_api_2.connect(
-                'DRIVER={Microsoft Excel Driver (*.xls, *.xlsx, *.xlsm, *.xlsb)};DBQ=%s;ReadOnly=0;Extended Properties="Excel 8.0;HDR=YES";)'
-                % (dbName),
+                f"DRIVER={{Microsoft Excel Driver (*.xls, *.xlsx, *.xlsm, *.xlsb)}};DBQ={dbName};"
+                f'ReadOnly=0;Extended Properties="Excel 8.0;HDR=YES";)',
                 autocommit=True,
             )
         elif dbapiModuleName in ["ibm_db", "ibm_db_dbi"]:
             dbPort = dbPort or 50000
-            logger.info(
-                "Connecting using : %s.connect(DATABASE=%s;HOSTNAME=%s;PORT=%s;PROTOCOL=TCPIP;UID=%s;PWD=***;) "
-                % (dbapiModuleName, dbName, dbHost, dbPort, dbUsername)
-            )
+            conn_str = f"DATABASE={dbName};HOSTNAME={dbHost};PORT={dbPort};PROTOCOL=TCPIP;UID={dbUsername};"
+            logger.info(f"Connecting using : {dbapiModuleName}.connect(" f"{conn_str};PWD=***;)")
             self._dbconnection = db_api_2.connect(
-                "DATABASE=%s;HOSTNAME=%s;PORT=%s;PROTOCOL=TCPIP;UID=%s;PWD=%s;"
-                % (dbName, dbHost, dbPort, dbUsername, dbPassword),
+                f"{conn_str};PWD={dbPassword};",
                 "",
                 "",
             )
@@ -187,8 +187,7 @@ class ConnectionManager:
             dbPort = dbPort or 1521
             oracle_dsn = db_api_2.makedsn(host=dbHost, port=dbPort, service_name=dbName)
             logger.info(
-                "Connecting using: %s.connect(user=%s, password=***, dsn=%s) "
-                % (dbapiModuleName, dbUsername, oracle_dsn)
+                f"Connecting using: {dbapiModuleName}.connect(user={dbUsername}, password=***, dsn={oracle_dsn})"
             )
             self._dbconnection = db_api_2.connect(user=dbUsername, password=dbPassword, dsn=oracle_dsn)
             self.omit_trailing_semicolon = True
@@ -213,8 +212,8 @@ class ConnectionManager:
             else:
                 raise ValueError(f"Invalid Oracle client mode provided: {driverMode}")
             logger.info(
-                "Connecting using: %s.connect(user=%s, password=***, params=%s) "
-                % (dbapiModuleName, dbUsername, oracle_connection_params)
+                f"Connecting using: {dbapiModuleName}.connect("
+                f"user={dbUsername}, password=***, params={oracle_connection_params})"
             )
             self._dbconnection = db_api_2.connect(user=dbUsername, password=dbPassword, params=oracle_connection_params)
             assert self._dbconnection.thin == oracle_thin_mode, (
@@ -226,8 +225,8 @@ class ConnectionManager:
             dbPort = dbPort or 1025
             teradata_udaExec = db_api_2.UdaExec(appName="RobotFramework", version="1.0", logConsole=False)
             logger.info(
-                "Connecting using : %s.connect(database=%s, user=%s, password=***, host=%s, port=%s) "
-                % (dbapiModuleName, dbName, dbUsername, dbHost, dbPort)
+                f"Connecting using : {dbapiModuleName}.connect("
+                f"database={dbName}, user={dbUsername}, password=***, host={dbHost}, port={dbPort})"
             )
             self._dbconnection = teradata_udaExec.connect(
                 method="odbc",
@@ -241,8 +240,8 @@ class ConnectionManager:
         elif dbapiModuleName in ["ksycopg2"]:
             dbPort = dbPort or 54321
             logger.info(
-                "Connecting using : %s.connect(database=%s, user=%s, password=***, host=%s, port=%s) "
-                % (dbapiModuleName, dbName, dbUsername, dbHost, dbPort)
+                f"Connecting using : {dbapiModuleName}.connect("
+                f"database={dbName}, user={dbUsername}, password=***, host={dbHost}, port={dbPort})"
             )
             self._dbconnection = db_api_2.connect(
                 database=dbName,
@@ -253,8 +252,8 @@ class ConnectionManager:
             )
         else:
             logger.info(
-                "Connecting using : %s.connect(database=%s, user=%s, password=***, host=%s, port=%s) "
-                % (dbapiModuleName, dbName, dbUsername, dbHost, dbPort)
+                f"Connecting using : {dbapiModuleName}.connect("
+                f"database={dbName}, user={dbUsername}, password=***, host={dbHost}, port={dbPort}) "
             )
             self._dbconnection = db_api_2.connect(
                 database=dbName,
@@ -264,7 +263,9 @@ class ConnectionManager:
                 port=dbPort,
             )
 
-    def connect_to_database_using_custom_params(self, dbapiModuleName=None, db_connect_string=""):
+    def connect_to_database_using_custom_params(
+        self, dbapiModuleName: Optional[str] = None, db_connect_string: str = ""
+    ):
         """
         Loads the DB API 2.0 module given `dbapiModuleName` then uses it to
         connect to the database using the map string `db_connect_string`
@@ -293,40 +294,44 @@ class ConnectionManager:
             value_to_hide = splitted[0]
             connection_string_with_hidden_pass = connection_string_with_hidden_pass.replace(value_to_hide, "***")
         logger.info(
-            "Executing : Connect To Database Using Custom Params : %s.connect(%s) "
-            % (dbapiModuleName, connection_string_with_hidden_pass)
+            f"Executing : Connect To Database Using Custom Params : {dbapiModuleName}.connect("
+            f"{connection_string_with_hidden_pass})"
         )
 
         self._dbconnection = eval(db_connect_string)
 
-    def connect_to_database_using_custom_connection_string(self, dbapiModuleName=None, db_connect_string=""):
+    def connect_to_database_using_custom_connection_string(
+        self, dbapiModuleName: Optional[str] = None, db_connect_string: str = ""
+    ):
         """
         Loads the DB API 2.0 module given `dbapiModuleName` then uses it to
         connect to the database using the `db_connect_string`
-        (parsed as single connection connection string or URI).
+        (parsed as single connection string or URI).
 
         Use `connect_to_database_using_custom_params` for passing
         connection params as named arguments.
 
         Example usage:
         | Connect To Database Using Custom Connection String | psycopg2 | postgresql://postgres:s3cr3t@tiger.foobar.com:5432/my_db_test |
-        | Connect To Database Using Custom Connection String | oracledb | username/pass@localhost:1521/orclpdb" |
+        | Connect To Database Using Custom Connection String | oracledb | username/pass@localhost:1521/orclpdb |
         """
         db_api_2 = importlib.import_module(dbapiModuleName)
         self.db_api_module_name = dbapiModuleName
         logger.info(
-            f"Executing : Connect To Database Using Custom Connection String : {dbapiModuleName}.connect('{db_connect_string}')"
+            f"Executing : Connect To Database Using Custom Connection String : {dbapiModuleName}.connect("
+            f"'{db_connect_string}')"
         )
         self._dbconnection = db_api_2.connect(db_connect_string)
 
-    def disconnect_from_database(self, error_if_no_connection=False):
+    def disconnect_from_database(self, error_if_no_connection: bool = False):
         """
         Disconnects from the database.
-        By default it's not an error if there was no open database connection -
-        suitable for usage as a teardown.
-        However you can enforce it using the `error_if_no_connection` parameter.
 
-        For example:
+        By default, it's not an error if there was no open database connection -
+        suitable for usage as a teardown.
+        However, you can enforce it using the `error_if_no_connection` parameter.
+
+        Example usage:
         | Disconnect From Database | # disconnects from current connection to the database |
         """
         logger.info("Executing : Disconnect From Database")
@@ -339,7 +344,7 @@ class ConnectionManager:
             self._dbconnection.close()
             self._dbconnection = None
 
-    def set_auto_commit(self, autoCommit=True):
+    def set_auto_commit(self, autoCommit: bool = True):
         """
         Turn the autocommit on the database connection ON or OFF.
 
@@ -349,7 +354,7 @@ class ConnectionManager:
         or database snapshot. By turning on auto commit on the database connection these actions
         can be performed.
 
-        Example:
+        Example usage:
         | # Default behaviour, sets auto commit to true
         | Set Auto Commit
         | # Explicitly set the desired state

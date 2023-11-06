@@ -11,6 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+from typing import Optional
 
 from robot.api import logger
 
@@ -20,7 +21,7 @@ class Assertion:
     Assertion handles all the assertions of Database Library.
     """
 
-    def check_if_exists_in_database(self, selectStatement, sansTran=False, msg=None):
+    def check_if_exists_in_database(self, selectStatement: str, sansTran: bool = False, msg: Optional[str] = None):
         """
         Check if any row would be returned by given the input `selectStatement`. If there are no results, then this will
         throw an AssertionError. Set optional input `sansTran` to True to run command without an explicit transaction
@@ -50,7 +51,7 @@ class Assertion:
                 msg or f"Expected to have have at least one row, " f"but got 0 rows from: '{selectStatement}'"
             )
 
-    def check_if_not_exists_in_database(self, selectStatement, sansTran=False, msg=None):
+    def check_if_not_exists_in_database(self, selectStatement: str, sansTran: bool = False, msg: Optional[str] = None):
         """
         This is the negation of `check_if_exists_in_database`.
 
@@ -77,13 +78,13 @@ class Assertion:
         | Check If Not Exists In Database | SELECT id FROM person WHERE first_name = 'Franz Allan' | msg=my error message |
         """
         logger.info(f"Executing : Check If Not Exists In Database  |  {selectStatement}")
-        queryResults = self.query(selectStatement, sansTran)
-        if queryResults:
+        query_results = self.query(selectStatement, sansTran)
+        if query_results:
             raise AssertionError(
-                msg or f"Expected to have have no rows from '{selectStatement}', but got some rows: {queryResults}"
+                msg or f"Expected to have have no rows from '{selectStatement}', but got some rows: {query_results}"
             )
 
-    def row_count_is_0(self, selectStatement, sansTran=False, msg=None):
+    def row_count_is_0(self, selectStatement: str, sansTran: bool = False, msg: Optional[str] = None):
         """
         Check if any rows are returned from the submitted `selectStatement`. If there are, then this will throw an
         AssertionError. Set optional input `sansTran` to True to run command without an explicit transaction commit or
@@ -107,12 +108,14 @@ class Assertion:
         Using optional `msg` to override the default error message:
         | Row Count is 0 | SELECT id FROM person WHERE first_name = 'Franz Allan' | msg=my error message |
         """
-        logger.info(f"Executing : Row Count Is 0  |  selectStatement")
+        logger.info(f"Executing : Row Count Is 0  |  {selectStatement}")
         num_rows = self.row_count(selectStatement, sansTran)
         if num_rows > 0:
             raise AssertionError(msg or f"Expected 0 rows, but {num_rows} were returned from: '{selectStatement}'")
 
-    def row_count_is_equal_to_x(self, selectStatement, numRows, sansTran=False, msg=None):
+    def row_count_is_equal_to_x(
+        self, selectStatement: str, numRows: str, sansTran: bool = False, msg: Optional[str] = None
+    ):
         """
         Check if the number of rows returned from `selectStatement` is equal to the value submitted. If not, then this
         will throw an AssertionError. Set optional input `sansTran` to True to run command without an explicit
@@ -144,7 +147,9 @@ class Assertion:
                 msg or f"Expected {numRows} rows, but {num_rows} were returned from: '{selectStatement}'"
             )
 
-    def row_count_is_greater_than_x(self, selectStatement, numRows, sansTran=False, msg=None):
+    def row_count_is_greater_than_x(
+        self, selectStatement: str, numRows: str, sansTran: bool = False, msg: Optional[str] = None
+    ):
         """
         Check if the number of rows returned from `selectStatement` is greater than the value submitted. If not, then
         this will throw an AssertionError. Set optional input `sansTran` to True to run command without an explicit
@@ -176,7 +181,9 @@ class Assertion:
                 msg or f"Expected more than {numRows} rows, but {num_rows} were returned from '{selectStatement}'"
             )
 
-    def row_count_is_less_than_x(self, selectStatement, numRows, sansTran=False, msg=None):
+    def row_count_is_less_than_x(
+        self, selectStatement: str, numRows: str, sansTran: bool = False, msg: Optional[str] = None
+    ):
         """
         Check if the number of rows returned from `selectStatement` is less than the value submitted. If not, then this
         will throw an AssertionError. Set optional input `sansTran` to True to run command without an explicit
@@ -208,7 +215,7 @@ class Assertion:
                 msg or f"Expected less than {numRows} rows, but {num_rows} were returned from '{selectStatement}'"
             )
 
-    def table_must_exist(self, tableName, sansTran=False, msg=None):
+    def table_must_exist(self, tableName: str, sansTran: bool = False, msg: Optional[str] = None):
         """
         Check if the table given exists in the database. Set optional input `sansTran` to True to run command without an
         explicit transaction commit or rollback. The default error message can be overridden with the `msg` argument.
@@ -228,33 +235,31 @@ class Assertion:
         Using optional `msg` to override the default error message:
         | Table Must Exist | first_name | msg=my error message |
         """
-        logger.info("Executing : Table Must Exist  |  %s " % tableName)
+        logger.info(f"Executing : Table Must Exist  |  {tableName}")
         if self.db_api_module_name in ["cx_Oracle", "oracledb"]:
-            selectStatement = (
+            query = (
                 "SELECT * FROM all_objects WHERE object_type IN ('TABLE','VIEW') AND "
-                "owner = SYS_CONTEXT('USERENV', 'SESSION_USER') AND object_name = UPPER('%s')" % tableName
+                f"owner = SYS_CONTEXT('USERENV', 'SESSION_USER') AND object_name = UPPER('{tableName}')"
             )
-            table_exists = self.row_count(selectStatement, sansTran) > 0
+            table_exists = self.row_count(query, sansTran) > 0
         elif self.db_api_module_name in ["sqlite3"]:
-            selectStatement = (
-                "SELECT name FROM sqlite_master WHERE type='table' AND name='%s' COLLATE NOCASE" % tableName
-            )
-            table_exists = self.row_count(selectStatement, sansTran) > 0
+            query = f"SELECT name FROM sqlite_master WHERE type='table' AND name='{tableName}' COLLATE NOCASE"
+            table_exists = self.row_count(query, sansTran) > 0
         elif self.db_api_module_name in ["ibm_db", "ibm_db_dbi"]:
-            selectStatement = "SELECT name FROM SYSIBM.SYSTABLES WHERE type='T' AND name=UPPER('%s')" % tableName
-            table_exists = self.row_count(selectStatement, sansTran) > 0
+            query = f"SELECT name FROM SYSIBM.SYSTABLES WHERE type='T' AND name=UPPER('{tableName}')"
+            table_exists = self.row_count(query, sansTran) > 0
         elif self.db_api_module_name in ["teradata"]:
-            selectStatement = "SELECT TableName FROM DBC.TablesV WHERE TableKind='T' AND TableName='%s'" % tableName
-            table_exists = self.row_count(selectStatement, sansTran) > 0
+            query = f"SELECT TableName FROM DBC.TablesV WHERE TableKind='T' AND TableName='{tableName}'"
+            table_exists = self.row_count(query, sansTran) > 0
         else:
             try:
-                selectStatement = f"SELECT * FROM information_schema.tables WHERE table_name='{tableName}'"
-                table_exists = self.row_count(selectStatement, sansTran) > 0
+                query = f"SELECT * FROM information_schema.tables WHERE table_name='{tableName}'"
+                table_exists = self.row_count(query, sansTran) > 0
             except:
                 logger.info("Database doesn't support information schema, try using a simple SQL request")
                 try:
-                    selectStatement = f"SELECT 1 from {tableName} where 1=0"
-                    num_rows = self.row_count(selectStatement, sansTran)
+                    query = f"SELECT 1 from {tableName} where 1=0"
+                    self.row_count(query, sansTran)
                     table_exists = True
                 except:
                     table_exists = False

@@ -14,6 +14,7 @@
 
 import inspect
 import sys
+from typing import List, Optional
 
 from robot.api import logger
 
@@ -23,7 +24,7 @@ class Query:
     Query handles all the querying done by the Database Library.
     """
 
-    def query(self, selectStatement, sansTran=False, returnAsDict=False):
+    def query(self, selectStatement: str, sansTran: bool = False, returnAsDict: bool = False):
         """
         Uses the input `selectStatement` to query for the values that will be returned as a list of tuples. Set optional
         input `sansTran` to True to run command without an explicit transaction commit or rollback.
@@ -60,28 +61,18 @@ class Query:
         cur = None
         try:
             cur = self._dbconnection.cursor()
-            logger.info("Executing : Query  |  %s " % selectStatement)
+            logger.info(f"Executing : Query  |  {selectStatement}")
             self.__execute_sql(cur, selectStatement)
-            allRows = cur.fetchall()
-
+            all_rows = cur.fetchall()
             if returnAsDict:
-                mappedRows = []
                 col_names = [c[0] for c in cur.description]
-
-                for rowIdx in range(len(allRows)):
-                    d = {}
-                    for colIdx in range(len(allRows[rowIdx])):
-                        d[col_names[colIdx]] = allRows[rowIdx][colIdx]
-                    mappedRows.append(d)
-                return mappedRows
-
-            return allRows
+                return [dict(zip(col_names, row)) for row in all_rows]
+            return all_rows
         finally:
-            if cur:
-                if not sansTran:
-                    self._dbconnection.rollback()
+            if cur and not sansTran:
+                self._dbconnection.rollback()
 
-    def row_count(self, selectStatement, sansTran=False):
+    def row_count(self, selectStatement: str, sansTran: bool = False):
         """
         Uses the input `selectStatement` to query the database and returns the number of rows from the query. Set
         optional input `sansTran` to True to run command without an explicit transaction commit or rollback.
@@ -111,20 +102,17 @@ class Query:
         cur = None
         try:
             cur = self._dbconnection.cursor()
-            logger.info("Executing : Row Count  |  %s " % selectStatement)
+            logger.info(f"Executing : Row Count  |  {selectStatement}")
             self.__execute_sql(cur, selectStatement)
             data = cur.fetchall()
             if self.db_api_module_name in ["sqlite3", "ibm_db", "ibm_db_dbi", "pyodbc"]:
-                rowCount = len(data)
-            else:
-                rowCount = cur.rowcount
-            return rowCount
+                return len(data)
+            return cur.rowcount
         finally:
-            if cur:
-                if not sansTran:
-                    self._dbconnection.rollback()
+            if cur and not sansTran:
+                self._dbconnection.rollback()
 
-    def description(self, selectStatement, sansTran=False):
+    def description(self, selectStatement: str, sansTran: bool = False):
         """
         Uses the input `selectStatement` to query a table in the db which will be used to determine the description. Set
         optional input `sansTran` to True to run command without an explicit transaction commit or rollback.
@@ -148,7 +136,7 @@ class Query:
         cur = None
         try:
             cur = self._dbconnection.cursor()
-            logger.info("Executing : Description  |  %s " % selectStatement)
+            logger.info("Executing : Description  |  {selectStatement}")
             self.__execute_sql(cur, selectStatement)
             description = list(cur.description)
             if sys.version_info[0] < 3:
@@ -156,11 +144,10 @@ class Query:
                     description[row] = (description[row][0].encode("utf-8"),) + description[row][1:]
             return description
         finally:
-            if cur:
-                if not sansTran:
-                    self._dbconnection.rollback()
+            if cur and not sansTran:
+                self._dbconnection.rollback()
 
-    def delete_all_rows_from_table(self, tableName, sansTran=False):
+    def delete_all_rows_from_table(self, tableName: str, sansTran: bool = False):
         """
         Delete all the rows within a given table. Set optional input `sansTran` to True to run command without an
         explicit transaction commit or rollback.
@@ -180,11 +167,11 @@ class Query:
         | Delete All Rows From Table | person | True |
         """
         cur = None
-        selectStatement = "DELETE FROM %s" % tableName
+        query = f"DELETE FROM {tableName}"
         try:
             cur = self._dbconnection.cursor()
-            logger.info("Executing : Delete All Rows From Table  |  %s " % selectStatement)
-            result = self.__execute_sql(cur, selectStatement)
+            logger.info(f"Executing : Delete All Rows From Table  |  {query}")
+            result = self.__execute_sql(cur, query)
             if result is not None:
                 if not sansTran:
                     self._dbconnection.commit()
@@ -192,11 +179,10 @@ class Query:
             if not sansTran:
                 self._dbconnection.commit()
         finally:
-            if cur:
-                if not sansTran:
-                    self._dbconnection.rollback()
+            if cur and not sansTran:
+                self._dbconnection.rollback()
 
-    def execute_sql_script(self, sqlScriptFileName, sansTran=False):
+    def execute_sql_script(self, sqlScriptFileName: str, sansTran: bool = False):
         """
         Executes the content of the `sqlScriptFileName` as SQL commands. Useful for setting the database to a known
         state before running your tests, or clearing out your test data after running each a test. Set optional input
@@ -210,7 +196,7 @@ class Query:
         | Execute Sql Script | ${EXECDIR}${/}resources${/}DML-teardown.sql |
         | Execute Sql Script | ${EXECDIR}${/}resources${/}DDL-teardown.sql |
 
-        SQL commands are expected to be delimited by a semi-colon (';') - they will be executed separately.
+        SQL commands are expected to be delimited by a semicolon (';') - they will be executed separately.
 
         For example:
         DELETE FROM person_employee_table;
@@ -259,7 +245,7 @@ class Query:
             try:
                 statements_to_execute = []
                 cur = self._dbconnection.cursor()
-                logger.info("Executing : Execute SQL Script  |  %s " % sqlScriptFileName)
+                logger.info(f"Executing : Execute SQL Script  |  {sqlScriptFileName}")
                 current_statement = ""
                 inside_statements_group = False
 
@@ -316,16 +302,15 @@ class Query:
                 if not sansTran:
                     self._dbconnection.commit()
             finally:
-                if cur:
-                    if not sansTran:
-                        self._dbconnection.rollback()
+                if cur and not sansTran:
+                    self._dbconnection.rollback()
 
-    def execute_sql_string(self, sqlString, sansTran=False):
+    def execute_sql_string(self, sqlString: str, sansTran: bool = False):
         """
         Executes the sqlString as SQL commands. Useful to pass arguments to your sql. Set optional input `sansTran` to
         True to run command without an explicit transaction commit or rollback.
 
-        SQL commands are expected to be delimited by a semi-colon (';').
+        SQL commands are expected to be delimited by a semicolon (';').
 
         For example:
         | Execute Sql String | DELETE FROM person_employee_table; DELETE FROM person_table |
@@ -339,16 +324,15 @@ class Query:
         cur = None
         try:
             cur = self._dbconnection.cursor()
-            logger.info("Executing : Execute SQL String  |  %s " % sqlString)
+            logger.info(f"Executing : Execute SQL String  |  {sqlString}")
             self.__execute_sql(cur, sqlString)
             if not sansTran:
                 self._dbconnection.commit()
         finally:
-            if cur:
-                if not sansTran:
-                    self._dbconnection.rollback()
+            if cur and not sansTran:
+                self._dbconnection.rollback()
 
-    def call_stored_procedure(self, spName, spParams=None, sansTran=False):
+    def call_stored_procedure(self, spName: str, spParams: Optional[List[str]] = None, sansTran: bool = False):
         """
         Calls a stored procedure `spName` with the `spParams` - a *list* of parameters the procedure requires.
         Use the special *CURSOR* value for OUT params, which should receive result sets -
@@ -391,7 +375,7 @@ class Query:
             spParams = []
         cur = None
         try:
-            logger.info("Executing : Call Stored Procedure  |  %s  |  %s " % (spName, spParams))
+            logger.info(f"Executing : Call Stored Procedure  |  {spName}  |  {spParams}")
             if self.db_api_module_name == "pymssql":
                 cur = self._dbconnection.cursor(as_dict=False)
             else:
@@ -483,17 +467,16 @@ class Query:
 
             return param_values, result_sets
         finally:
-            if cur:
-                if not sansTran:
-                    self._dbconnection.rollback()
+            if cur and not sansTran:
+                self._dbconnection.rollback()
 
-    def __execute_sql(self, cur, sql_statement, omit_trailing_semicolon=None):
+    def __execute_sql(self, cur, sql_statement: str, omit_trailing_semicolon: Optional[bool] = None):
         """
         Runs the `sql_statement` using `cur` as Cursor object.
-        Use `omit_trailing_semicolon` parameter (bool) for explicite instruction,
+        Use `omit_trailing_semicolon` parameter (bool) for explicit instruction,
         if the trailing semicolon (;) should be removed - otherwise the statement
         won't be executed by some databases (e.g. Oracle).
-        Otherwise it's decided based on the current database module in use.
+        Otherwise, it's decided based on the current database module in use.
         """
         if omit_trailing_semicolon is None:
             omit_trailing_semicolon = self.omit_trailing_semicolon
