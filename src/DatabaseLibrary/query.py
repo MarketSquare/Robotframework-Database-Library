@@ -66,7 +66,7 @@ class Query:
             if returnAsDict:
                 col_names = [c[0] for c in cur.description]
                 return [dict(zip(col_names, row)) for row in all_rows]
-            return al_rows
+            return all_rows
         finally:
             if cur and not sansTran:
                 self._dbconnection.rollback()
