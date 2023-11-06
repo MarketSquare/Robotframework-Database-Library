@@ -148,7 +148,7 @@ class Assertion:
             )
 
     def row_count_is_greater_than_x(
-        self, selectStatement: str, numRows: int, sansTran: bool = False, msg: Optional[str] = None
+        self, selectStatement: str, numRows: str, sansTran: bool = False, msg: Optional[str] = None
     ):
         """
         Check if the number of rows returned from `selectStatement` is greater than the value submitted. If not, then
@@ -182,7 +182,7 @@ class Assertion:
             )
 
     def row_count_is_less_than_x(
-        self, selectStatement: str, numRows: int, sansTran: bool = False, msg: Optional[str] = None
+        self, selectStatement: str, numRows: str, sansTran: bool = False, msg: Optional[str] = None
     ):
         """
         Check if the number of rows returned from `selectStatement` is less than the value submitted. If not, then this
