@@ -4,6 +4,7 @@ Documentation    Tests of switching between thin and thick mode of oracledb clie
 ...    See more here: https://python-oracledb.readthedocs.io/en/latest/user_guide/initialization.html#initialization
 
 Resource    ../../resources/common.resource
+Test Teardown    Disconnect From Database
 
 
 *** Variables ***
@@ -14,6 +15,7 @@ ${DB_PASS}              pass
 ${DB_USER}              db_user
 ${DB_NAME}              db
 ${ORACLE_LIB_DIR}       ${EMPTY}
+
 
 *** Test Cases ***
 Thin Mode - Default
