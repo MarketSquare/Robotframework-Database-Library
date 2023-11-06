@@ -18,6 +18,10 @@ ${ORACLE_LIB_DIR}       ${EMPTY}
 
 
 *** Test Cases ***
+Thick Mode Without Client Dir Specified
+    [Documentation]    No client dir --> oracledb will search it in usual places
+    Connect And Run Simple Query    driverMode=thick
+
 Thin Mode - Default
     [Documentation]    No mode specified --> thin mode is used
     Connect And Run Simple Query
@@ -25,10 +29,6 @@ Thin Mode - Default
 Thin Mode Explicitely Specified
     [Documentation]    Thin mode specified --> thin mode is used
     Connect And Run Simple Query  driverMode=thin
-
-Thick Mode Without Client Dir Specified
-    [Documentation]    No client dir --> oracledb will search it in usual places
-    Connect And Run Simple Query    driverMode=thick
 
 Thick Mode With Client Dir Specified
     [Documentation]    Client dir specified --> oracledb will search it in this place
