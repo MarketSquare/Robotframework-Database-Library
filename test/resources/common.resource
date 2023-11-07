@@ -24,13 +24,14 @@ ${DB_DRIVER}            ODBC Driver 18 for SQL Server
 Connect To DB
     [Documentation]    Connects to the database based on the current DB module under test
     ...    and connection params set in global variables
+    [Arguments]    ${alias}=${None}
     IF    "${DB_MODULE_MODE}" == "custom"
         IF    "${DB_MODULE}" == "sqlite3"
-            Remove File    ${DBName}.db
-            Connect To Database Using Custom Params    sqlite3    database="./${DBName}.db", isolation_level=None
+            IF    $alias is None    Remove File    ${DBName}.db
+            Connect To Database Using Custom Params    sqlite3    database="./${DBName}.db", isolation_level=None    alias=${alias}
         ELSE
             ${Connection String}=    Build Connection String
-            Connect To Database Using Custom Connection String    ${DB_MODULE}    ${Connection String}
+            Connect To Database Using Custom Connection String    ${DB_MODULE}    ${Connection String}    alias=${alias}
         END
     ELSE IF    "${DB_MODULE_MODE}" == "standard"
         IF    "${DB_MODULE}" == "pyodbc"
@@ -42,6 +43,7 @@ Connect To DB
             ...    ${DB_HOST}
             ...    ${DB_PORT}
             ...    dbDriver=${DB_DRIVER}
+            ...    alias=${alias}
         ELSE
             Connect To Database
             ...    ${DB_MODULE}
@@ -50,6 +52,7 @@ Connect To DB
             ...    ${DB_PASS}
             ...    ${DB_HOST}
             ...    ${DB_PORT}
+            ...    alias=${alias}
         END
     ELSE
         Fail    Unexpected mode - ${DB_MODULE_MODE}
