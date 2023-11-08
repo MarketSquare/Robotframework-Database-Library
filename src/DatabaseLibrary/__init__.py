@@ -69,7 +69,7 @@ class DatabaseLibrary(ConnectionManager, Query, Assertion):
     The library is basically compatible with any [https://peps.python.org/pep-0249|Python Database API Specification 2.0] module.
 
     However, the actual implementation in existing Python modules is sometimes quite different, which requires custom handling in the library.
-    Therefore there are some modules, which are "natively" supported in the library - and others, which may work and may not.
+    Therefore, there are some modules, which are "natively" supported in the library - and others, which may work and may not.
 
     See more on the [https://github.com/MarketSquare/Robotframework-Database-Library|project page on GitHub].
     """

@@ -13,7 +13,8 @@
 #  limitations under the License.
 
 import importlib
-from typing import Optional
+from dataclasses import dataclass
+from typing import Any, Dict, Optional
 
 try:
     import ConfigParser
@@ -21,7 +22,12 @@ except:
     import configparser as ConfigParser
 
 from robot.api import logger
-from robot.utils import ConnectionCache
+
+
+@dataclass
+class Connection:
+    client: Any
+    module_name: str
 
 
 class ConnectionManager:
@@ -30,8 +36,14 @@ class ConnectionManager:
     """
 
     def __init__(self):
-        self.omit_trailing_semicolon = False
-        self._cache = ConnectionCache("No sessions created")
+        self.omit_trailing_semicolon: bool = False
+        self._connections: Dict[str, Connection] = {}
+        self.default_alias: str = "default"
+
+    def _register_connection(self, client: Any, module_name: str, alias: str):
+        if alias in self._connections:
+            logger.warn(f"Overwriting not closed connection for alias = '{alias}'")
+        self._connections[alias] = Connection(client, module_name)
 
     def connect_to_database(
         self,
@@ -45,11 +57,14 @@ class ConnectionManager:
         dbDriver: Optional[str] = None,
         dbConfigFile: Optional[str] = None,
         driverMode: Optional[str] = None,
-        alias: Optional[str] = "default",
+        alias: str = "default",
     ):
         """
         Loads the DB API 2.0 module given `dbapiModuleName` then uses it to
-        connect to the database using `dbName`, `dbUsername`, and `dbPassword`.
+        connect to the database using provided parameters such as `dbName`, `dbUsername`, and `dbPassword`.
+
+        Optional ``alias`` parameter can be used for creating multiple open connections, even for different databases.
+        If the same alias is given twice then previous connection will be overriden.
 
         The `driverMode` is used to select the *oracledb* client mode.
         Allowed values are:
@@ -261,10 +276,10 @@ class ConnectionManager:
                 host=dbHost,
                 port=dbPort,
             )
-        self._cache.register((db_connection, db_api_module_name), alias=alias)
+        self._register_connection(db_connection, db_api_module_name, alias)
 
     def connect_to_database_using_custom_params(
-        self, dbapiModuleName: Optional[str] = None, db_connect_string: str = "", alias: Optional[str] = "default"
+        self, dbapiModuleName: Optional[str] = None, db_connect_string: str = "", alias: str = "default"
     ):
         """
         Loads the DB API 2.0 module given `dbapiModuleName` then uses it to
@@ -299,10 +314,10 @@ class ConnectionManager:
         )
 
         db_connection = eval(db_connect_string)
-        self._cache.register((db_connection, db_api_module_name), alias=alias)
+        self._register_connection(db_connection, db_api_module_name, alias)
 
     def connect_to_database_using_custom_connection_string(
-        self, dbapiModuleName: Optional[str] = None, db_connect_string: str = "", alias: Optional[str] = "default"
+        self, dbapiModuleName: Optional[str] = None, db_connect_string: str = "", alias: str = "default"
     ):
         """
         Loads the DB API 2.0 module given `dbapiModuleName` then uses it to
@@ -323,9 +338,9 @@ class ConnectionManager:
             f"'{db_connect_string}')"
         )
         db_connection = db_api_2.connect(db_connect_string)
-        self._cache.register((db_connection, db_api_module_name), alias=alias)
+        self._register_connection(db_connection, db_api_module_name, alias)
 
-    def disconnect_from_database(self, error_if_no_connection: bool = False, alias: Optional[str] = "default"):
+    def disconnect_from_database(self, error_if_no_connection: bool = False, alias: Optional[str] = None):
         """
         Disconnects from the database.
 
@@ -338,13 +353,12 @@ class ConnectionManager:
         | Disconnect From Database | alias=my_alias | # disconnects from current connection to the database |
         """
         logger.info("Executing : Disconnect From Database")
+        if not alias:
+            alias = self.default_alias
         try:
-            db_connection, _ = self._cache.switch(alias)
-        except RuntimeError:  # Non-existing index or alias
-            db_connection = None
-        if db_connection:
-            db_connection.close()
-        else:
+            db_connection = self._connections.pop(alias)
+            db_connection.client.close()
+        except KeyError:  # Non-existing alias
             log_msg = "No open database connection to close"
             if error_if_no_connection:
                 raise ConnectionError(log_msg) from None
@@ -358,12 +372,11 @@ class ConnectionManager:
         | Disconnect From All Databases | # disconnects from all connections to the database |
         """
         logger.info("Executing : Disconnect From All Databases")
-        for db_connection, _ in self._cache:
-            if db_connection:
-                db_connection.close()
-        self._cache.empty_cache()
+        for db_connection in self._connections.values():
+            db_connection.client.close()
+        self._connections = {}
 
-    def set_auto_commit(self, autoCommit: bool = True, alias: Optional[str] = "default"):
+    def set_auto_commit(self, autoCommit: bool = True, alias: Optional[str] = None):
         """
         Turn the autocommit on the database connection ON or OFF.
 
@@ -381,10 +394,10 @@ class ConnectionManager:
         | Set Auto Commit | False
         """
         logger.info("Executing : Set Auto Commit")
-        db_connection, _ = self._cache.switch(alias)
-        db_connection.autocommit = autoCommit
+        db_connection = self._get_connection_with_alias(alias)
+        db_connection.client.autocommit = autoCommit
 
-    def switch_database(self, alias):
+    def switch_database(self, alias: str):
         """
         Switch default database.
 
@@ -392,4 +405,23 @@ class ConnectionManager:
         | Switch Database | my_alias |
         | Switch Database | alias=my_alias |
         """
-        self._cache.switch(alias)
+        if alias not in self._connections:
+            raise ValueError(f"Alias '{alias}' not found in existing connections.")
+        self.default_alias = alias
+
+    def _get_connection_with_alias(self, alias: Optional[str]) -> Connection:
+        """
+        Return connection with given alias.
+
+        If alias is not provided, it will return default connection.
+        If there is no default connection, it will return last opened connection.
+        """
+        if not self._connections:
+            raise ValueError(f"No database connection is open.")
+        if not alias:
+            if self.default_alias in self._connections:
+                return self._connections[self.default_alias]
+            return list(self._connections.values())[-1]
+        if alias not in self._connections:
+            raise ValueError(f"Alias '{alias}' not found in existing connections.")
+        return self._connections[alias]
