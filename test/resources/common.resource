@@ -84,6 +84,16 @@ Connect To DB Aliased
         Fail    Unexpected mode - ${DB_MODULE_MODE}
     END
 
+Aliased Suite Setup
+    Connect To DB
+    Create Person Table
+    Disconnect From Database
+
+Aliased Suite Teardown
+    Connect To DB
+    Drop Tables Person And Foobar
+    Disconnect From Database
+
 Build Connection String
     [Documentation]    Returns the connection string variable depending on the DB module
     ...    currently under test.

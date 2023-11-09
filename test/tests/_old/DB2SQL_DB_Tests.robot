@@ -1,9 +1,8 @@
 *** Settings ***
 Suite Setup       Connect To Database    ibm_db_dbi    ${DBName}    ${DBUser}    ${DBPass}    ${DBHost}    ${DBPort}
 Suite Teardown    Disconnect From Database
+Resource          DB2SQL_DB_Conf.txt
 Library           DatabaseLibrary
-Library           Collections
-Force Tags        optional
 
 *** Test Cases ***
 Create person table
@@ -12,8 +11,8 @@ Create person table
     Should Be Equal As Strings    ${output}    None
 
 Execute SQL Script - Insert Data person table
-    Comment    ${output} =    Execute SQL Script    ${CURDIR}/my_db_test_insertData.sql
-    ${output} =    Execute SQL Script    ${CURDIR}/my_db_test_insertData.sql
+    Comment    ${output} =    Execute SQL Script    ./my_db_test_insertData.sql
+    ${output} =    Execute SQL Script    ../test/my_db_test_insertData.sql
     Log    ${output}
     Should Be Equal As Strings    ${output}    None
 
@@ -54,20 +53,11 @@ Verify person Description
     @{queryResults} =    Description    SELECT * FROM person fetch first 1 rows only;
     Log Many    @{queryResults}
     ${output} =    Set Variable    ${queryResults[0]}
-    Should Be Equal As Strings    ${output[0]}    ID
-    ${expected}=    Evaluate    ['DEC', 'NUMERIC', 'DECIMAL', 'NUM']
-    Lists Should Be Equal    ${output[1].col_types}    ${expected}    ignore_order=True
-    Should Be Equal As Strings    ${output[2:]}    [12, 12, 10, 0, True]
+    Should Be Equal As Strings    ${output}    ['ID', DBAPITypeObject(['NUM', 'DECIMAL', 'DEC', 'NUMERIC']), 12, 12, 10, 0, True]
     ${output} =    Set Variable    ${queryResults[1]}
-    Should Be Equal As Strings    ${output[0]}    FIRST_NAME
-    ${expected}=    Evaluate    ['VARCHAR', 'CHARACTER VARYING', 'STRING', 'CHARACTER', 'CHAR', 'CHAR VARYING']
-    Lists Should Be Equal    ${output[1].col_types}    ${expected}    ignore_order=True
-    Should Be Equal As Strings    ${output[2:]}    [30, 30, 30, 0, True]
+    Should Be Equal As Strings    ${output}    ['FIRST_NAME', DBAPITypeObject(['CHARACTER VARYING', 'CHAR VARYING', 'VARCHAR', 'STRING', 'CHARACTER', 'CHAR']), 30, 30, 30, 0, True]
     ${output} =    Set Variable    ${queryResults[2]}
-    Should Be Equal As Strings    ${output[0]}    LAST_NAME
-    ${expected}=    Evaluate    ['CHAR', 'CHAR VARYING', 'VARCHAR', 'CHARACTER VARYING', 'CHARACTER', 'STRING']
-    Lists Should Be Equal    ${output[1].col_types}    ${expected}    ignore_order=True
-    Should Be Equal As Strings    ${output[2:]}    [30, 30, 30, 0, True]
+    Should Be Equal As Strings    ${output}    ['LAST_NAME', DBAPITypeObject(['CHARACTER VARYING', 'CHAR VARYING', 'VARCHAR', 'STRING', 'CHARACTER', 'CHAR']), 30, 30, 30, 0, True]
     ${NumColumns} =    Get Length    ${queryResults}
     Should Be Equal As Integers    ${NumColumns}    3
 
@@ -85,8 +75,8 @@ Verify Query - Get results as a list of dictionaries
     [Tags]    db    smoke
     ${output} =    Query    SELECT * FROM person;    \    True
     Log    ${output}
-    Should Be Equal As Strings    ${output[0]['FIRST_NAME']}    Franz Allan
-    Should Be Equal As Strings    ${output[1]['FIRST_NAME']}    Jerry
+    Should Be Equal As Strings    &{output[0]}[first_name]    Franz Allan
+    Should Be Equal As Strings    &{output[1]}[first_name]    Jerry
 
 Insert Data Into Table foobar
     ${output} =    Execute SQL String    INSERT INTO foobar VALUES(1,'Jerry');
@@ -107,6 +97,3 @@ Verify Query - Row Count foobar table 0 row
 Drop person and foobar table
     Execute SQL String    DROP TABLE person;
     Execute SQL String    DROP TABLE foobar;
-
-Disconnect from all databases
-    Disconnect From All Databases

@@ -137,7 +137,7 @@ class Assertion:
         numRows: str,
         sansTran: bool = False,
         msg: Optional[str] = None,
-        alias: str = "default",
+        alias: Optional[str] = None,
     ):
         """
         Check if the number of rows returned from `selectStatement` is equal to the value submitted. If not, then this
@@ -180,7 +180,7 @@ class Assertion:
         numRows: str,
         sansTran: bool = False,
         msg: Optional[str] = None,
-        alias: str = "default",
+        alias: Optional[str] = None,
     ):
         """
         Check if the number of rows returned from `selectStatement` is greater than the value submitted. If not, then
@@ -223,7 +223,7 @@ class Assertion:
         numRows: str,
         sansTran: bool = False,
         msg: Optional[str] = None,
-        alias: str = "default",
+        alias: Optional[str] = None,
     ):
         """
         Check if the number of rows returned from `selectStatement` is less than the value submitted. If not, then this

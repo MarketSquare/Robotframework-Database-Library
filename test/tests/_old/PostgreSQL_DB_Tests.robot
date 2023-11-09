@@ -145,6 +145,3 @@ Drop person and foobar tables
     ${output} =    Execute SQL String    DROP TABLE IF EXISTS person,foobar;
     Log    ${output}
     Should Be Equal As Strings    ${output}    None
-
-Disconnect from all databases
-    Disconnect From All Databases

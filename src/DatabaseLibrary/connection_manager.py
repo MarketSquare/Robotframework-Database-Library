@@ -42,7 +42,10 @@ class ConnectionManager:
 
     def _register_connection(self, client: Any, module_name: str, alias: str):
         if alias in self._connections:
-            logger.warn(f"Overwriting not closed connection for alias = '{alias}'")
+            if alias == self.default_alias:
+                logger.warn("Overwriting not closed connection.")
+            else:
+                logger.warn(f"Overwriting not closed connection for alias = '{alias}'")
         self._connections[alias] = Connection(client, module_name)
 
     def connect_to_database(
@@ -354,7 +357,10 @@ class ConnectionManager:
         """
         logger.info("Executing : Disconnect From Database")
         if not alias:
-            alias = self.default_alias
+            if not self._connections or self.default_alias in self._connections:
+                alias = self.default_alias
+            else:
+                alias = list(self._connections.keys())[-1]
         try:
             db_connection = self._connections.pop(alias)
             db_connection.client.close()

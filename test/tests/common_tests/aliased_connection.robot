@@ -1,13 +1,7 @@
 *** Settings ***
 Resource            ../../resources/common.resource
-Suite Setup         Run Keywords
-...                 Connect To DB
-...                 AND
-...                 Create Person Table
-Suite Teardown      Run Keywords
-...                 Connect To DB
-...                 AND
-...                 Drop Tables Person And Foobar
+Suite Setup         Aliased Suite Setup
+Suite Teardown      Aliased Suite Teardown
 Test Teardown    Disconnect From All Databases
 
 
@@ -116,14 +110,3 @@ Verify Delete All Rows From Table
     Connect To DB Aliased    alias=aliased_conn
     Delete All Rows From Table    person    alias=aliased_conn
     Row Count Is 0    SELECT * FROM person    alias=aliased_conn
-
-
-*** Keywords ***
-Aliases Suite Setup
-    Connect To DB Aliased
-    Create Person Table
-
-Aliases Suite Teardown
-    Connect To DB Aliased
-    Drop Tables Person And Foobar
-    Disconnect From All Databases
