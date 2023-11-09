@@ -25,9 +25,9 @@ class Assertion:
         self, selectStatement: str, sansTran: bool = False, msg: Optional[str] = None, alias: Optional[str] = None
     ):
         """
-        Check if any row would be returned by given the input `selectStatement`. If there are no results, then this will
-        throw an AssertionError. Set optional input `sansTran` to True to run command without an explicit transaction
-        commit or rollback. The default error message can be overridden with the `msg` argument.
+        Check if any row would be returned by given the input ``selectStatement``. If there are no results, then this will
+        throw an AssertionError. Set optional input ``sansTran`` to True to run command without an explicit transaction
+        commit or rollback. The default error message can be overridden with the ``msg`` argument.
 
         For example, given we have a table `person` with the following data:
         | id | first_name  | last_name |
@@ -42,10 +42,13 @@ class Assertion:
         | Check If Exists In Database | SELECT id FROM person WHERE first_name = 'Franz Allan' | # PASS |
         | Check If Exists In Database | SELECT id FROM person WHERE first_name = 'John' | # FAIL |
 
-        Using optional `sansTran` to run command without an explicit transaction commit or rollback:
+        Use optional ``alias`` parameter to specify what connection should be used for the query if you have more
+        than one connection open.
+
+        Using optional ``sansTran`` to run command without an explicit transaction commit or rollback:
         | Check If Exists In Database | SELECT id FROM person WHERE first_name = 'John' | True |
 
-        Using optional `msg` to override the default error message:
+        Using optional ``msg`` to override the default error message:
         | Check If Exists In Database | SELECT id FROM person WHERE first_name = 'John' | msg=my error message |
         """
         logger.info(f"Executing : Check If Exists In Database  |  {selectStatement}")
@@ -60,9 +63,9 @@ class Assertion:
         """
         This is the negation of `check_if_exists_in_database`.
 
-        Check if no rows would be returned by given the input `selectStatement`. If there are any results, then this
-        will throw an AssertionError. Set optional input `sansTran` to True to run command without an explicit
-        transaction commit or rollback. The default error message can be overridden with the `msg` argument.
+        Check if no rows would be returned by given the input ``selectStatement``. If there are any results, then this
+        will throw an AssertionError. Set optional input ``sansTran`` to True to run command without an explicit
+        transaction commit or rollback. The default error message can be overridden with the ``msg`` argument.
 
         For example, given we have a table `person` with the following data:
         | id | first_name  | last_name |
@@ -77,10 +80,13 @@ class Assertion:
         | Check If Not Exists In Database | SELECT id FROM person WHERE first_name = 'John' | # PASS |
         | Check If Not Exists In Database | SELECT id FROM person WHERE first_name = 'Franz Allan' | # FAIL |
 
-        Using optional `sansTran` to run command without an explicit transaction commit or rollback:
+        Use optional ``alias`` parameter to specify what connection should be used for the query if you have more
+        than one connection open.
+
+        Using optional ``sansTran`` to run command without an explicit transaction commit or rollback:
         | Check If Not Exists In Database | SELECT id FROM person WHERE first_name = 'John' | True |
 
-        Using optional `msg` to override the default error message:
+        Using optional ``msg`` to override the default error message:
         | Check If Not Exists In Database | SELECT id FROM person WHERE first_name = 'Franz Allan' | msg=my error message |
         """
         logger.info(f"Executing : Check If Not Exists In Database  |  {selectStatement}")
@@ -94,9 +100,9 @@ class Assertion:
         self, selectStatement: str, sansTran: bool = False, msg: Optional[str] = None, alias: Optional[str] = None
     ):
         """
-        Check if any rows are returned from the submitted `selectStatement`. If there are, then this will throw an
-        AssertionError. Set optional input `sansTran` to True to run command without an explicit transaction commit or
-        rollback. The default error message can be overridden with the `msg` argument.
+        Check if any rows are returned from the submitted ``selectStatement``. If there are, then this will throw an
+        AssertionError. Set optional input ``sansTran`` to True to run command without an explicit transaction commit or
+        rollback. The default error message can be overridden with the ``msg`` argument.
 
         For example, given we have a table `person` with the following data:
         | id | first_name  | last_name |
@@ -111,7 +117,10 @@ class Assertion:
         | Row Count is 0 | SELECT id FROM person WHERE first_name = 'Franz Allan' | # FAIL |
         | Row Count is 0 | SELECT id FROM person WHERE first_name = 'John' | # PASS |
 
-        Using optional `sansTran` to run command without an explicit transaction commit or rollback:
+        Use optional ``alias`` parameter to specify what connection should be used for the query if you have more
+        than one connection open.
+
+        Using optional ``sansTran`` to run command without an explicit transaction commit or rollback:
         | Row Count is 0 | SELECT id FROM person WHERE first_name = 'John' | True |
 
         Using optional `msg` to override the default error message:
@@ -148,6 +157,9 @@ class Assertion:
         Then you will get the following:
         | Row Count Is Equal To X | SELECT id FROM person | 1 | # FAIL |
         | Row Count Is Equal To X | SELECT id FROM person WHERE first_name = 'John' | 0 | # PASS |
+
+        Use optional ``alias`` parameter to specify what connection should be used for the query if you have more
+        than one connection open.
 
         Using optional `sansTran` to run command without an explicit transaction commit or rollback:
         | Row Count Is Equal To X | SELECT id FROM person WHERE first_name = 'John' | 0 | True |
@@ -189,6 +201,9 @@ class Assertion:
         | Row Count Is Greater Than X | SELECT id FROM person | 1 | # PASS |
         | Row Count Is Greater Than X | SELECT id FROM person WHERE first_name = 'John' | 0 | # FAIL |
 
+        Use optional ``alias`` parameter to specify what connection should be used for the query if you have more
+        than one connection open.
+
         Using optional `sansTran` to run command without an explicit transaction commit or rollback:
         | Row Count Is Greater Than X | SELECT id FROM person | 1 | True |
 
@@ -229,6 +244,9 @@ class Assertion:
         | Row Count Is Less Than X | SELECT id FROM person | 3 | # PASS |
         | Row Count Is Less Than X | SELECT id FROM person WHERE first_name = 'John' | 1 | # FAIL |
 
+        Use optional ``alias`` parameter to specify what connection should be used for the query if you have more
+        than one connection open.
+
         Using optional `sansTran` to run command without an explicit transaction commit or rollback:
         | Row Count Is Less Than X | SELECT id FROM person | 3 | True |
 
@@ -258,6 +276,9 @@ class Assertion:
         | Table Must Exist | person | # PASS |
         | Table Must Exist | first_name | # FAIL |
         | Table Must Exist | first_name | alias=my_alias |
+
+        Use optional ``alias`` parameter to specify what connection should be used for the query if you have more
+        than one connection open.
 
         Using optional `sansTran` to run command without an explicit transaction commit or rollback:
         | Table Must Exist | person | True |

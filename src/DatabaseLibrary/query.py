@@ -28,9 +28,12 @@ class Query:
         self, selectStatement: str, sansTran: bool = False, returnAsDict: bool = False, alias: Optional[str] = None
     ):
         """
-        Uses the input `selectStatement` to query for the values that will be returned as a list of tuples. Set optional
-        input `sansTran` to True to run command without an explicit transaction commit or rollback.
-        Set optional input `returnAsDict` to True to return values as a list of dictionaries.
+        Uses the input ``selectStatement`` to query for the values that will be returned as a list of tuples. Set
+        optional input ``sansTran`` to True to run command without an explicit transaction commit or rollback.
+        Set optional input ``returnAsDict`` to True to return values as a list of dictionaries.
+
+        Use optional ``alias`` parameter to specify what connection should be used for the query if you have more
+        than one connection open.
 
         Tip: Unless you want to log all column values of the specified rows,
         try specifying the column names in your select statements
@@ -58,7 +61,7 @@ class Query:
         And get the following
         See, Franz Allan
 
-        Using optional `sansTran` to run command without an explicit transaction commit or rollback:
+        Using optional ``sansTran`` to run command without an explicit transaction commit or rollback:
         | @{queryResults} | Query | SELECT * FROM person | True |
         """
         db_connection = self._get_connection_with_alias(alias)
@@ -78,8 +81,8 @@ class Query:
 
     def row_count(self, selectStatement: str, sansTran: bool = False, alias: Optional[str] = None):
         """
-        Uses the input `selectStatement` to query the database and returns the number of rows from the query. Set
-        optional input `sansTran` to True to run command without an explicit transaction commit or rollback.
+        Uses the input ``selectStatement`` to query the database and returns the number of rows from the query. Set
+        optional input ``sansTran`` to True to run command without an explicit transaction commit or rollback.
 
         For example, given we have a table `person` with the following data:
         | id | first_name  | last_name |
@@ -101,7 +104,10 @@ class Query:
         And get the following
         1
 
-        Using optional `sansTran` to run command without an explicit transaction commit or rollback:
+        Use optional ``alias`` parameter to specify what connection should be used for the query if you have more
+        than one connection open.
+
+        Using optional ``sansTran`` to run command without an explicit transaction commit or rollback:
         | ${rowCount} | Row Count | SELECT * FROM person | True |
         """
         db_connection = self._get_connection_with_alias(alias)
@@ -120,8 +126,8 @@ class Query:
 
     def description(self, selectStatement: str, sansTran: bool = False, alias: Optional[str] = None):
         """
-        Uses the input `selectStatement` to query a table in the db which will be used to determine the description. Set
-        optional input `sansTran` to True to run command without an explicit transaction commit or rollback.
+        Uses the input ``selectStatement`` to query a table in the db which will be used to determine the description. Set
+        optional input ``sansTran` to True to run command without an explicit transaction commit or rollback.
 
         For example, given we have a table `person` with the following data:
         | id | first_name  | last_name |
@@ -136,6 +142,9 @@ class Query:
         [Column(name='id', type_code=1043, display_size=None, internal_size=255, precision=None, scale=None, null_ok=None)]
         [Column(name='first_name', type_code=1043, display_size=None, internal_size=255, precision=None, scale=None, null_ok=None)]
         [Column(name='last_name', type_code=1043, display_size=None, internal_size=255, precision=None, scale=None, null_ok=None)]
+
+        Use optional ``alias`` parameter to specify what connection should be used for the query if you have more
+        than one connection open.
 
         Using optional `sansTran` to run command without an explicit transaction commit or rollback:
         | @{queryResults} | Description | SELECT * FROM person | True |
@@ -172,6 +181,9 @@ class Query:
         will get:
         | Delete All Rows From Table | first_name | # FAIL |
 
+        Use optional ``alias`` parameter to specify what connection should be used for the query if you have more
+        than one connection open.
+
         Using optional `sansTran` to run command without an explicit transaction commit or rollback:
         | Delete All Rows From Table | person | True |
         """
@@ -197,7 +209,6 @@ class Query:
         Executes the content of the `sqlScriptFileName` as SQL commands. Useful for setting the database to a known
         state before running your tests, or clearing out your test data after running each a test. Set optional input
         `sansTran` to True to run command without an explicit transaction commit or rollback.
-
 
         Sample usage :
         | Execute Sql Script | ${EXECDIR}${/}resources${/}DDL-setup.sql |
@@ -247,6 +258,9 @@ class Query:
           FROM employee_table
 
         The slash signs ("/") are always ignored and have no impact on execution order.
+
+        Use optional ``alias`` parameter to specify what connection should be used for the query if you have more
+        than one connection open.
 
         Using optional `sansTran` to run command without an explicit transaction commit or rollback:
         | Execute Sql Script | ${EXECDIR}${/}resources${/}DDL-setup.sql | True |
@@ -331,6 +345,9 @@ class Query:
         For example with an argument:
         | Execute Sql String | SELECT * FROM person WHERE first_name = ${FIRSTNAME} |
 
+        Use optional ``alias`` parameter to specify what connection should be used for the query if you have more
+        than one connection open.
+
         Using optional `sansTran` to run command without an explicit transaction commit or rollback:
         | Execute Sql String | DELETE FROM person_employee_table; DELETE FROM person_table | True |
         """
@@ -383,6 +400,9 @@ class Query:
         | @{Param values}    @{Result sets} = | Call Stored Procedure | Get_all_first_and_second_names | ${Params} |
         | # ${Param values} = [<oracledb.Cursor on <oracledb.Connection ...>>, <oracledb.Cursor on <oracledb.Connection ...>>] |
         | # ${result sets} = [[('Franz Allan',), ('Jerry',)], [('See',), ('Schneider',)]] |
+
+        Use optional ``alias`` parameter to specify what connection should be used for the query if you have more
+        than one connection open.
 
         Using optional `sansTran` to run command without an explicit transaction commit or rollback:
         | @{Param values}    @{Result sets} = | Call Stored Procedure | DBName.SchemaName.StoredProcName | ${Params} | True |

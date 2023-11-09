@@ -60,21 +60,21 @@ class ConnectionManager:
         alias: str = "default",
     ):
         """
-        Loads the DB API 2.0 module given `dbapiModuleName` then uses it to
-        connect to the database using provided parameters such as `dbName`, `dbUsername`, and `dbPassword`.
+        Loads the DB API 2.0 module given ``dbapiModuleName`` then uses it to
+        connect to the database using provided parameters such as ``dbName``, ``dbUsername``, and ``dbPassword``.
 
         Optional ``alias`` parameter can be used for creating multiple open connections, even for different databases.
         If the same alias is given twice then previous connection will be overriden.
 
-        The `driverMode` is used to select the *oracledb* client mode.
+        The ``driverMode`` is used to select the *oracledb* client mode.
         Allowed values are:
         - _thin_ (default if omitted)
         - _thick_
         - _thick,lib_dir=<PATH_TO_ORACLE_CLIENT>_
 
-        Optionally, you can specify a `dbConfigFile` wherein it will load the
-        alias (or alias will be "default") property values for `dbapiModuleName`, `dbName` `dbUsername`
-        and `dbPassword` (note: specifying `dbapiModuleName`, `dbName`
+        Optionally, you can specify a ``dbConfigFile`` wherein it will load the
+        alias (or alias will be "default") property values for ``dbapiModuleName``, ``dbName`` ``dbUsername``
+        and ``dbPassword`` (note: specifying ``dbapiModuleName``, ``dbName``
         `dbUsername` or `dbPassword` directly will override the properties of
         the same key in `dbConfigFile`). If no `dbConfigFile` is specified, it
         defaults to `./resources/db.cfg`.
