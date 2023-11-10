@@ -30,6 +30,57 @@ class Connection:
     module_name: str
 
 
+class ConnectionStore:
+    def __init__(self):
+        self._connections: Dict[str, Connection] = {}
+        self.default_alias: str = "default"
+
+    def register_connection(self, client: Any, module_name: str, alias: str):
+        if alias in self._connections:
+            if alias == self.default_alias:
+                logger.warn("Overwriting not closed connection.")
+            else:
+                logger.warn(f"Overwriting not closed connection for alias = '{alias}'")
+        self._connections[alias] = Connection(client, module_name)
+
+    def get_connection(self, alias: Optional[str]):
+        """
+        Return connection with given alias.
+
+        If alias is not provided, it will return default connection.
+        If there is no default connection, it will return last opened connection.
+        """
+        if not self._connections:
+            raise ValueError(f"No database connection is open.")
+        if not alias:
+            if self.default_alias in self._connections:
+                return self._connections[self.default_alias]
+            return list(self._connections.values())[-1]
+        if alias not in self._connections:
+            raise ValueError(f"Alias '{alias}' not found in existing connections.")
+        return self._connections[alias]
+
+    def pop_connection(self, alias: Optional[str]):
+        if not self._connections:
+            return None
+        if not alias:
+            alias = self.default_alias
+            if alias not in self._connections:
+                alias = list(self._connections.keys())[-1]
+        return self._connections.pop(alias, None)
+
+    def clear(self):
+        self._connections = {}
+
+    def switch(self, alias: str):
+        if alias not in self._connections:
+            raise ValueError(f"Alias '{alias}' not found in existing connections.")
+        self.default_alias = alias
+
+    def __iter__(self):
+        return iter(self._connections.values())
+
+
 class ConnectionManager:
     """
     Connection Manager handles the connection & disconnection to the database.
@@ -37,16 +88,7 @@ class ConnectionManager:
 
     def __init__(self):
         self.omit_trailing_semicolon: bool = False
-        self._connections: Dict[str, Connection] = {}
-        self.default_alias: str = "default"
-
-    def _register_connection(self, client: Any, module_name: str, alias: str):
-        if alias in self._connections:
-            if alias == self.default_alias:
-                logger.warn("Overwriting not closed connection.")
-            else:
-                logger.warn(f"Overwriting not closed connection for alias = '{alias}'")
-        self._connections[alias] = Connection(client, module_name)
+        self.connection_store: ConnectionStore = ConnectionStore()
 
     def connect_to_database(
         self,
@@ -279,7 +321,7 @@ class ConnectionManager:
                 host=dbHost,
                 port=dbPort,
             )
-        self._register_connection(db_connection, db_api_module_name, alias)
+        self.connection_store.register_connection(db_connection, db_api_module_name, alias)
 
     def connect_to_database_using_custom_params(
         self, dbapiModuleName: Optional[str] = None, db_connect_string: str = "", alias: str = "default"
@@ -317,7 +359,7 @@ class ConnectionManager:
         )
 
         db_connection = eval(db_connect_string)
-        self._register_connection(db_connection, db_api_module_name, alias)
+        self.connection_store.register_connection(db_connection, db_api_module_name, alias)
 
     def connect_to_database_using_custom_connection_string(
         self, dbapiModuleName: Optional[str] = None, db_connect_string: str = "", alias: str = "default"
@@ -341,7 +383,7 @@ class ConnectionManager:
             f"'{db_connect_string}')"
         )
         db_connection = db_api_2.connect(db_connect_string)
-        self._register_connection(db_connection, db_api_module_name, alias)
+        self.connection_store.register_connection(db_connection, db_api_module_name, alias)
 
     def disconnect_from_database(self, error_if_no_connection: bool = False, alias: Optional[str] = None):
         """
@@ -356,19 +398,14 @@ class ConnectionManager:
         | Disconnect From Database | alias=my_alias | # disconnects from current connection to the database |
         """
         logger.info("Executing : Disconnect From Database")
-        if not alias:
-            if not self._connections or self.default_alias in self._connections:
-                alias = self.default_alias
-            else:
-                alias = list(self._connections.keys())[-1]
-        try:
-            db_connection = self._connections.pop(alias)
-            db_connection.client.close()
-        except KeyError:  # Non-existing alias
+        db_connection = self.connection_store.pop_connection(alias)
+        if db_connection is None:
             log_msg = "No open database connection to close"
             if error_if_no_connection:
                 raise ConnectionError(log_msg) from None
             logger.info(log_msg)
+        else:
+            db_connection.client.close()
 
     def disconnect_from_all_databases(self):
         """
@@ -378,9 +415,9 @@ class ConnectionManager:
         | Disconnect From All Databases | # disconnects from all connections to the database |
         """
         logger.info("Executing : Disconnect From All Databases")
-        for db_connection in self._connections.values():
+        for db_connection in self.connection_store:
             db_connection.client.close()
-        self._connections = {}
+        self.connection_store.clear()
 
     def set_auto_commit(self, autoCommit: bool = True, alias: Optional[str] = None):
         """
@@ -400,7 +437,7 @@ class ConnectionManager:
         | Set Auto Commit | False
         """
         logger.info("Executing : Set Auto Commit")
-        db_connection = self._get_connection_with_alias(alias)
+        db_connection = self.connection_store.get_connection(alias)
         db_connection.client.autocommit = autoCommit
 
     def switch_database(self, alias: str):
@@ -411,23 +448,4 @@ class ConnectionManager:
         | Switch Database | my_alias |
         | Switch Database | alias=my_alias |
         """
-        if alias not in self._connections:
-            raise ValueError(f"Alias '{alias}' not found in existing connections.")
-        self.default_alias = alias
-
-    def _get_connection_with_alias(self, alias: Optional[str]) -> Connection:
-        """
-        Return connection with given alias.
-
-        If alias is not provided, it will return default connection.
-        If there is no default connection, it will return last opened connection.
-        """
-        if not self._connections:
-            raise ValueError(f"No database connection is open.")
-        if not alias:
-            if self.default_alias in self._connections:
-                return self._connections[self.default_alias]
-            return list(self._connections.values())[-1]
-        if alias not in self._connections:
-            raise ValueError(f"Alias '{alias}' not found in existing connections.")
-        return self._connections[alias]
+        self.connection_store.switch(alias)

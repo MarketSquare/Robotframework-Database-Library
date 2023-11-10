@@ -64,7 +64,7 @@ class Query:
         Using optional ``sansTran`` to run command without an explicit transaction commit or rollback:
         | @{queryResults} | Query | SELECT * FROM person | True |
         """
-        db_connection = self._get_connection_with_alias(alias)
+        db_connection = self.connection_store.get_connection(alias)
         cur = None
         try:
             cur = db_connection.client.cursor()
@@ -110,7 +110,7 @@ class Query:
         Using optional ``sansTran`` to run command without an explicit transaction commit or rollback:
         | ${rowCount} | Row Count | SELECT * FROM person | True |
         """
-        db_connection = self._get_connection_with_alias(alias)
+        db_connection = self.connection_store.get_connection(alias)
         cur = None
         try:
             cur = db_connection.client.cursor()
@@ -149,7 +149,7 @@ class Query:
         Using optional `sansTran` to run command without an explicit transaction commit or rollback:
         | @{queryResults} | Description | SELECT * FROM person | True |
         """
-        db_connection = self._get_connection_with_alias(alias)
+        db_connection = self.connection_store.get_connection(alias)
         cur = None
         try:
             cur = db_connection.client.cursor()
@@ -187,7 +187,7 @@ class Query:
         Using optional `sansTran` to run command without an explicit transaction commit or rollback:
         | Delete All Rows From Table | person | True |
         """
-        db_connection = self._get_connection_with_alias(alias)
+        db_connection = self.connection_store.get_connection(alias)
         cur = None
         query = f"DELETE FROM {tableName}"
         try:
@@ -265,7 +265,7 @@ class Query:
         Using optional `sansTran` to run command without an explicit transaction commit or rollback:
         | Execute Sql Script | ${EXECDIR}${/}resources${/}DDL-setup.sql | True |
         """
-        db_connection = self._get_connection_with_alias(alias)
+        db_connection = self.connection_store.get_connection(alias)
         with open(sqlScriptFileName, encoding="UTF-8") as sql_file:
             cur = None
             try:
@@ -351,7 +351,7 @@ class Query:
         Using optional `sansTran` to run command without an explicit transaction commit or rollback:
         | Execute Sql String | DELETE FROM person_employee_table; DELETE FROM person_table | True |
         """
-        db_connection = self._get_connection_with_alias(alias)
+        db_connection = self.connection_store.get_connection(alias)
         cur = None
         try:
             cur = db_connection.client.cursor()
@@ -407,7 +407,7 @@ class Query:
         Using optional `sansTran` to run command without an explicit transaction commit or rollback:
         | @{Param values}    @{Result sets} = | Call Stored Procedure | DBName.SchemaName.StoredProcName | ${Params} | True |
         """
-        db_connection = self._get_connection_with_alias(alias)
+        db_connection = self.connection_store.get_connection(alias)
         if spParams is None:
             spParams = []
         cur = None

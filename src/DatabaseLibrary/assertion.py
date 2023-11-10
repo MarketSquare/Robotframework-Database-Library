@@ -287,7 +287,7 @@ class Assertion:
         | Table Must Exist | first_name | msg=my error message |
         """
         logger.info(f"Executing : Table Must Exist  |  {tableName}")
-        db_connection = self._get_connection_with_alias(alias)
+        db_connection = self.connection_store.get_connection(alias)
         if db_connection.module_name in ["cx_Oracle", "oracledb"]:
             query = (
                 "SELECT * FROM all_objects WHERE object_type IN ('TABLE','VIEW') AND "
