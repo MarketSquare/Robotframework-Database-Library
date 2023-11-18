@@ -26,30 +26,21 @@ class Assertion:
     ):
         """
         Check if any row would be returned by given the input ``selectStatement``. If there are no results, then this will
-        throw an AssertionError. Set optional input ``sansTran`` to True to run command without an explicit transaction
-        commit or rollback. The default error message can be overridden with the ``msg`` argument.
+        throw an AssertionError.
 
-        For example, given we have a table `person` with the following data:
-        | id | first_name  | last_name |
-        |  1 | Franz Allan | See       |
+        Set optional input ``sansTran`` to _True_ to run command without an explicit transaction
+        commit or rollback.
 
-        When you have the following assertions in your robot
-        | Check If Exists In Database | SELECT id FROM person WHERE first_name = 'Franz Allan' |
-        | Check If Exists In Database | SELECT id FROM person WHERE first_name = 'John' |
-        | Check If Exists In Database | SELECT id FROM person WHERE first_name = 'Franz Allan' | alias=my_alias |
-
-        Then you will get the following:
-        | Check If Exists In Database | SELECT id FROM person WHERE first_name = 'Franz Allan' | # PASS |
-        | Check If Exists In Database | SELECT id FROM person WHERE first_name = 'John' | # FAIL |
+        The default error message can be overridden with the ``msg`` argument.
 
         Use optional ``alias`` parameter to specify what connection should be used for the query if you have more
         than one connection open.
 
-        Using optional ``sansTran`` to run command without an explicit transaction commit or rollback:
-        | Check If Exists In Database | SELECT id FROM person WHERE first_name = 'John' | True |
-
-        Using optional ``msg`` to override the default error message:
+        Examples:
+        | Check If Exists In Database | SELECT id FROM person WHERE first_name = 'Franz Allan' |
         | Check If Exists In Database | SELECT id FROM person WHERE first_name = 'John' | msg=my error message |
+        | Check If Exists In Database | SELECT id FROM person WHERE first_name = 'Franz Allan' | alias=my_alias |
+        | Check If Exists In Database | SELECT id FROM person WHERE first_name = 'John' | sansTran=True |
         """
         logger.info(f"Executing : Check If Exists In Database  |  {selectStatement}")
         if not self.query(selectStatement, sansTran, alias=alias):
@@ -64,30 +55,20 @@ class Assertion:
         This is the negation of `check_if_exists_in_database`.
 
         Check if no rows would be returned by given the input ``selectStatement``. If there are any results, then this
-        will throw an AssertionError. Set optional input ``sansTran`` to True to run command without an explicit
-        transaction commit or rollback. The default error message can be overridden with the ``msg`` argument.
+        will throw an AssertionError.
 
-        For example, given we have a table `person` with the following data:
-        | id | first_name  | last_name |
-        |  1 | Franz Allan | See       |
+        Set optional input ``sansTran`` to _True_ to run command without an explicit transaction commit or rollback.
 
-        When you have the following assertions in your robot
-        | Check If Not Exists In Database | SELECT id FROM person WHERE first_name = 'John' |
-        | Check If Not Exists In Database | SELECT id FROM person WHERE first_name = 'Franz Allan' |
-        | Check If Not Exists In Database | SELECT id FROM person WHERE first_name = 'Franz Allan' | alias=my_alias |
-
-        Then you will get the following:
-        | Check If Not Exists In Database | SELECT id FROM person WHERE first_name = 'John' | # PASS |
-        | Check If Not Exists In Database | SELECT id FROM person WHERE first_name = 'Franz Allan' | # FAIL |
+        The default error message can be overridden with the ``msg`` argument.
 
         Use optional ``alias`` parameter to specify what connection should be used for the query if you have more
         than one connection open.
 
-        Using optional ``sansTran`` to run command without an explicit transaction commit or rollback:
-        | Check If Not Exists In Database | SELECT id FROM person WHERE first_name = 'John' | True |
-
-        Using optional ``msg`` to override the default error message:
+        Examples:
+        | Check If Not Exists In Database | SELECT id FROM person WHERE first_name = 'John' |
         | Check If Not Exists In Database | SELECT id FROM person WHERE first_name = 'Franz Allan' | msg=my error message |
+        | Check If Not Exists In Database | SELECT id FROM person WHERE first_name = 'Franz Allan' | alias=my_alias |
+        | Check If Not Exists In Database | SELECT id FROM person WHERE first_name = 'John' | sansTran=True |
         """
         logger.info(f"Executing : Check If Not Exists In Database  |  {selectStatement}")
         query_results = self.query(selectStatement, sansTran, alias=alias)
@@ -101,30 +82,21 @@ class Assertion:
     ):
         """
         Check if any rows are returned from the submitted ``selectStatement``. If there are, then this will throw an
-        AssertionError. Set optional input ``sansTran`` to True to run command without an explicit transaction commit or
-        rollback. The default error message can be overridden with the ``msg`` argument.
+        AssertionError.
 
-        For example, given we have a table `person` with the following data:
-        | id | first_name  | last_name |
-        |  1 | Franz Allan | See       |
+        Set optional input ``sansTran`` to _True_ to run command without an explicit transaction commit or
+        rollback.
 
-        When you have the following assertions in your robot
-        | Row Count is 0 | SELECT id FROM person WHERE first_name = 'Franz Allan' |
-        | Row Count is 0 | SELECT id FROM person WHERE first_name = 'John' |
-        | Row Count is 0 | SELECT id FROM person WHERE first_name = 'John' | alias=my_alias |
-
-        Then you will get the following:
-        | Row Count is 0 | SELECT id FROM person WHERE first_name = 'Franz Allan' | # FAIL |
-        | Row Count is 0 | SELECT id FROM person WHERE first_name = 'John' | # PASS |
+        The default error message can be overridden with the ``msg`` argument.
 
         Use optional ``alias`` parameter to specify what connection should be used for the query if you have more
         than one connection open.
 
-        Using optional ``sansTran`` to run command without an explicit transaction commit or rollback:
-        | Row Count is 0 | SELECT id FROM person WHERE first_name = 'John' | True |
-
-        Using optional `msg` to override the default error message:
+        Examples:
+        | Row Count is 0 | SELECT id FROM person WHERE first_name = 'Franz Allan' |
         | Row Count is 0 | SELECT id FROM person WHERE first_name = 'Franz Allan' | msg=my error message |
+        | Row Count is 0 | SELECT id FROM person WHERE first_name = 'John' | alias=my_alias |
+        | Row Count is 0 | SELECT id FROM person WHERE first_name = 'John' | sansTran=True |
         """
         logger.info(f"Executing : Row Count Is 0  |  {selectStatement}")
         num_rows = self.row_count(selectStatement, sansTran, alias=alias)
@@ -140,32 +112,21 @@ class Assertion:
         alias: Optional[str] = None,
     ):
         """
-        Check if the number of rows returned from `selectStatement` is equal to the value submitted. If not, then this
-        will throw an AssertionError. Set optional input `sansTran` to True to run command without an explicit
-        transaction commit or rollback. The default error message can be overridden with the `msg` argument.
+        Check if the number of rows returned from ``selectStatement`` is equal to the value submitted. If not, then this
+        will throw an AssertionError.
 
-        For example, given we have a table `person` with the following data:
-        | id | first_name  | last_name |
-        |  1 | Franz Allan | See       |
-        |  2 | Jerry       | Schneider |
+        Set optional input ``sansTran`` to _True_ to run command without an explicit transaction commit or rollback.
 
-        When you have the following assertions in your robot
-        | Row Count Is Equal To X | SELECT id FROM person | 1 |
-        | Row Count Is Equal To X | SELECT id FROM person WHERE first_name = 'John' | 0 |
-        | Row Count Is Equal To X | SELECT id FROM person WHERE first_name = 'John' | 0 | alias=my_alias |
-
-        Then you will get the following:
-        | Row Count Is Equal To X | SELECT id FROM person | 1 | # FAIL |
-        | Row Count Is Equal To X | SELECT id FROM person WHERE first_name = 'John' | 0 | # PASS |
+        The default error message can be overridden with the ``msg`` argument.
 
         Use optional ``alias`` parameter to specify what connection should be used for the query if you have more
         than one connection open.
 
-        Using optional `sansTran` to run command without an explicit transaction commit or rollback:
-        | Row Count Is Equal To X | SELECT id FROM person WHERE first_name = 'John' | 0 | True |
-
-        Using optional `msg` to override the default error message:
-        | Row Count Is Equal To X | SELECT id FROM person | 1 | msg=my error message |
+        Examples:
+        | Row Count Is Equal To X | SELECT id FROM person | 1 |
+        | Row Count Is Equal To X | SELECT id FROM person | 3 | msg=my error message |
+        | Row Count Is Equal To X | SELECT id FROM person WHERE first_name = 'John' | 0 | alias=my_alias |
+        | Row Count Is Equal To X | SELECT id FROM person WHERE first_name = 'John' | 0 | sansTran=True |
         """
         logger.info(f"Executing : Row Count Is Equal To X  |  {selectStatement}  |  {numRows}")
         num_rows = self.row_count(selectStatement, sansTran, alias=alias)
@@ -183,32 +144,21 @@ class Assertion:
         alias: Optional[str] = None,
     ):
         """
-        Check if the number of rows returned from `selectStatement` is greater than the value submitted. If not, then
-        this will throw an AssertionError. Set optional input `sansTran` to True to run command without an explicit
-        transaction commit or rollback. The default error message can be overridden with the `msg` argument.
+        Check if the number of rows returned from ``selectStatement`` is greater than the value submitted. If not, then
+        this will throw an AssertionError.
 
-        For example, given we have a table `person` with the following data:
-        | id | first_name  | last_name |
-        |  1 | Franz Allan | See       |
-        |  2 | Jerry       | Schneider |
+        Set optional input ``sansTran`` to _True_ to run command without an explicit transaction commit or rollback.
 
-        When you have the following assertions in your robot
-        | Row Count Is Greater Than X | SELECT id FROM person | 1 |
-        | Row Count Is Greater Than X | SELECT id FROM person WHERE first_name = 'John' | 0 |
-        | Row Count Is Greater Than X | SELECT id FROM person WHERE first_name = 'John' | 0 | alias=my_alias |
-
-        Then you will get the following:
-        | Row Count Is Greater Than X | SELECT id FROM person | 1 | # PASS |
-        | Row Count Is Greater Than X | SELECT id FROM person WHERE first_name = 'John' | 0 | # FAIL |
+        The default error message can be overridden with the ``msg`` argument.
 
         Use optional ``alias`` parameter to specify what connection should be used for the query if you have more
         than one connection open.
 
-        Using optional `sansTran` to run command without an explicit transaction commit or rollback:
-        | Row Count Is Greater Than X | SELECT id FROM person | 1 | True |
-
-        Using optional `msg` to override the default error message:
+        Examples:
+        | Row Count Is Greater Than X | SELECT id FROM person WHERE first_name = 'John' | 0 |
         | Row Count Is Greater Than X | SELECT id FROM person WHERE first_name = 'John' | 0 | msg=my error message |
+        | Row Count Is Greater Than X | SELECT id FROM person WHERE first_name = 'John' | 0 | alias=my_alias |
+        | Row Count Is Greater Than X | SELECT id FROM person | 1 | sansTran=True |
         """
         logger.info(f"Executing : Row Count Is Greater Than X  |  {selectStatement}  |  {numRows}")
         num_rows = self.row_count(selectStatement, sansTran, alias=alias)
@@ -226,32 +176,22 @@ class Assertion:
         alias: Optional[str] = None,
     ):
         """
-        Check if the number of rows returned from `selectStatement` is less than the value submitted. If not, then this
-        will throw an AssertionError. Set optional input `sansTran` to True to run command without an explicit
-        transaction commit or rollback.
+        Check if the number of rows returned from ``selectStatement`` is less than the value submitted. If not, then this
+        will throw an AssertionError.
 
-        For example, given we have a table `person` with the following data:
-        | id | first_name  | last_name |
-        |  1 | Franz Allan | See       |
-        |  2 | Jerry       | Schneider |
+        Set optional input ``sansTran`` to _True_ to run command without an explicit transaction commit or rollback.
 
-        When you have the following assertions in your robot
-        | Row Count Is Less Than X | SELECT id FROM person | 3 |
-        | Row Count Is Less Than X | SELECT id FROM person WHERE first_name = 'John' | 1 |
-        | Row Count Is Less Than X | SELECT id FROM person WHERE first_name = 'John' | 1 | alias=my_alias |
-
-        Then you will get the following:
-        | Row Count Is Less Than X | SELECT id FROM person | 3 | # PASS |
-        | Row Count Is Less Than X | SELECT id FROM person WHERE first_name = 'John' | 1 | # FAIL |
+        Using optional ``msg`` to override the default error message:
 
         Use optional ``alias`` parameter to specify what connection should be used for the query if you have more
         than one connection open.
 
-        Using optional `sansTran` to run command without an explicit transaction commit or rollback:
-        | Row Count Is Less Than X | SELECT id FROM person | 3 | True |
+        Examples:
+        | Row Count Is Less Than X | SELECT id FROM person WHERE first_name = 'John' | 1 |
+        | Row Count Is Less Than X | SELECT id FROM person WHERE first_name = 'John' | 2 | msg=my error message |
+        | Row Count Is Less Than X | SELECT id FROM person WHERE first_name = 'John' | 3 | alias=my_alias |
+        | Row Count Is Less Than X | SELECT id FROM person WHERE first_name = 'John' | 4 | sansTran=True |
 
-        Using optional `msg` to override the default error message:
-        | Row Count Is Less Than X | SELECT id FROM person WHERE first_name = 'John' | 1 | msg=my error message |
         """
         logger.info(f"Executing : Row Count Is Less Than X  |  {selectStatement}  |  {numRows}")
         num_rows = self.row_count(selectStatement, sansTran, alias=alias)
@@ -264,27 +204,21 @@ class Assertion:
         self, tableName: str, sansTran: bool = False, msg: Optional[str] = None, alias: Optional[str] = None
     ):
         """
-        Check if the table given exists in the database. Set optional input `sansTran` to True to run command without an
-        explicit transaction commit or rollback. The default error message can be overridden with the `msg` argument.
+        Check if the table given exists in the database.
 
-        For example, given we have a table `person` in a database
+        Set optional input ``sansTran`` to True to run command without an
+        explicit transaction commit or rollback.
 
-        When you do the following:
-        | Table Must Exist | person |
-
-        Then you will get the following:
-        | Table Must Exist | person | # PASS |
-        | Table Must Exist | first_name | # FAIL |
-        | Table Must Exist | first_name | alias=my_alias |
+        The default error message can be overridden with the ``msg`` argument.
 
         Use optional ``alias`` parameter to specify what connection should be used for the query if you have more
         than one connection open.
 
-        Using optional `sansTran` to run command without an explicit transaction commit or rollback:
-        | Table Must Exist | person | True |
-
-        Using optional `msg` to override the default error message:
-        | Table Must Exist | first_name | msg=my error message |
+        Examples:
+        | Table Must Exist | person |
+        | Table Must Exist | person | msg=my error message |
+        | Table Must Exist | person | alias=my_alias |
+        | Table Must Exist | person | sansTran=True |
         """
         logger.info(f"Executing : Table Must Exist  |  {tableName}")
         db_connection = self.connection_store.get_connection(alias)
