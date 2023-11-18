@@ -14,7 +14,8 @@ Here you can find the [keyword docs](http://marketsquare.github.io/Robotframewor
 ```
 pip install robotframework-databaselibrary
 ```
-# Usage example
+# Usage examples
+## Basic usage
 ```RobotFramework
 *** Settings ***
 Library       DatabaseLibrary
@@ -42,6 +43,32 @@ Person Table Contains No Joe
     ...                    WHERE FIRST_NAME= 'Joe'    
     Check If Not Exists In Database    ${sql}
 ```
+## Handling multiple database connections
+```RobotFramework
+*** Settings ***
+Library          DatabaseLibrary
+Test Setup       Connect To All Databases
+Test Teardown    Disconnect From All Databases
+
+*** Keywords ***
+Connect To All Databases
+    Connect To Database    psycopg2    db    db_user    pass    127.0.0.1    5432
+    ...    alias=postgres
+    Connect To Database    pymysql    db    db_user    pass    127.0.0.1    3306
+    ...    alias=mysql
+
+*** Test Cases ***
+Using Aliases
+    ${names}=    Query    select LAST_NAME from person    alias=postgres
+    Execute Sql String    drop table XYZ                  alias=mysql
+
+Switching Default Alias
+    Switch Database    postgres
+    ${names}=    Query    select LAST_NAME from person
+    Switch Database    mysql
+    Execute Sql String    drop table XYZ
+```
+
 See more examples in the folder `tests`.
 # Database modules compatibility
 The library is basically compatible with any [Python Database API Specification 2.0](https://peps.python.org/pep-0249/) module.
