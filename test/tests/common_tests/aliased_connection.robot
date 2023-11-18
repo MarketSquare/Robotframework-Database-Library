@@ -108,9 +108,11 @@ Verify Query - Get results as a list of dictionaries
     Should Be Equal As Strings    ${value 2}    Jerry
 
 Verify Delete All Rows From Table
-    Connect To DB Aliased    alias=aliased_conn
+    Connect To DB    alias=aliased_conn
     Delete All Rows From Table    person    alias=aliased_conn
     Row Count Is 0    SELECT * FROM person    alias=aliased_conn
+
+
 *** Keywords ***
 Connect, Create Some Data And Disconnect
     Connect To DB

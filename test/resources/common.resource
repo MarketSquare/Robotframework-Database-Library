@@ -23,55 +23,19 @@ ${DB_DRIVER}            ODBC Driver 18 for SQL Server
 *** Keywords ***
 Connect To DB
     [Documentation]    Connects to the database based on the current DB module under test
-    ...    and connection params set in global variables
-    IF    "${DB_MODULE_MODE}" == "custom"
-        IF    "${DB_MODULE}" == "sqlite3"
-            Remove File    ${DBName}.db
-            Connect To Database Using Custom Params    sqlite3    database="./${DBName}.db", isolation_level=None
-        ELSE
-            ${Connection String}=    Build Connection String
-            Connect To Database Using Custom Connection String    ${DB_MODULE}    ${Connection String}
-        END
-    ELSE IF    "${DB_MODULE_MODE}" == "standard"
-        IF    "${DB_MODULE}" == "pyodbc"
-            Connect To Database
-            ...    ${DB_MODULE}
-            ...    ${DB_NAME}
-            ...    ${DB_USER}
-            ...    ${DB_PASS}
-            ...    ${DB_HOST}
-            ...    ${DB_PORT}
-            ...    dbDriver=${DB_DRIVER}
-        ELSE
-            Connect To Database
-            ...    ${DB_MODULE}
-            ...    ${DB_NAME}
-            ...    ${DB_USER}
-            ...    ${DB_PASS}
-            ...    ${DB_HOST}
-            ...    ${DB_PORT}
-        END
-    ELSE
-        Fail    Unexpected mode - ${DB_MODULE_MODE}
-    END
-
-Connect To DB Aliased
-    [Documentation]    Connects to the database based on the current DB module under test
     ...    and connection params set in global variables with alias
     [Arguments]    ${alias}=${None}
     ${DB_KWARGS}    Create Dictionary
     IF    $alias is not None    Set To Dictionary    ${DB_KWARGS}    alias=${alias}
     IF    "${DB_MODULE_MODE}" == "custom"
         IF    "${DB_MODULE}" == "sqlite3"
-            IF    $alias is None
-                # Remove File    ${DBName}.db  TODO Figure out when clear db for aliased tests
-                Connect To Database Using Custom Params    sqlite3    database="./${DBName}.db", isolation_level=None
-            ELSE
-                Connect To Database Using Custom Params
-                ...    sqlite3
-                ...    database="./${DBName}.db", isolation_level=None
-                ...    alias=${alias}
+            ${DB_Filename}=    Set Variable    ${DBName}
+            IF    $alias is not None
+                ${DB_Filename}=    Set Variable    ${DB_Filename}_${alias}
             END
+            Remove File    ${DB_Filename}.db
+            Connect To Database Using Custom Params    sqlite3    database="./${DB_Filename}.db", isolation_level=None
+            ...    &{DB_KWARGS}
         ELSE
             ${Connection String}=    Build Connection String
             Connect To Database Using Custom Connection String    ${DB_MODULE}    ${Connection String}    &{DB_KWARGS}
