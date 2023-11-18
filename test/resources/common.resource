@@ -29,12 +29,8 @@ Connect To DB
     IF    $alias is not None    Set To Dictionary    ${DB_KWARGS}    alias=${alias}
     IF    "${DB_MODULE_MODE}" == "custom"
         IF    "${DB_MODULE}" == "sqlite3"
-            ${DB_Filename}=    Set Variable    ${DBName}
-            IF    $alias is not None
-                ${DB_Filename}=    Set Variable    ${DB_Filename}_${alias}
-            END
-            Remove File    ${DB_Filename}.db
-            Connect To Database Using Custom Params    sqlite3    database="./${DB_Filename}.db", isolation_level=None
+            Remove File    ${DBName}.db
+            Connect To Database Using Custom Params    sqlite3    database="./${DBName}.db", isolation_level=None
             ...    &{DB_KWARGS}
         ELSE
             ${Connection String}=    Build Connection String
@@ -74,12 +70,12 @@ Create Person Table And Insert Data
     Insert Data In Person Table Using SQL Script
 
 Insert Data In Person Table Using SQL Script
-    ${output}=    Execute SQL Script    ${CURDIR}/insert_data_in_person_table.sql
-    RETURN    ${output}
-
-Insert Data In Person Table Using SQL Script Aliased
-    [Arguments]    ${alias}
-    ${output}=    Execute SQL Script    ${CURDIR}/insert_data_in_person_table.sql    alias=${alias}
+    [Arguments]    ${alias}=${None}
+    IF    $alias is None
+        ${output}=    Execute SQL Script    ${CURDIR}/insert_data_in_person_table.sql
+    ELSE
+        ${output}=    Execute SQL Script    ${CURDIR}/insert_data_in_person_table.sql    alias=${alias}
+    END
     RETURN    ${output}
 
 Create Foobar Table

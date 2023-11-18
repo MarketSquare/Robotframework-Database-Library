@@ -1,9 +1,10 @@
 *** Settings ***
 Resource            ../../resources/common.resource
+Suite Setup    Skip If    "${DB_MODULE}" == "sqlite3"
+...    Aliases tests don't work for SQLite as each connection is always a new file
 
-Suite Setup         Connect, Create Some Data And Disconnect
-Suite Teardown      Connect, Clean Up Data And Disconnect
-Test Teardown       Disconnect From All Databases
+Test Setup         Connect, Create Some Data And Disconnect
+Test Teardown      Connect, Clean Up Data And Disconnect
 
 
 *** Test Cases ***
@@ -39,8 +40,9 @@ Switch Not Existing Alias
     ...    Switch Database    second
 
 Execute SQL Script - Insert Data In Person table
+    [Setup]    Connect, Create Some Data And Disconnect    Run SQL script=${False}
     Connect To DB    alias=aliased_conn
-    ${output}    Insert Data In Person Table Using SQL Script Aliased    alias=aliased_conn
+    ${output}    Insert Data In Person Table Using SQL Script    alias=aliased_conn
     Should Be Equal As Strings    ${output}    None
 
 Check If Exists In DB - Franz Allan
@@ -115,11 +117,16 @@ Verify Delete All Rows From Table
 
 *** Keywords ***
 Connect, Create Some Data And Disconnect
+    [Arguments]    ${Run SQL script}=${True}
     Connect To DB
     Create Person Table
+    IF    $Run_SQL_script
+        Insert Data In Person Table Using SQL Script
+    END
     Disconnect From Database
 
 Connect, Clean Up Data And Disconnect
+    Disconnect From All Databases
     Connect To DB
     Drop Tables Person And Foobar
     Disconnect From Database
