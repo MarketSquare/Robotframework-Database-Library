@@ -4,6 +4,8 @@ Suite Teardown    Disconnect From Database
 Library           DatabaseLibrary
 Library           OperatingSystem
 Library           Collections
+Test Tags        main    db    smoke
+
 
 *** Variables ***
 ${DBHost}         localhost
@@ -61,7 +63,6 @@ Retrieve records from person table
     Should Be Equal As Strings    ${output}    None
 
 Verify person Description
-    [Tags]    db    smoke
     Comment    Query db for table column descriptions
     @{queryResults} =    Description    SELECT * FROM person LIMIT 1;
     Log Many    @{queryResults}
@@ -75,7 +76,6 @@ Verify person Description
     Should Be Equal As Integers    ${NumColumns}    3
 
 Verify foobar Description
-    [Tags]    db    smoke
     Comment    Query db for table column descriptions
     @{queryResults} =    Description    SELECT * FROM foobar LIMIT 1;
     Log Many    @{queryResults}
@@ -103,7 +103,6 @@ Verify Query - Row Count foobar table
     Should be equal as Integers    ${val}    0
 
 Verify Query - Get results as a list of dictionaries
-    [Tags]    db    smoke
     ${output} =    Query    SELECT * FROM person;    \    True
     Log    ${output}
     Should Be Equal As Strings    ${output}[0][first_name]    Franz Allan

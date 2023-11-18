@@ -23,34 +23,23 @@ ${DB_DRIVER}            ODBC Driver 18 for SQL Server
 *** Keywords ***
 Connect To DB
     [Documentation]    Connects to the database based on the current DB module under test
-    ...    and connection params set in global variables
+    ...    and connection params set in global variables with alias
+    [Arguments]    ${alias}=${None}
+    ${DB_KWARGS}    Create Dictionary
+    IF    $alias is not None    Set To Dictionary    ${DB_KWARGS}    alias=${alias}
     IF    "${DB_MODULE_MODE}" == "custom"
         IF    "${DB_MODULE}" == "sqlite3"
             Remove File    ${DBName}.db
             Connect To Database Using Custom Params    sqlite3    database="./${DBName}.db", isolation_level=None
+            ...    &{DB_KWARGS}
         ELSE
             ${Connection String}=    Build Connection String
-            Connect To Database Using Custom Connection String    ${DB_MODULE}    ${Connection String}
+            Connect To Database Using Custom Connection String    ${DB_MODULE}    ${Connection String}    &{DB_KWARGS}
         END
     ELSE IF    "${DB_MODULE_MODE}" == "standard"
-        IF    "${DB_MODULE}" == "pyodbc"
-            Connect To Database
-            ...    ${DB_MODULE}
-            ...    ${DB_NAME}
-            ...    ${DB_USER}
-            ...    ${DB_PASS}
-            ...    ${DB_HOST}
-            ...    ${DB_PORT}
-            ...    dbDriver=${DB_DRIVER}
-        ELSE
-            Connect To Database
-            ...    ${DB_MODULE}
-            ...    ${DB_NAME}
-            ...    ${DB_USER}
-            ...    ${DB_PASS}
-            ...    ${DB_HOST}
-            ...    ${DB_PORT}
-        END
+        ${DB_ARGS}    Create List    ${DB_MODULE}    ${DB_NAME}    ${DB_USER}    ${DB_PASS}    ${DB_HOST}    ${DB_PORT}
+        IF    "${DB_MODULE}" == "pyodbc"    Set To Dictionary    ${DB_KWARGS}    dbDriver=${DB_DRIVER}
+        Connect To Database    @{DB_ARGS}    &{DB_KWARGS}
     ELSE
         Fail    Unexpected mode - ${DB_MODULE_MODE}
     END
@@ -81,7 +70,12 @@ Create Person Table And Insert Data
     Insert Data In Person Table Using SQL Script
 
 Insert Data In Person Table Using SQL Script
-    ${output}=    Execute SQL Script    ${CURDIR}/insert_data_in_person_table.sql
+    [Arguments]    ${alias}=${None}
+    IF    $alias is None
+        ${output}=    Execute SQL Script    ${CURDIR}/insert_data_in_person_table.sql
+    ELSE
+        ${output}=    Execute SQL Script    ${CURDIR}/insert_data_in_person_table.sql    alias=${alias}
+    END
     RETURN    ${output}
 
 Create Foobar Table
