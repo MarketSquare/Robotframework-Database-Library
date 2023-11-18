@@ -443,9 +443,9 @@ class ConnectionManager:
 
     def switch_database(self, alias: str):
         """
-        Switch default database.
+        Switch the default database connection to ``alias``.
 
-        Example:
+        Examples:
         | Switch Database | my_alias |
         | Switch Database | alias=my_alias |
         """
