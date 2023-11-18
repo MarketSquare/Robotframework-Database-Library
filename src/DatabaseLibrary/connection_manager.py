@@ -409,10 +409,11 @@ class ConnectionManager:
 
     def disconnect_from_all_databases(self):
         """
-        Disconnects from all the databases.
+        Disconnects from all the databases -
+        useful when testing with multiple database connections (aliases).
 
         For example:
-        | Disconnect From All Databases | # disconnects from all connections to the database |
+        | Disconnect From All Databases | # Closes connections to all databases |
         """
         logger.info("Executing : Disconnect From All Databases")
         for db_connection in self.connection_store:
