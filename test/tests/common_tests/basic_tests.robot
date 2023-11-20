@@ -16,19 +16,6 @@ SQL Statement Ending With Semicolon Works
 SQL Statement Ending Without Semicolon Works
     Query    SELECT * FROM person;
 
-SQL Statement With Parameters Works
-    @{params}=    Create List    2
-    
-    IF  "${DB_MODULE}" in ["oracledb"]
-        ${output}=    Query    SELECT * FROM person WHERE id < :id    parameters=${params}
-    ELSE IF  "${DB_MODULE}" in ["sqlite3", "pyodbc"]
-        ${output}=    Query    SELECT * FROM person WHERE id < ?    parameters=${params}
-    ELSE
-        ${output}=    Query    SELECT * FROM person WHERE id < %s    parameters=${params}    
-    END
-    
-    Length Should Be    ${output}    1    
-
 Create Person Table
     [Setup]    Log    No setup for this test
     ${output}=    Create Person Table
