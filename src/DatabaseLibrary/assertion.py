@@ -11,7 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-from typing import Optional
+from typing import List, Optional
 
 from robot.api import logger
 
@@ -22,7 +22,12 @@ class Assertion:
     """
 
     def check_if_exists_in_database(
-        self, selectStatement: str, sansTran: bool = False, msg: Optional[str] = None, alias: Optional[str] = None
+        self,
+        selectStatement: str,
+        sansTran: bool = False,
+        msg: Optional[str] = None,
+        alias: Optional[str] = None,
+        parameters: Optional[List] = None,
     ):
         """
         Check if any row would be returned by given the input ``selectStatement``. If there are no results, then this will
@@ -43,13 +48,18 @@ class Assertion:
         | Check If Exists In Database | SELECT id FROM person WHERE first_name = 'John' | sansTran=True |
         """
         logger.info(f"Executing : Check If Exists In Database  |  {selectStatement}")
-        if not self.query(selectStatement, sansTran, alias=alias):
+        if not self.query(selectStatement, sansTran, alias=alias, parameters=parameters):
             raise AssertionError(
                 msg or f"Expected to have have at least one row, but got 0 rows from: '{selectStatement}'"
             )
 
     def check_if_not_exists_in_database(
-        self, selectStatement: str, sansTran: bool = False, msg: Optional[str] = None, alias: Optional[str] = None
+        self,
+        selectStatement: str,
+        sansTran: bool = False,
+        msg: Optional[str] = None,
+        alias: Optional[str] = None,
+        parameters: Optional[List] = None,
     ):
         """
         This is the negation of `check_if_exists_in_database`.
@@ -71,14 +81,19 @@ class Assertion:
         | Check If Not Exists In Database | SELECT id FROM person WHERE first_name = 'John' | sansTran=True |
         """
         logger.info(f"Executing : Check If Not Exists In Database  |  {selectStatement}")
-        query_results = self.query(selectStatement, sansTran, alias=alias)
+        query_results = self.query(selectStatement, sansTran, alias=alias, parameters=parameters)
         if query_results:
             raise AssertionError(
                 msg or f"Expected to have have no rows from '{selectStatement}', but got some rows: {query_results}"
             )
 
     def row_count_is_0(
-        self, selectStatement: str, sansTran: bool = False, msg: Optional[str] = None, alias: Optional[str] = None
+        self,
+        selectStatement: str,
+        sansTran: bool = False,
+        msg: Optional[str] = None,
+        alias: Optional[str] = None,
+        parameters: Optional[List] = None,
     ):
         """
         Check if any rows are returned from the submitted ``selectStatement``. If there are, then this will throw an
@@ -99,7 +114,7 @@ class Assertion:
         | Row Count is 0 | SELECT id FROM person WHERE first_name = 'John' | sansTran=True |
         """
         logger.info(f"Executing : Row Count Is 0  |  {selectStatement}")
-        num_rows = self.row_count(selectStatement, sansTran, alias=alias)
+        num_rows = self.row_count(selectStatement, sansTran, alias=alias, parameters=parameters)
         if num_rows > 0:
             raise AssertionError(msg or f"Expected 0 rows, but {num_rows} were returned from: '{selectStatement}'")
 
@@ -110,6 +125,7 @@ class Assertion:
         sansTran: bool = False,
         msg: Optional[str] = None,
         alias: Optional[str] = None,
+        parameters: Optional[List] = None,
     ):
         """
         Check if the number of rows returned from ``selectStatement`` is equal to the value submitted. If not, then this
@@ -129,7 +145,7 @@ class Assertion:
         | Row Count Is Equal To X | SELECT id FROM person WHERE first_name = 'John' | 0 | sansTran=True |
         """
         logger.info(f"Executing : Row Count Is Equal To X  |  {selectStatement}  |  {numRows}")
-        num_rows = self.row_count(selectStatement, sansTran, alias=alias)
+        num_rows = self.row_count(selectStatement, sansTran, alias=alias, parameters=parameters)
         if num_rows != int(numRows.encode("ascii")):
             raise AssertionError(
                 msg or f"Expected {numRows} rows, but {num_rows} were returned from: '{selectStatement}'"
@@ -142,6 +158,7 @@ class Assertion:
         sansTran: bool = False,
         msg: Optional[str] = None,
         alias: Optional[str] = None,
+        parameters: Optional[List] = None,
     ):
         """
         Check if the number of rows returned from ``selectStatement`` is greater than the value submitted. If not, then
@@ -161,7 +178,7 @@ class Assertion:
         | Row Count Is Greater Than X | SELECT id FROM person | 1 | sansTran=True |
         """
         logger.info(f"Executing : Row Count Is Greater Than X  |  {selectStatement}  |  {numRows}")
-        num_rows = self.row_count(selectStatement, sansTran, alias=alias)
+        num_rows = self.row_count(selectStatement, sansTran, alias=alias, parameters=parameters)
         if num_rows <= int(numRows.encode("ascii")):
             raise AssertionError(
                 msg or f"Expected more than {numRows} rows, but {num_rows} were returned from '{selectStatement}'"
@@ -174,6 +191,7 @@ class Assertion:
         sansTran: bool = False,
         msg: Optional[str] = None,
         alias: Optional[str] = None,
+        parameters: Optional[List] = None,
     ):
         """
         Check if the number of rows returned from ``selectStatement`` is less than the value submitted. If not, then this
@@ -194,7 +212,7 @@ class Assertion:
 
         """
         logger.info(f"Executing : Row Count Is Less Than X  |  {selectStatement}  |  {numRows}")
-        num_rows = self.row_count(selectStatement, sansTran, alias=alias)
+        num_rows = self.row_count(selectStatement, sansTran, alias=alias, parameters=parameters)
         if num_rows >= int(numRows.encode("ascii")):
             raise AssertionError(
                 msg or f"Expected less than {numRows} rows, but {num_rows} were returned from '{selectStatement}'"
@@ -204,7 +222,7 @@ class Assertion:
         self, tableName: str, sansTran: bool = False, msg: Optional[str] = None, alias: Optional[str] = None
     ):
         """
-        Check if the table given exists in the database.
+        Check if the given table exists in the database.
 
         Set optional input ``sansTran`` to True to run command without an
         explicit transaction commit or rollback.
