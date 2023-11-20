@@ -13,13 +13,10 @@
 #  limitations under the License.
 
 import importlib
+from configparser import ConfigParser, NoOptionError, NoSectionError
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any, Dict, Optional
-
-try:
-    import ConfigParser
-except:
-    import configparser as ConfigParser
 
 from robot.api import logger
 
@@ -79,6 +76,35 @@ class ConnectionStore:
 
     def __iter__(self):
         return iter(self._connections.values())
+
+
+class ConfigReader:
+    def __init__(self, config_file: Optional[str], alias: str):
+        if config_file is None:
+            config_file = "./resources/db.cfg"
+        self.alias = alias
+        self.config = self._load_config(config_file)
+
+    @staticmethod
+    def _load_config(config_file: str) -> Optional[ConfigParser]:
+        config_path = Path(config_file)
+        if not config_path.exists():
+            return None
+        config = ConfigParser()
+        config.read([config_path])
+        return config
+
+    def get(self, param: str) -> str:
+        if self.config is None:
+            raise ValueError(f"Required '{param}' parameter was not provided in keyword arguments.") from None
+        try:
+            return self.config.get(self.alias, param)
+        except NoSectionError:
+            raise ValueError(f"Configuration file does not have [{self.alias}] section.") from None
+        except NoOptionError:
+            raise ValueError(
+                f"Required '{param}' parameter missing in both keyword arguments and configuration file."
+            ) from None
 
 
 class ConnectionManager:
@@ -153,18 +179,14 @@ class ConnectionManager:
         | # uses explicit `dbapiModuleName` and `dbName` but uses the `dbUsername` and `dbPassword` in './resources/db.cfg' |
         | Connect To Database | psycopg2 | my_db_test |
         """
+        config = ConfigReader(dbConfigFile, alias)
 
-        if dbConfigFile is None:
-            dbConfigFile = "./resources/db.cfg"
-        config = ConfigParser.ConfigParser()
-        config.read([dbConfigFile])
-
-        dbapiModuleName = dbapiModuleName or config.get(alias, "dbapiModuleName")
-        dbName = dbName or config.get(alias, "dbName")
-        dbUsername = dbUsername or config.get(alias, "dbUsername")
-        dbPassword = dbPassword if dbPassword is not None else config.get(alias, "dbPassword")
-        dbHost = dbHost or config.get(alias, "dbHost") or "localhost"
-        dbPort = int(dbPort or config.get(alias, "dbPort"))
+        dbapiModuleName = dbapiModuleName or config.get("dbapiModuleName")
+        dbName = dbName or config.get("dbName")
+        dbUsername = dbUsername or config.get("dbUsername")
+        dbPassword = dbPassword if dbPassword is not None else config.get("dbPassword")
+        dbHost = dbHost or config.get("dbHost") or "localhost"
+        dbPort = int(dbPort if dbPort is not None else config.get("dbPort"))
 
         if dbapiModuleName == "excel" or dbapiModuleName == "excelrw":
             db_api_module_name = "pyodbc"
