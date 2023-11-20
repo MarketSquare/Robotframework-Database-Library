@@ -37,7 +37,7 @@ class DatabaseLibrary(ConnectionManager, Query, Assertion):
     Don't forget to install the required Python database module!
 
     == Usage example ==
-
+    === Basic usage ===
     | *** Settings ***
     | Library       DatabaseLibrary
     | Test Setup    Connect To My Oracle DB
@@ -65,6 +65,30 @@ class DatabaseLibrary(ConnectionManager, Query, Assertion):
     |     Check If Not Exists In Database    ${sql}
     |
 
+    === Handling multiple database connections ===
+    | *** Settings ***
+    | Library          DatabaseLibrary
+    | Test Setup       Connect To All Databases
+    | Test Teardown    Disconnect From All Databases
+    |
+    | *** Keywords ***
+    | Connect To All Databases
+    |     Connect To Database    psycopg2    db    db_user    pass    127.0.0.1    5432
+    |     ...    alias=postgres
+    |     Connect To Database    pymysql    db    db_user    pass    127.0.0.1    3306
+    |     ...    alias=mysql
+    |
+    | *** Test Cases ***
+    | Using Aliases
+    |     ${names}=    Query    select LAST_NAME from person    alias=postgres
+    |     Execute Sql String    drop table XYZ                  alias=mysql
+    |
+    | Switching Default Alias
+    |     Switch Database    postgres
+    |     ${names}=    Query    select LAST_NAME from person
+    |     Switch Database    mysql
+    |     Execute Sql String    drop table XYZ
+    |
     == Database modules compatibility ==
     The library is basically compatible with any [https://peps.python.org/pep-0249|Python Database API Specification 2.0] module.
 
