@@ -41,11 +41,16 @@ class Assertion:
         Use optional ``alias`` parameter to specify what connection should be used for the query if you have more
         than one connection open.
 
+        Use optional ``parameters`` for query variable substitution (variable substitution syntax may be different
+        depending on the database client).
+
         Examples:
         | Check If Exists In Database | SELECT id FROM person WHERE first_name = 'Franz Allan' |
         | Check If Exists In Database | SELECT id FROM person WHERE first_name = 'John' | msg=my error message |
         | Check If Exists In Database | SELECT id FROM person WHERE first_name = 'Franz Allan' | alias=my_alias |
         | Check If Exists In Database | SELECT id FROM person WHERE first_name = 'John' | sansTran=True |
+        | @{parameters} | Create List |  John |
+        | Check If Exists In Database | SELECT id FROM person WHERE first_name = %s | parameters=${parameters} |
         """
         logger.info(f"Executing : Check If Exists In Database  |  {selectStatement}")
         if not self.query(selectStatement, sansTran, alias=alias, parameters=parameters):
@@ -74,11 +79,16 @@ class Assertion:
         Use optional ``alias`` parameter to specify what connection should be used for the query if you have more
         than one connection open.
 
+        Use optional ``parameters`` for query variable substitution (variable substitution syntax may be different
+        depending on the database client).
+
         Examples:
         | Check If Not Exists In Database | SELECT id FROM person WHERE first_name = 'John' |
         | Check If Not Exists In Database | SELECT id FROM person WHERE first_name = 'Franz Allan' | msg=my error message |
         | Check If Not Exists In Database | SELECT id FROM person WHERE first_name = 'Franz Allan' | alias=my_alias |
         | Check If Not Exists In Database | SELECT id FROM person WHERE first_name = 'John' | sansTran=True |
+        | @{parameters} | Create List |  John |
+        | Check If Not Exists In Database | SELECT id FROM person WHERE first_name = %s | parameters=${parameters} |
         """
         logger.info(f"Executing : Check If Not Exists In Database  |  {selectStatement}")
         query_results = self.query(selectStatement, sansTran, alias=alias, parameters=parameters)
@@ -107,11 +117,16 @@ class Assertion:
         Use optional ``alias`` parameter to specify what connection should be used for the query if you have more
         than one connection open.
 
+        Use optional ``parameters`` for query variable substitution (variable substitution syntax may be different
+        depending on the database client).
+
         Examples:
         | Row Count is 0 | SELECT id FROM person WHERE first_name = 'Franz Allan' |
         | Row Count is 0 | SELECT id FROM person WHERE first_name = 'Franz Allan' | msg=my error message |
         | Row Count is 0 | SELECT id FROM person WHERE first_name = 'John' | alias=my_alias |
         | Row Count is 0 | SELECT id FROM person WHERE first_name = 'John' | sansTran=True |
+        | @{parameters} | Create List |  John |
+        | Row Count is 0 | SELECT id FROM person WHERE first_name = %s | parameters=${parameters} |
         """
         logger.info(f"Executing : Row Count Is 0  |  {selectStatement}")
         num_rows = self.row_count(selectStatement, sansTran, alias=alias, parameters=parameters)
@@ -138,11 +153,16 @@ class Assertion:
         Use optional ``alias`` parameter to specify what connection should be used for the query if you have more
         than one connection open.
 
+        Use optional ``parameters`` for query variable substitution (variable substitution syntax may be different
+        depending on the database client).
+
         Examples:
         | Row Count Is Equal To X | SELECT id FROM person | 1 |
         | Row Count Is Equal To X | SELECT id FROM person | 3 | msg=my error message |
         | Row Count Is Equal To X | SELECT id FROM person WHERE first_name = 'John' | 0 | alias=my_alias |
         | Row Count Is Equal To X | SELECT id FROM person WHERE first_name = 'John' | 0 | sansTran=True |
+        | @{parameters} | Create List |  John |
+        | Row Count Is Equal To X | SELECT id FROM person WHERE first_name = %s | 0 | parameters=${parameters} |
         """
         logger.info(f"Executing : Row Count Is Equal To X  |  {selectStatement}  |  {numRows}")
         num_rows = self.row_count(selectStatement, sansTran, alias=alias, parameters=parameters)
@@ -171,11 +191,16 @@ class Assertion:
         Use optional ``alias`` parameter to specify what connection should be used for the query if you have more
         than one connection open.
 
+        Use optional ``parameters`` for query variable substitution (variable substitution syntax may be different
+        depending on the database client).
+
         Examples:
         | Row Count Is Greater Than X | SELECT id FROM person WHERE first_name = 'John' | 0 |
         | Row Count Is Greater Than X | SELECT id FROM person WHERE first_name = 'John' | 0 | msg=my error message |
         | Row Count Is Greater Than X | SELECT id FROM person WHERE first_name = 'John' | 0 | alias=my_alias |
         | Row Count Is Greater Than X | SELECT id FROM person | 1 | sansTran=True |
+        | @{parameters} | Create List |  John |
+        | Row Count Is Greater Than X | SELECT id FROM person WHERE first_name = %s | 0 | parameters=${parameters} |
         """
         logger.info(f"Executing : Row Count Is Greater Than X  |  {selectStatement}  |  {numRows}")
         num_rows = self.row_count(selectStatement, sansTran, alias=alias, parameters=parameters)
@@ -204,12 +229,16 @@ class Assertion:
         Use optional ``alias`` parameter to specify what connection should be used for the query if you have more
         than one connection open.
 
+        Use optional ``parameters`` for query variable substitution (variable substitution syntax may be different
+        depending on the database client).
+
         Examples:
         | Row Count Is Less Than X | SELECT id FROM person WHERE first_name = 'John' | 1 |
         | Row Count Is Less Than X | SELECT id FROM person WHERE first_name = 'John' | 2 | msg=my error message |
         | Row Count Is Less Than X | SELECT id FROM person WHERE first_name = 'John' | 3 | alias=my_alias |
         | Row Count Is Less Than X | SELECT id FROM person WHERE first_name = 'John' | 4 | sansTran=True |
-
+        | @{parameters} | Create List |  John |
+        | Row Count Is Less Than X | SELECT id FROM person WHERE first_name = %s | 5 | parameters=${parameters} |
         """
         logger.info(f"Executing : Row Count Is Less Than X  |  {selectStatement}  |  {numRows}")
         num_rows = self.row_count(selectStatement, sansTran, alias=alias, parameters=parameters)
