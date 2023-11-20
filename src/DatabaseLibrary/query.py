@@ -25,7 +25,12 @@ class Query:
     """
 
     def query(
-        self, selectStatement: str, sansTran: bool = False, returnAsDict: bool = False, alias: Optional[str] = None, parameters: Optional[List] = None
+        self,
+        selectStatement: str,
+        sansTran: bool = False,
+        returnAsDict: bool = False,
+        alias: Optional[str] = None,
+        parameters: Optional[List] = None,
     ):
         """
         Uses the input ``selectStatement`` to query for the values that will be returned as a list of tuples.
@@ -33,6 +38,14 @@ class Query:
 
         Use optional ``alias`` parameter to specify what connection should be used for the query if you have more
         than one connection open.
+
+        Use optional ``parameters`` for query variable substitution (variable substitution syntax may be different
+        depending on the database client):
+        | @{parameters} | Create List |  person |
+        | Query | SELECT * FROM %s | parameters=${parameters} |
+
+        Use optional ``sansTran`` to run command without an explicit transaction commit or rollback:
+        | @{queryResults} | Query | SELECT * FROM person | True |
 
         Tip: Unless you want to log all column values of the specified rows,
         try specifying the column names in your select statements
@@ -59,14 +72,6 @@ class Query:
 
         And get the following
         See, Franz Allan
-
-        Use optional ``parameters`` for query variable substitution (variable substitution syntax may be different
-        depending on the database client):
-        | parameters | Create List |  person |
-        | Query | SELECT * FROM %s | parameters=${parameters} |
-
-        Use optional ``sansTran`` to run command without an explicit transaction commit or rollback:
-        | @{queryResults} | Query | SELECT * FROM person | True |
         """
         db_connection = self.connection_store.get_connection(alias)
         cur = None
@@ -83,40 +88,30 @@ class Query:
             if cur and not sansTran:
                 db_connection.client.rollback()
 
-    def row_count(self, selectStatement: str, sansTran: bool = False, alias: Optional[str] = None, parameters: Optional[List] = None):
+    def row_count(
+        self,
+        selectStatement: str,
+        sansTran: bool = False,
+        alias: Optional[str] = None,
+        parameters: Optional[List] = None,
+    ):
         """
         Uses the input ``selectStatement`` to query the database and returns the number of rows from the query.
-
-        For example, given we have a table `person` with the following data:
-        | id | first_name  | last_name |
-        |  1 | Franz Allan | See       |
-        |  2 | Jerry       | Schneider |
-
-        When you do the following:
-        | ${rowCount} | Row Count | SELECT * FROM person |
-        | ${rowCount} | Row Count | SELECT * FROM person | alias=my_alias |
-        | Log | ${rowCount} |
-
-        You will get the following:
-        2
-
-        Also, you can do something like this:
-        | ${rowCount} | Row Count | SELECT * FROM person WHERE id = 2 |
-        | Log | ${rowCount} |
-
-        And get the following
-        1
 
         Use optional ``alias`` parameter to specify what connection should be used for the query if you have more
         than one connection open.
 
+        Use optional ``sansTran`` to run command without an explicit transaction commit or rollback:
+
         Use optional ``parameters`` for query variable substitution (variable substitution syntax may be different
         depending on the database client):
-        | parameters | Create List |  person |
-        | ${rowCount} | Row Count | SELECT * FROM %s | parameters=${parameters} |
 
-        Use optional ``sansTran`` to run command without an explicit transaction commit or rollback:
-        | ${rowCount} | Row Count | SELECT * FROM person | True |
+        Examples:
+        | ${rowCount} | Row Count | SELECT * FROM person |
+        | ${rowCount} | Row Count | SELECT * FROM person | sansTran=True |
+        | ${rowCount} | Row Count | SELECT * FROM person | alias=my_alias |
+        | @{parameters} | Create List |  person |
+        | ${rowCount} | Row Count | SELECT * FROM %s | parameters=${parameters} |
         """
         db_connection = self.connection_store.get_connection(alias)
         cur = None
@@ -132,7 +127,13 @@ class Query:
             if cur and not sansTran:
                 db_connection.client.rollback()
 
-    def description(self, selectStatement: str, sansTran: bool = False, alias: Optional[str] = None, parameters: Optional[List] = None):
+    def description(
+        self,
+        selectStatement: str,
+        sansTran: bool = False,
+        alias: Optional[str] = None,
+        parameters: Optional[List] = None,
+    ):
         """
         Uses the input ``selectStatement`` to query a table in the db which will be used to determine the description.
 
@@ -155,7 +156,7 @@ class Query:
 
         Use optional ``parameters`` for query variable substitution (variable substitution syntax may be different
         depending on the database client):
-        | parameters | Create List |  person |
+        | @{parameters} | Create List |  person |
         | ${desc} | Description | SELECT * FROM %s | parameters=${parameters} |
 
         Using optional `sansTran` to run command without an explicit transaction commit or rollback:
@@ -180,23 +181,15 @@ class Query:
         """
         Delete all the rows within a given table.
 
-        For example, given we have a table `person` in a database
-
-        When you do the following:
-        | Delete All Rows From Table | person |
-        | Delete All Rows From Table | person | alias=my_alias |
-
-        If all the rows can be successfully deleted, then you will get:
-        | Delete All Rows From Table | person | # PASS |
-        If the table doesn't exist or all the data can't be deleted, then you
-        will get:
-        | Delete All Rows From Table | first_name | # FAIL |
+        Use optional `sansTran` to run command without an explicit transaction commit or rollback.
 
         Use optional ``alias`` parameter to specify what connection should be used for the query if you have more
         than one connection open.
 
-        Use optional `sansTran` to run command without an explicit transaction commit or rollback:
-        | Delete All Rows From Table | person | True |
+        Examples:
+        | Delete All Rows From Table | person |
+        | Delete All Rows From Table | person | alias=my_alias |
+        | Delete All Rows From Table | person | sansTran=True |
         """
         db_connection = self.connection_store.get_connection(alias)
         cur = None
@@ -341,29 +334,27 @@ class Query:
                 if cur and not sansTran:
                     db_connection.client.rollback()
 
-    def execute_sql_string(self, sqlString: str, sansTran: bool = False, alias: Optional[str] = None, parameters: Optional[List] = None):
+    def execute_sql_string(
+        self, sqlString: str, sansTran: bool = False, alias: Optional[str] = None, parameters: Optional[List] = None
+    ):
         """
         Executes the sqlString as SQL commands. Useful to pass arguments to your sql.
-
         SQL commands are expected to be delimited by a semicolon (';').
 
-        For example:
-        | Execute Sql String | DELETE FROM person_employee_table; DELETE FROM person_table |
-        | Execute Sql String | DELETE FROM person_employee_table; DELETE FROM person_table | alias=my_alias |
-
-        For example with an argument:
-        | Execute Sql String | SELECT * FROM person WHERE first_name = ${FIRSTNAME} |
+        Use optional `sansTran` to run command without an explicit transaction commit or rollback:
 
         Use optional ``alias`` parameter to specify what connection should be used for the query if you have more
         than one connection open.
 
         Use optional ``parameters`` for query variable substitution (variable substitution syntax may be different
-        depending on the database client):
-        | parameters | Create List |  person_employee_table |
-        | Execute Sql String | SELECT * FROM %s | parameters=${parameters} |
+        depending on the database client).
 
-        Use optional `sansTran` to run command without an explicit transaction commit or rollback:
-        | Execute Sql String | DELETE FROM person_employee_table; DELETE FROM person_table | True |
+        For example:
+        | Execute Sql String | DELETE FROM person_employee_table; DELETE FROM person_table |
+        | Execute Sql String | DELETE FROM person_employee_table; DELETE FROM person_table | alias=my_alias |
+        | Execute Sql String | DELETE FROM person_employee_table; DELETE FROM person_table | sansTran=True |
+        | @{parameters} | Create List |  person_employee_table |
+        | Execute Sql String | SELECT * FROM %s | parameters=${parameters} |
         """
         db_connection = self.connection_store.get_connection(alias)
         cur = None
@@ -519,7 +510,9 @@ class Query:
             if cur and not sansTran:
                 db_connection.client.rollback()
 
-    def __execute_sql(self, cur, sql_statement: str, omit_trailing_semicolon: Optional[bool] = None, parameters: Optional[List] = None):
+    def __execute_sql(
+        self, cur, sql_statement: str, omit_trailing_semicolon: Optional[bool] = None, parameters: Optional[List] = None
+    ):
         """
         Runs the `sql_statement` using `cur` as Cursor object.
         Use `omit_trailing_semicolon` parameter (bool) for explicit instruction,
