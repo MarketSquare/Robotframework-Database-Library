@@ -18,6 +18,8 @@ from typing import List, Optional
 
 from robot.api import logger
 
+from DatabaseLibrary import utils
+
 
 class Query:
     """
@@ -31,6 +33,7 @@ class Query:
         returnAsDict: bool = False,
         alias: Optional[str] = None,
         parameters: Optional[List] = None,
+        log_results: bool = False,
     ):
         """
         Uses the input ``selectStatement`` to query for the values that will be returned as a list of tuples.
@@ -80,9 +83,13 @@ class Query:
             logger.info(f"Executing : Query  |  {selectStatement} ")
             self.__execute_sql(cur, selectStatement, parameters=parameters)
             all_rows = cur.fetchall()
-            if returnAsDict:
+            if returnAsDict or log_results:
                 col_names = [c[0] for c in cur.description]
-                return [dict(zip(col_names, row)) for row in all_rows]
+                results = [dict(zip(col_names, row)) for row in all_rows]
+                if log_results:
+                    utils.log_results_as_html_table(results)
+                if returnAsDict:
+                    return results
             return all_rows
         finally:
             if cur and not sansTran:
