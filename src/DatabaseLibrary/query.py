@@ -525,6 +525,8 @@ class Query:
         if omit_trailing_semicolon:
             sql_statement = sql_statement.rstrip(";")
         if parameters is None:
-            parameters = []
-        logger.debug(f"Executing sql: {sql_statement}")
-        return cur.execute(sql_statement, parameters)
+            logger.debug(f"Executing sql '{sql_statement}' without parameters")
+            return cur.execute(sql_statement)
+        else:
+            logger.debug(f"Executing sql '{sql_statement}' with parameters: {parameters}")
+            return cur.execute(sql_statement, parameters)
