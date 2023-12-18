@@ -13,6 +13,7 @@
 #  limitations under the License.
 
 import inspect
+import re
 import sys
 from typing import List, Optional
 
@@ -277,12 +278,17 @@ class Query:
                 logger.info(f"Executing : Execute SQL Script  |  {sqlScriptFileName}")
                 current_statement = ""
                 inside_statements_group = False
-
+                proc_start_pattern = re.compile("create( or replace)? (procedure|function){1}( )?")
+                proc_end_pattern = re.compile("end(?!( if;| loop;| case;| while;| repeat;)).*;()?")
                 for line in sql_file:
                     line = line.strip()
                     if line.startswith("#") or line.startswith("--") or line == "/":
                         continue
-                    if line.lower().startswith("begin"):
+
+                    # check if the line matches the creating procedure regexp pattern
+                    elif proc_start_pattern.match(line.lower()):
+                        inside_statements_group = True
+                    elif line.lower().startswith("begin"):
                         inside_statements_group = True
 
                     # semicolons inside the line? use them to separate statements
@@ -297,12 +303,16 @@ class Query:
                     for sqlFragment in sqlFragments:
                         if len(sqlFragment.strip()) == 0:
                             continue
+
                         if inside_statements_group:
                             # if statements inside a begin/end block have semicolns,
                             # they must persist - even with oracle
                             sqlFragment += "; "
-                        if sqlFragment.lower() == "end; ":
+
+                        if proc_end_pattern.match(sqlFragment.lower()):
                             inside_statements_group = False
+                        elif proc_start_pattern.match(sqlFragment.lower()):
+                            inside_statements_group = True
                         elif sqlFragment.lower().startswith("begin"):
                             inside_statements_group = True
 
@@ -326,7 +336,8 @@ class Query:
 
                 for statement in statements_to_execute:
                     logger.info(f"Executing statement from script file: {statement}")
-                    omit_semicolon = not statement.lower().endswith("end;")
+                    line_ends_with_proc_end = re.compile(r"(\s|;)" + proc_end_pattern.pattern + "$")
+                    omit_semicolon = not line_ends_with_proc_end.search(statement.lower())
                     self.__execute_sql(cur, statement, omit_semicolon)
                 if not sansTran:
                     db_connection.client.commit()
