@@ -98,11 +98,11 @@ Create And Fill Tables And Stored Procedures
     IF    "${DB_MODULE}" in ["oracledb", "cx_Oracle"]
         Execute SQL Script    ${CURDIR}/../../resources/create_stored_procedures_oracle.sql
     ELSE IF    "${DB_MODULE}" in ["pymysql"]
-        Execute SQL Script    ${CURDIR}/../../resources/create_stored_procedure_mysql.sql
+        Execute SQL Script    ${CURDIR}/../../resources/create_stored_procedures_mysql.sql
     ELSE IF    "${DB_MODULE}" in ["psycopg2", "psycopg3"]
-        Execute SQL Script    ${CURDIR}/../../resources/create_stored_procedure_postgres.sql
+        Execute SQL Script    ${CURDIR}/../../resources/create_stored_procedures_postgres.sql
     ELSE IF    "${DB_MODULE}" in ["pymssql"]
-        Execute SQL Script    ${CURDIR}/../../resources/create_stored_procedure_mssql.sql
+        Execute SQL Script    ${CURDIR}/../../resources/create_stored_procedures_mssql.sql
     ELSE
         Skip    Don't know how to create stored procedures for '${DB_MODULE}'
     END
