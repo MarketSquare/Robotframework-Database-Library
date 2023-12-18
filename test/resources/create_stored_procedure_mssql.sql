@@ -46,5 +46,5 @@ END
 ELSE
 BEGIN
 PRINT 'Condition is false';
-END;
+END
 END;

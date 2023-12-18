@@ -50,3 +50,22 @@ OPEN result2 FOR SELECT LAST_NAME FROM person;
 RETURN NEXT result2;
 END
 ';
+
+DROP ROUTINE IF EXISTS check_condition;
+CREATE FUNCTION
+check_condition()
+RETURNS VOID
+LANGUAGE plpgsql
+AS
+'
+DECLARE
+   v_condition BOOLEAN := TRUE;
+   v_res BOOLEAN := TRUE;
+BEGIN
+   IF v_condition THEN
+      v_res := TRUE;
+   ELSE
+      v_res := FALSE;
+   END IF;
+END
+';
