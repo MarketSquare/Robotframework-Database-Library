@@ -34,3 +34,17 @@ SELECT FIRST_NAME FROM person;
 SELECT LAST_NAME FROM person;
 RETURN;
 END;
+
+DROP PROCEDURE IF EXISTS check_condition;
+CREATE PROCEDURE check_condition
+AS
+DECLARE @v_condition BIT = 1;
+IF @v_condition = 1
+BEGIN
+PRINT 'Condition is true';
+END
+ELSE
+BEGIN
+PRINT 'Condition is false';
+END;
+END;

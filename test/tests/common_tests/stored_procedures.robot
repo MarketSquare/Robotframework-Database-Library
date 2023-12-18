@@ -88,6 +88,9 @@ Procedure Returns Multiple Result Sets
     Should Be Equal    ${second result set}[0][0]    See
     Should Be Equal    ${second result set}[1][0]    Schneider
 
+Procedure With IF/ELSE Block
+    Call Stored Procedure    check_condition
+
 
 *** Keywords ***
 Create And Fill Tables And Stored Procedures
