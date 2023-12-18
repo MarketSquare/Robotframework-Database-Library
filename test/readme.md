@@ -40,7 +40,7 @@ See the folder `.github/workflows`
 
 ## Microsoft SQL Server
 - https://hub.docker.com/_/microsoft-mssql-server
-- docker run --rm --name mssql -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=MyPass1234!" -p 1433:1433 -d mcr.microsoft.com/mssql/server
+- docker run --rm --name mssql -e ACCEPT_EULA=Y -e MSSQL_SA_PASSWORD='MyPass1234!' -p 1433:1433 -d mcr.microsoft.com/mssql/server
 --> login and create DB:
     - docker exec -it mssql bash
     - /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P 'MyPass1234!'
