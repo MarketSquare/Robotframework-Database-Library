@@ -28,3 +28,14 @@ BEGIN
 SELECT FIRST_NAME FROM person;
 SELECT LAST_NAME FROM person;
 END;
+
+DROP PROCEDURE IF EXISTS check_condition;
+CREATE PROCEDURE check_condition()
+BEGIN
+   DECLARE v_condition BOOLEAN DEFAULT TRUE;
+   IF v_condition THEN
+      SELECT 'Condition is true' AS Result;
+   ELSE
+      SELECT 'Condition is false' AS Result;
+   END IF;
+END

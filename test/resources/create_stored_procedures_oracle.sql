@@ -30,3 +30,14 @@ SELECT FIRST_NAME FROM person;
 OPEN second_names_cursor for
 SELECT LAST_NAME FROM person;
 END;
+
+CREATE OR REPLACE PROCEDURE 
+check_condition AS
+v_condition BOOLEAN := TRUE;
+BEGIN
+IF v_condition THEN
+DBMS_OUTPUT.PUT_LINE('Condition is true');
+ELSE
+DBMS_OUTPUT.PUT_LINE('Condition is false');
+END IF;
+END check_condition;
