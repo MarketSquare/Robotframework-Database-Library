@@ -214,7 +214,7 @@ class Query:
                 db_connection.client.rollback()
 
     def execute_sql_script(
-        self, sqlScriptFileName: str, sansTran: bool = False, split: bool = True, alias: Optional[str] = None
+        self, sqlScriptFileName: str, sansTran: bool = False, alias: Optional[str] = None, split: bool = True
     ):
         """
         Executes the content of the `sqlScriptFileName` as SQL commands. Useful for setting the database to a known
@@ -363,9 +363,9 @@ class Query:
         self,
         sqlString: str,
         sansTran: bool = False,
-        omitTrailingSemicolon: Optional[bool] = None,
         alias: Optional[str] = None,
         parameters: Optional[List] = None,
+        omitTrailingSemicolon: Optional[bool] = None,
     ):
         """
         Executes the ``sqlString`` as a single SQL command.
