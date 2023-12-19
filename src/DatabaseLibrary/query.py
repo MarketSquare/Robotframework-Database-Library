@@ -356,13 +356,23 @@ class Query:
                     db_connection.client.rollback()
 
     def execute_sql_string(
-        self, sqlString: str, sansTran: bool = False, alias: Optional[str] = None, parameters: Optional[List] = None
+        self,
+        sqlString: str,
+        sansTran: bool = False,
+        omitTrailingSemicolon: Optional[bool] = None,
+        alias: Optional[str] = None,
+        parameters: Optional[List] = None,
     ):
         """
-        Executes the sqlString as SQL commands. Useful to pass arguments to your sql.
-        SQL commands are expected to be delimited by a semicolon (';').
+        Executes the ``sqlString`` as a single SQL command.
 
-        Use optional `sansTran` to run command without an explicit transaction commit or rollback:
+        Use optional ``sansTran`` to run command without an explicit transaction commit or rollback.
+
+        Use optional ``omitTrailingSemicolon`` parameter for explicit instruction,
+        if the trailing semicolon (;) at the SQL string end should be removed or not:
+        - Some database modules (e.g. Oracle) throw an exception, if you leave a semicolon at the string end
+        - However, there are exceptional cases, when you need it even for Oracle - e.g. at the end of a PL/SQL block.
+        - If not specified, it's decided based on the current database module in use. For Oracle, the semicolon is removed by default.
 
         Use optional ``alias`` parameter to specify what connection should be used for the query if you have more
         than one connection open.
@@ -374,6 +384,7 @@ class Query:
         | Execute Sql String | DELETE FROM person_employee_table; DELETE FROM person_table |
         | Execute Sql String | DELETE FROM person_employee_table; DELETE FROM person_table | alias=my_alias |
         | Execute Sql String | DELETE FROM person_employee_table; DELETE FROM person_table | sansTran=True |
+        | Execute Sql String | CREATE PROCEDURE proc AS BEGIN DBMS_OUTPUT.PUT_LINE('Hello!'); END; | omitTrailingSemicolon=False |
         | @{parameters} | Create List |  person_employee_table |
         | Execute Sql String | SELECT * FROM %s | parameters=${parameters} |
         """
@@ -382,7 +393,7 @@ class Query:
         try:
             cur = db_connection.client.cursor()
             logger.info(f"Executing : Execute SQL String  |  {sqlString}")
-            self.__execute_sql(cur, sqlString, parameters=parameters)
+            self.__execute_sql(cur, sqlString, omit_trailing_semicolon=omitTrailingSemicolon, parameters=parameters)
             if not sansTran:
                 db_connection.client.commit()
         finally:
