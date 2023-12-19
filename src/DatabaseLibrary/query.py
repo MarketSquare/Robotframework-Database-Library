@@ -34,8 +34,12 @@ class Query:
         parameters: Optional[List] = None,
     ):
         """
-        Uses the input ``selectStatement`` to query for the values that will be returned as a list of tuples.
-        Set optional input ``returnAsDict`` to True to return values as a list of dictionaries.
+        Runs a query with the ``selectStatement`` and returns the result as a list of rows.
+        The type of row values depends on the database module -
+        usually they are tuples or tuple-like objects.
+
+        Set optional input ``returnAsDict`` to _True_ to explicitely convert the return values
+        into a list of dictionaries.
 
         Use optional ``alias`` parameter to specify what connection should be used for the query if you have more
         than one connection open.
