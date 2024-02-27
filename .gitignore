@@ -12,3 +12,4 @@ output.xml
 report.html
 venv
 .runNumber
+.DS_Store
