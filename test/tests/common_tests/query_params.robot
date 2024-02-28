@@ -1,5 +1,5 @@
 *** Settings ***
-Documentation       Keywords with query params as seperate arguments work across all databases.
+Documentation       Keywords with query params as separate arguments work across all databases.
 
 Resource            ../../resources/common.resource
 
