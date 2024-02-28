@@ -11,7 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-from typing import List, Optional
+from typing import Optional, Tuple
 
 from robot.api import logger
 
@@ -27,7 +27,7 @@ class Assertion:
         sansTran: bool = False,
         msg: Optional[str] = None,
         alias: Optional[str] = None,
-        parameters: Optional[List] = None,
+        parameters: Optional[Tuple] = None,
     ):
         """
         Check if any row would be returned by given the input ``selectStatement``. If there are no results, then this will
@@ -64,7 +64,7 @@ class Assertion:
         sansTran: bool = False,
         msg: Optional[str] = None,
         alias: Optional[str] = None,
-        parameters: Optional[List] = None,
+        parameters: Optional[Tuple] = None,
     ):
         """
         This is the negation of `check_if_exists_in_database`.
@@ -103,7 +103,7 @@ class Assertion:
         sansTran: bool = False,
         msg: Optional[str] = None,
         alias: Optional[str] = None,
-        parameters: Optional[List] = None,
+        parameters: Optional[Tuple] = None,
     ):
         """
         Check if any rows are returned from the submitted ``selectStatement``. If there are, then this will throw an
@@ -140,7 +140,7 @@ class Assertion:
         sansTran: bool = False,
         msg: Optional[str] = None,
         alias: Optional[str] = None,
-        parameters: Optional[List] = None,
+        parameters: Optional[Tuple] = None,
     ):
         """
         Check if the number of rows returned from ``selectStatement`` is equal to the value submitted. If not, then this
@@ -178,7 +178,7 @@ class Assertion:
         sansTran: bool = False,
         msg: Optional[str] = None,
         alias: Optional[str] = None,
-        parameters: Optional[List] = None,
+        parameters: Optional[Tuple] = None,
     ):
         """
         Check if the number of rows returned from ``selectStatement`` is greater than the value submitted. If not, then
@@ -216,7 +216,7 @@ class Assertion:
         sansTran: bool = False,
         msg: Optional[str] = None,
         alias: Optional[str] = None,
-        parameters: Optional[List] = None,
+        parameters: Optional[Tuple] = None,
     ):
         """
         Check if the number of rows returned from ``selectStatement`` is less than the value submitted. If not, then this
