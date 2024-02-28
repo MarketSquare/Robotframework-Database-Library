@@ -38,7 +38,9 @@ END;
 DROP PROCEDURE IF EXISTS check_condition;
 CREATE PROCEDURE check_condition
 AS
-DECLARE @v_condition BIT = 1;
+BEGIN
+DECLARE @v_condition BIT;
+SET @v_condition = 1;
 IF @v_condition = 1
 BEGIN
 PRINT 'Condition is true';

@@ -15,7 +15,7 @@
 import inspect
 import re
 import sys
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 from robot.api import logger
 
@@ -31,7 +31,7 @@ class Query:
         sansTran: bool = False,
         returnAsDict: bool = False,
         alias: Optional[str] = None,
-        parameters: Optional[List] = None,
+        parameters: Optional[Tuple] = None,
     ):
         """
         Runs a query with the ``selectStatement`` and returns the result as a list of rows.
@@ -98,7 +98,7 @@ class Query:
         selectStatement: str,
         sansTran: bool = False,
         alias: Optional[str] = None,
-        parameters: Optional[List] = None,
+        parameters: Optional[Tuple] = None,
     ):
         """
         Uses the input ``selectStatement`` to query the database and returns the number of rows from the query.
@@ -137,7 +137,7 @@ class Query:
         selectStatement: str,
         sansTran: bool = False,
         alias: Optional[str] = None,
-        parameters: Optional[List] = None,
+        parameters: Optional[Tuple] = None,
     ):
         """
         Uses the input ``selectStatement`` to query a table in the db which will be used to determine the description.
@@ -364,7 +364,7 @@ class Query:
         sqlString: str,
         sansTran: bool = False,
         alias: Optional[str] = None,
-        parameters: Optional[List] = None,
+        parameters: Optional[Tuple] = None,
         omitTrailingSemicolon: Optional[bool] = None,
     ):
         """
@@ -547,7 +547,11 @@ class Query:
                 db_connection.client.rollback()
 
     def __execute_sql(
-        self, cur, sql_statement: str, omit_trailing_semicolon: Optional[bool] = None, parameters: Optional[List] = None
+        self,
+        cur,
+        sql_statement: str,
+        omit_trailing_semicolon: Optional[bool] = None,
+        parameters: Optional[Tuple] = None,
     ):
         """
         Runs the `sql_statement` using `cur` as Cursor object.
