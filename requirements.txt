@@ -2,3 +2,4 @@ robotframework
 robotframework-excellib
 pre-commit
 build
+twine
