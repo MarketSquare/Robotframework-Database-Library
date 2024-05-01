@@ -77,6 +77,9 @@ class ConnectionStore:
     def __iter__(self):
         return iter(self._connections.values())
 
+# Used to make None a valid fallback value
+# Shamelessly lifted from cpython configparser
+_UNSET = object()
 
 class ConfigReader:
     def __init__(self, config_file: Optional[str], alias: str):
@@ -94,7 +97,7 @@ class ConfigReader:
         config.read([config_path])
         return config
 
-    def get(self, param: str) -> str:
+    def get(self, param: str, fallback=_UNSET) -> str:
         if self.config is None:
             raise ValueError(f"Required '{param}' parameter was not provided in keyword arguments.") from None
         try:
@@ -102,9 +105,12 @@ class ConfigReader:
         except NoSectionError:
             raise ValueError(f"Configuration file does not have [{self.alias}] section.") from None
         except NoOptionError:
-            raise ValueError(
-                f"Required '{param}' parameter missing in both keyword arguments and configuration file."
-            ) from None
+            if fallback == _UNSET:
+                raise ValueError(
+                    f"Required '{param}' parameter missing in both keyword arguments and configuration file."
+                ) from None
+            else:
+                return fallback
 
 
 class ConnectionManager:
@@ -129,6 +135,7 @@ class ConnectionManager:
         dbConfigFile: Optional[str] = None,
         driverMode: Optional[str] = None,
         alias: str = "default",
+        **kwargs
     ):
         """
         Loads the DB API 2.0 module given ``dbapiModuleName`` then uses it to
@@ -182,11 +189,11 @@ class ConnectionManager:
         config = ConfigReader(dbConfigFile, alias)
 
         dbapiModuleName = dbapiModuleName or config.get("dbapiModuleName")
-        dbName = dbName or config.get("dbName")
-        dbUsername = dbUsername or config.get("dbUsername")
-        dbPassword = dbPassword if dbPassword is not None else config.get("dbPassword")
-        dbHost = dbHost or config.get("dbHost") or "localhost"
-        dbPort = int(dbPort if dbPort is not None else config.get("dbPort"))
+        dbName = dbName or config.get("dbName", fallback=None)
+        dbUsername = dbUsername or config.get("dbUsername", fallback=None)
+        dbPassword = dbPassword if dbPassword is not None else config.get("dbPassword", fallback=None)
+        dbHost = dbHost or config.get("dbHost", fallback=None) or "localhost"
+        dbPort = int(dbPort if dbPort is not None else config.get("dbPort", fallback=1433))
 
         if dbapiModuleName == "excel" or dbapiModuleName == "excelrw":
             db_api_module_name = "pyodbc"
@@ -342,6 +349,7 @@ class ConnectionManager:
                 password=dbPassword,
                 host=dbHost,
                 port=dbPort,
+                **kwargs,
             )
         self.connection_store.register_connection(db_connection, db_api_module_name, alias)
 
