@@ -16,6 +16,8 @@ import inspect
 import re
 import sys
 from typing import List, Optional, Tuple
+import importlib
+import builtins
 
 from robot.api import logger
 
@@ -481,14 +483,14 @@ class Query:
                 # check if "CURSOR" params were passed - they will be replaced
                 # with cursor variables for storing the result sets
                 params_substituted = spParams.copy()
-                cursor_params = []
+                output_params = []
                 for i in range(0, len(spParams)):
                     if spParams[i] == "CURSOR":
                         cursor_param = db_connection.client.cursor()
                         params_substituted[i] = cursor_param
-                        cursor_params.append(cursor_param)
+                        output_params.append(cursor_param)
                 param_values = cur.callproc(spName, params_substituted)
-                for result_set in cursor_params:
+                for result_set in output_params:
                     result_sets.append(list(result_set))
 
             elif db_connection.module_name in ["psycopg2", "psycopg3"]:
@@ -496,15 +498,15 @@ class Query:
                 # check if "CURSOR" params were passed - they will be replaced
                 # with cursor variables for storing the result sets
                 params_substituted = spParams.copy()
-                cursor_params = []
+                output_params = []
                 for i in range(0, len(spParams)):
                     if spParams[i] == "CURSOR":
                         cursor_param = f"CURSOR_{i}"
                         params_substituted[i] = cursor_param
-                        cursor_params.append(cursor_param)
+                        output_params.append(cursor_param)
                 param_values = cur.callproc(spName, params_substituted)
-                if cursor_params:
-                    for cursor_param in cursor_params:
+                if output_params:
+                    for cursor_param in output_params:
                         cur.execute(f'FETCH ALL IN "{cursor_param}"')
                         result_set = cur.fetchall()
                         result_sets.append(list(result_set))
@@ -517,6 +519,34 @@ class Query:
                     else:
                         result_set = cur.fetchall()
                         result_sets.append(list(result_set))
+
+            elif db_connection.module_name == "pymssql":
+                logger.info(
+                    f"Attempting pymssql stored procedure  for '{db_connection.module_name}',"
+                    "may have unexpected results. Please look at query.py if unsure."
+                )
+                pyo = importlib.import_module("pymssql")
+                output_params = []
+                for i in range(0, len(spParams)):
+                    if 'CURSOR_' in spParams[i]:
+                        output_params.append(pyo.output(getattr(builtins, spParams[i].replace('CURSOR_','').lower())))
+                        # cursor_params.append(getattr(__builtins__, i.split()))
+                    else:
+                        output_params.append(spParams[i])
+                cur = db_connection.client.cursor()
+                param_values = cur.callproc(spName, tuple(output_params))
+                result_sets_available = True
+                while result_sets_available:
+                    result_set = []
+                    for row in cur:
+                        result_set.append(row)
+                    if result_set:
+                        result_sets.append(list(result_set))
+                    if hasattr(cur, "nextset") and inspect.isroutine(cur.nextset):
+                        result_sets_available = cur.nextset()
+                    else:
+                        result_sets_available = False
+
 
             else:
                 logger.info(
