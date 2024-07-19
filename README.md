@@ -6,9 +6,9 @@ It requires an appropriate **Python module to be installed separately** - depend
 The library consists of some keywords designed to perform different checks on your database.
 Here you can find the [keyword docs](http://marketsquare.github.io/Robotframework-Database-Library/).
 
-Wath the [talk at Robocon 2024 about the Database Library update](https://youtu.be/yZt1eygIn4U)
+Wath the [talk at Robocon 2024 about the Database Library update](https://youtu.be/A96NTUps8sU)
 
-[![Talk at Robocon 2024 about the Database Library update](http://img.youtube.com/vi/_K6aMRzU7Zo/0.jpg)](https://youtu.be/yZt1eygIn4U)
+[![Talk at Robocon 2024 about the Database Library update](http://img.youtube.com/vi/A96NTUps8sU/0.jpg)](https://youtu.be/A96NTUps8sU)
 
 # Requirements
 - Python
