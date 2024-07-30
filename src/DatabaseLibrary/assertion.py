@@ -13,6 +13,7 @@
 #  limitations under the License.
 from typing import Optional, Tuple
 
+from assertionengine import AssertionOperator, verify_assertion
 from robot.api import logger
 
 
@@ -246,6 +247,42 @@ class Assertion:
             raise AssertionError(
                 msg or f"Expected less than {numRows} rows, but {num_rows} were returned from '{selectStatement}'"
             )
+
+    def check_row_count(
+        self,
+        selectStatement: str,
+        assertion_operator: AssertionOperator,
+        expected_value: int,
+        assertion_message: Optional[str] = None,
+        sansTran: bool = False,
+        alias: Optional[str] = None,
+        parameters: Optional[Tuple] = None,
+    ):
+        """
+        Check the number of rows returned from ``selectStatement`` using ``assertion_operator``
+        and ``expected_value``. See `Inline assertions` for more details.
+
+        Use optional ``assertion_message`` to override the default error message.
+
+        Set optional input ``sansTran`` to _True_ to run command without an explicit transaction commit or rollback.
+
+        Use optional ``alias`` parameter to specify what connection should be used for the query if you have more
+        than one connection open.
+
+        Use optional ``parameters`` for query variable substitution (variable substitution syntax may be different
+        depending on the database client).
+
+        Examples:
+        | Check Row Count | SELECT id FROM person WHERE first_name = 'John' | == | 1 |
+        | Check Row Count | SELECT id FROM person WHERE first_name = 'John' | >= | 2 | assertion_message=my error message |
+        | Check Row Count | SELECT id FROM person WHERE first_name = 'John' | inequal | 3 | alias=my_alias |
+        | Check Row Count | SELECT id FROM person WHERE first_name = 'John' | less than | 4 | sansTran=True |
+        | @{parameters} | Create List |  John |
+        | Check Row Count | SELECT id FROM person WHERE first_name = %s | equals | 5 | parameters=${parameters} |
+        """
+        logger.info(f"Executing : Check Row Count  |  {selectStatement}  | {assertion_operator} | {expected_value}")
+        num_rows = self.row_count(selectStatement, sansTran, alias=alias, parameters=parameters)
+        return verify_assertion(num_rows, assertion_operator, expected_value, "Wrong row count:", assertion_message)
 
     def table_must_exist(
         self, tableName: str, sansTran: bool = False, msg: Optional[str] = None, alias: Optional[str] = None

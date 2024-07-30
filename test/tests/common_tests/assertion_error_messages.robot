@@ -103,3 +103,16 @@ Verify Row Count Is Greater Than X Fails With Message
     ...    Row Count Is Greater Than X
     ...    ${Existing Select}    1
     ...    msg=${Error Message}
+
+Check Row Count With Assertion Engine Fails
+    ${expected value}=    Set Variable    5
+    ${expected error}=    Catenate
+    ...    Wrong row count: '1' (int) should be '${expected value}' (int)
+    Run Keyword And Expect Error
+    ...    ${expected error}
+    ...    Check Row Count    ${Existing Select}    equals    ${expected value}
+
+Check Row Count With Assertion Engine Fails With Message
+    Run Keyword And Expect Error    ${Error Message}
+    ...    Check Row Count    ${Existing Select}    less than    1
+    ...    assertion_message=${Error Message}

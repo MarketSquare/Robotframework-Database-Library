@@ -63,6 +63,9 @@ Retrieve Row Count
     Log    ${output}
     Should Be Equal As Strings    ${output}    2
 
+Check Row Count With Assertion Engine
+    Check Row Count    SELECT id FROM person    ==    2
+
 Retrieve records from person table
     ${output}=    Execute SQL String    SELECT * FROM person
     Log    ${output}
