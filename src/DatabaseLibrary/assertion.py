@@ -31,6 +31,9 @@ class Assertion:
         parameters: Optional[Tuple] = None,
     ):
         """
+        *DEPRECATED* Use new `Check Row Count` keyword with assertion engine instead.
+        The deprecated keyword will be removed in future versions.
+
         Check if any row would be returned by given the input ``selectStatement``. If there are no results, then this will
         throw an AssertionError.
 
@@ -68,6 +71,9 @@ class Assertion:
         parameters: Optional[Tuple] = None,
     ):
         """
+        *DEPRECATED* Use new `Check Row Count` keyword with assertion engine instead.
+        The deprecated keyword will be removed in future versions.
+
         This is the negation of `check_if_exists_in_database`.
 
         Check if no rows would be returned by given the input ``selectStatement``. If there are any results, then this
