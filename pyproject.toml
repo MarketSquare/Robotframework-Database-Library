@@ -1,7 +1,8 @@
 [build-system]
 requires = [
     "setuptools>=61.0",
-    "robotframework"
+    "robotframework",
+    "robotframework-assertion-engine"
     ]
 build-backend = "setuptools.build_meta"
 
@@ -11,10 +12,11 @@ authors = [{name="Franz Allan Valencia See", email="franz.see@gmail.com"},
 ]
 description = "Database Library for Robot Framework"
 readme = "README.md"
-requires-python = ">=3.7"
+requires-python = ">=3.8.1"
 dependencies = [
     "robotframework",
-    "robotframework-excellib"
+    "robotframework-excellib",
+    "robotframework-assertion-engine"
 ]
 classifiers = [
     "Programming Language :: Python :: 3",

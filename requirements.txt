@@ -1,5 +1,7 @@
 robotframework
 robotframework-excellib
+robotframework-assertion-engine
+psycopg2-binary
 pre-commit
 build
 twine
