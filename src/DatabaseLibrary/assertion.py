@@ -107,6 +107,9 @@ class Assertion:
         parameters: Optional[Tuple] = None,
     ):
         """
+        *DEPRECATED* Use new `Check Row Count` keyword with assertion engine instead.
+        The deprecated keyword will be removed in future versions.
+
         Check if any rows are returned from the submitted ``selectStatement``. If there are, then this will throw an
         AssertionError.
 
@@ -144,6 +147,9 @@ class Assertion:
         parameters: Optional[Tuple] = None,
     ):
         """
+        *DEPRECATED* Use new `Check Row Count` keyword with assertion engine instead.
+        The deprecated keyword will be removed in future versions.
+
         Check if the number of rows returned from ``selectStatement`` is equal to the value submitted. If not, then this
         will throw an AssertionError.
 
@@ -182,6 +188,9 @@ class Assertion:
         parameters: Optional[Tuple] = None,
     ):
         """
+        *DEPRECATED* Use new `Check Row Count` keyword with assertion engine instead.
+        The deprecated keyword will be removed in future versions.
+
         Check if the number of rows returned from ``selectStatement`` is greater than the value submitted. If not, then
         this will throw an AssertionError.
 
@@ -220,6 +229,9 @@ class Assertion:
         parameters: Optional[Tuple] = None,
     ):
         """
+        *DEPRECATED* Use new `Check Row Count` keyword with assertion engine instead.
+        The deprecated keyword will be removed in future versions.
+
         Check if the number of rows returned from ``selectStatement`` is less than the value submitted. If not, then this
         will throw an AssertionError.
 
