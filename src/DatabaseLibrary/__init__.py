@@ -91,8 +91,8 @@ class DatabaseLibrary(ConnectionManager, Query, Assertion):
     |
 
     == Inline assertions ==
-    Keywords that accept arguments ``assertion_operator`` <`AssertionOperator`> and ``assertion_value``
-    perform a check according to the specified condition.
+    Keywords that accept arguments ``assertion_operator`` <`AssertionOperator`> and ``expected_value``
+    perform a check according to the specified condition - using the [https://github.com/MarketSquare/AssertionEngine|Assertion Engine].
 
     == Database modules compatibility ==
     The library is basically compatible with any [https://peps.python.org/pep-0249|Python Database API Specification 2.0] module.
