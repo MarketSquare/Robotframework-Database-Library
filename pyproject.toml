@@ -1,7 +1,7 @@
 [build-system]
 requires = [
     "setuptools>=61.0",
-    "robotframework",
+    "robotframework>=5.0.1",
     "robotframework-assertion-engine"
     ]
 build-backend = "setuptools.build_meta"
@@ -14,7 +14,7 @@ description = "Database Library for Robot Framework"
 readme = "README.md"
 requires-python = ">=3.8.1"
 dependencies = [
-    "robotframework",
+    "robotframework>=5.0.1",
     "robotframework-excellib",
     "robotframework-assertion-engine"
 ]
