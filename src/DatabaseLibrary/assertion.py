@@ -15,6 +15,8 @@ from typing import Any, Optional, Tuple
 
 from assertionengine import AssertionOperator, verify_assertion
 from robot.api import logger
+from robot.libraries.BuiltIn import BuiltIn
+from robot.utils import timestr_to_secs
 
 
 class Assertion:
@@ -275,6 +277,8 @@ class Assertion:
         sansTran: bool = False,
         alias: Optional[str] = None,
         parameters: Optional[Tuple] = None,
+        retry_timeout="0 seconds",
+        retry_pause="0.5 seconds",
     ):
         """
         Check the number of rows returned from ``selectStatement`` using ``assertion_operator``
@@ -290,6 +294,9 @@ class Assertion:
         Use optional ``parameters`` for query variable substitution (variable substitution syntax may be different
         depending on the database client).
 
+        Use ``retry_timeout`` and ``retry_pause`` parameters to enable waiting for assertion to pass.
+        See `Retry mechanism` for more details.
+
         Examples:
         | Check Row Count | SELECT id FROM person WHERE first_name = 'John' | *==* | 1 |
         | Check Row Count | SELECT id FROM person WHERE first_name = 'John' | *>=* | 2 | assertion_message=my error message |
@@ -299,8 +306,18 @@ class Assertion:
         | Check Row Count | SELECT id FROM person WHERE first_name = %s | *equals* | 5 | parameters=${parameters} |
         """
         logger.info(f"Executing : Check Row Count  |  {selectStatement}  | {assertion_operator} | {expected_value}")
-        num_rows = self.row_count(selectStatement, sansTran, alias=alias, parameters=parameters)
-        return verify_assertion(num_rows, assertion_operator, expected_value, "Wrong row count:", assertion_message)
+        check_ok = False
+        time_counter = 0
+        while not check_ok:
+            try:
+                num_rows = self.row_count(selectStatement, sansTran, alias=alias, parameters=parameters)
+                verify_assertion(num_rows, assertion_operator, expected_value, "Wrong row count:", assertion_message)
+                check_ok = True
+            except AssertionError as e:
+                if time_counter >= timestr_to_secs(retry_timeout):
+                    raise e
+                BuiltIn().sleep(retry_pause)
+                time_counter += timestr_to_secs(retry_pause)
 
     def check_query_result(
         self,
@@ -313,6 +330,8 @@ class Assertion:
         sansTran: bool = False,
         alias: Optional[str] = None,
         parameters: Optional[Tuple] = None,
+        retry_timeout="0 seconds",
+        retry_pause="0.5 seconds",
     ):
         """
         Check value in query result returned from ``selectStatement`` using ``assertion_operator`` and ``expected_value``.
@@ -333,6 +352,9 @@ class Assertion:
         Use optional ``parameters`` for query variable substitution (variable substitution syntax may be different
         depending on the database client).
 
+        Use ``retry_timeout`` and ``retry_pause`` parameters to enable waiting for assertion to pass.
+        See `Retry mechanism` for more details.
+
         Examples:
         | Check Query Result | SELECT first_name FROM person | *contains* | Allan |
         | Check Query Result | SELECT first_name, last_name FROM person | *==* | Schneider | row=1 | col=1 |
@@ -347,19 +369,30 @@ class Assertion:
         logger.info(
             f"Executing : Check Query Results  |  {selectStatement}  |  {assertion_operator}  |  {expected_value}  |  row = {row}  |  col = {col} "
         )
-        query_results = self.query(selectStatement, sansTran, alias=alias, parameters=parameters)
 
-        row_count = len(query_results)
-        assert row < row_count, f"Checking row '{row}' is not possible, as query results contain {row_count} rows only!"
-        col_count = len(query_results[row])
-        assert (
-            col < col_count
-        ), f"Checking column '{col}' is not possible, as query results contain {col_count} columns only!"
-
-        actual_value = query_results[row][col]
-        return verify_assertion(
-            actual_value, assertion_operator, expected_value, "Wrong query result:", assertion_message
-        )
+        check_ok = False
+        time_counter = 0
+        while not check_ok:
+            try:
+                query_results = self.query(selectStatement, sansTran, alias=alias, parameters=parameters)
+                row_count = len(query_results)
+                assert (
+                    row < row_count
+                ), f"Checking row '{row}' is not possible, as query results contain {row_count} rows only!"
+                col_count = len(query_results[row])
+                assert (
+                    col < col_count
+                ), f"Checking column '{col}' is not possible, as query results contain {col_count} columns only!"
+                actual_value = query_results[row][col]
+                verify_assertion(
+                    actual_value, assertion_operator, expected_value, "Wrong query result:", assertion_message
+                )
+                check_ok = True
+            except AssertionError as e:
+                if time_counter >= timestr_to_secs(retry_timeout):
+                    raise e
+                BuiltIn().sleep(retry_pause)
+                time_counter += timestr_to_secs(retry_pause)
 
     def table_must_exist(
         self, tableName: str, sansTran: bool = False, msg: Optional[str] = None, alias: Optional[str] = None

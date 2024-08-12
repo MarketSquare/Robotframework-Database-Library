@@ -96,8 +96,27 @@ class DatabaseLibrary(ConnectionManager, Query, Assertion):
     = Inline assertions =
     Keywords that accept arguments ``assertion_operator`` <`AssertionOperator`> and ``expected_value``
     perform a check according to the specified condition - using the [https://github.com/MarketSquare/AssertionEngine|Assertion Engine].
-    |   Check Row Count       SELECT id FROM person            ==         2
-    |   Check Query Result    SELECT first_name FROM person    contains   Allan
+
+    Examples:
+    | Check Row Count | SELECT id FROM person | *==* | 2 |
+    | Check Query Result | SELECT first_name FROM person | *contains* | Allan |
+
+    = Retry mechanism =
+    Assertion keywords that accept arguments ``retry_timeout`` and ``retry_pause`` support waiting for assertion to pass.
+
+    Setting the ``retry_timeout`` argument enables the mechanism -
+    in this case the SQL request and the assertion are executed in a loop,
+    until the assertion is passed or the ``retry_timeout`` is reached.
+    The pause between the loop iterations is set using the ``retry_pause`` argument.
+
+    The argument values are set in [http://robotframework.org/robotframework/latest/RobotFrameworkUserGuide.html#time-format|Robot Framework time format] -
+    e.g. ``5 seconds``.
+
+    The retry mechanism is disabled by default - the ``retry_timeout`` is set to ``0``.
+
+    Examples:
+    | Check Row Count | SELECT id FROM person | *==* | 2 | retry_timeout=10 seconds |
+    | Check Query Result | SELECT first_name FROM person | *contains* | Allan | retry_timeout=5s | retry_timeout=1s |
 
     = Database modules compatibility =
     The library is basically compatible with any [https://peps.python.org/pep-0249|Python Database API Specification 2.0] module.

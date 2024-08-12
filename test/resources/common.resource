@@ -5,6 +5,7 @@ Documentation       Global variables, which are used in all test common tests
 Library             Collections
 Library             OperatingSystem
 Library             DatabaseLibrary
+Library             DateTime
 
 
 *** Variables ***

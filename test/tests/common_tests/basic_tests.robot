@@ -80,7 +80,6 @@ Check Query Result With Assertion Engine - Col Out Of Range
     Run Keyword And Expect Error    Checking column '5' is not possible, as query results contain 2 columns only!
     ...    Check Query Result    SELECT id, first_name FROM person    ==   Blah    col=5
 
-
 Retrieve records from person table
     ${output}=    Execute SQL String    SELECT * FROM person
     Log    ${output}
