@@ -338,7 +338,7 @@ class Assertion:
         | Check Query Result | SELECT first_name, last_name FROM person | *==* | Schneider | row=1 | col=1 |
         | Check Query Result | SELECT id FROM person WHERE first_name = 'John' | *==* | 2 | # Fails, if query returns an integer value |
         | Check Query Result | SELECT id FROM person WHERE first_name = 'John' | *==* | ${2} | # Works, if query returns an integer value |
-        | Check Query Result | SELECT first_name FROM person | *equal* | Franz Allan | 2 | assertion_message=my error message |
+        | Check Query Result | SELECT first_name FROM person | *equal* | Franz Allan | assertion_message=my error message |
         | Check Query Result | SELECT first_name FROM person | *inequal* | John | alias=my_alias |
         | Check Query Result | SELECT first_name FROM person | *contains* | Allan | sansTran=True |
         | @{parameters} | Create List |  John |
