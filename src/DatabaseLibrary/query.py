@@ -126,8 +126,11 @@ class Query:
             self.__execute_sql(cur, selectStatement, parameters=parameters)
             data = cur.fetchall()
             if db_connection.module_name in ["sqlite3", "ibm_db", "ibm_db_dbi", "pyodbc"]:
-                return len(data)
-            return cur.rowcount
+                current_row_count = len(data)
+            else:
+                current_row_count = cur.rowcount
+            logger.info(f"Retrieved {current_row_count} rows")
+            return current_row_count
         finally:
             if cur and not sansTran:
                 db_connection.client.rollback()
