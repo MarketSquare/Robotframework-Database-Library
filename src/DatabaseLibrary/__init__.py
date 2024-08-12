@@ -27,17 +27,20 @@ class DatabaseLibrary(ConnectionManager, Query, Assertion):
     The Database Library for [https://robotframework.org|Robot Framework] allows you to query a database and verify the results.
     It requires an appropriate *Python module to be installed separately* - depending on your database, like e.g. `oracledb` or `pymysql`.
 
-    == Requirements ==
+    == Table of contents ==
+    %TOC%
+
+    = Requirements =
     - Python
     - Robot Framework
     - Python database module you're going to use - e.g. `oracledb`
 
-    == Installation ==
+    = Installation =
     | pip install robotframework-databaselibrary
     Don't forget to install the required Python database module!
 
-    == Usage example ==
-    === Basic usage ===
+    = Usage example =
+    == Basic usage ==
     | *** Settings ***
     | Library       DatabaseLibrary
     | Test Setup    Connect To My Oracle DB
@@ -65,7 +68,7 @@ class DatabaseLibrary(ConnectionManager, Query, Assertion):
     |     Check If Not Exists In Database    ${sql}
     |
 
-    === Handling multiple database connections ===
+    == Handling multiple database connections ==
     | *** Settings ***
     | Library          DatabaseLibrary
     | Test Setup       Connect To All Databases
@@ -90,11 +93,13 @@ class DatabaseLibrary(ConnectionManager, Query, Assertion):
     |     Execute Sql String    drop table XYZ
     |
 
-    == Inline assertions ==
+    = Inline assertions =
     Keywords that accept arguments ``assertion_operator`` <`AssertionOperator`> and ``expected_value``
     perform a check according to the specified condition - using the [https://github.com/MarketSquare/AssertionEngine|Assertion Engine].
+    |   Check Row Count       SELECT id FROM person            ==         2
+    |   Check Query Result    SELECT first_name FROM person    contains   Allan
 
-    == Database modules compatibility ==
+    = Database modules compatibility =
     The library is basically compatible with any [https://peps.python.org/pep-0249|Python Database API Specification 2.0] module.
 
     However, the actual implementation in existing Python modules is sometimes quite different, which requires custom handling in the library.
