@@ -116,3 +116,18 @@ Check Row Count With Assertion Engine Fails With Message
     Run Keyword And Expect Error    ${Error Message}
     ...    Check Row Count    ${Existing Select}    less than    1
     ...    assertion_message=${Error Message}
+
+
+Check Query Result With Assertion Engine Fails
+    ${expected value}=    Set Variable    ${5}
+    ${expected error}=    Catenate
+    ...    Wrong query result: '1' (int) should be '${expected value}' (int)
+    Run Keyword And Expect Error
+    ...    ${expected error}
+    ...    Check Query Result    ${Existing Select}    equals    ${expected value}
+
+
+Check Query Result With Assertion Engine Fails With Message
+    Run Keyword And Expect Error    ${Error Message}
+    ...    Check Query Result    ${Existing Select}    less than    ${1}
+    ...    assertion_message=${Error Message}

@@ -11,7 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-from typing import Optional, Tuple
+from typing import Any, Optional, Tuple
 
 from assertionengine import AssertionOperator, verify_assertion
 from robot.api import logger
@@ -291,16 +291,75 @@ class Assertion:
         depending on the database client).
 
         Examples:
-        | Check Row Count | SELECT id FROM person WHERE first_name = 'John' | == | 1 |
-        | Check Row Count | SELECT id FROM person WHERE first_name = 'John' | >= | 2 | assertion_message=my error message |
-        | Check Row Count | SELECT id FROM person WHERE first_name = 'John' | inequal | 3 | alias=my_alias |
-        | Check Row Count | SELECT id FROM person WHERE first_name = 'John' | less than | 4 | sansTran=True |
+        | Check Row Count | SELECT id FROM person WHERE first_name = 'John' | *==* | 1 |
+        | Check Row Count | SELECT id FROM person WHERE first_name = 'John' | *>=* | 2 | assertion_message=my error message |
+        | Check Row Count | SELECT id FROM person WHERE first_name = 'John' | *inequal* | 3 | alias=my_alias |
+        | Check Row Count | SELECT id FROM person WHERE first_name = 'John' | *less than* | 4 | sansTran=True |
         | @{parameters} | Create List |  John |
-        | Check Row Count | SELECT id FROM person WHERE first_name = %s | equals | 5 | parameters=${parameters} |
+        | Check Row Count | SELECT id FROM person WHERE first_name = %s | *equals* | 5 | parameters=${parameters} |
         """
         logger.info(f"Executing : Check Row Count  |  {selectStatement}  | {assertion_operator} | {expected_value}")
         num_rows = self.row_count(selectStatement, sansTran, alias=alias, parameters=parameters)
         return verify_assertion(num_rows, assertion_operator, expected_value, "Wrong row count:", assertion_message)
+
+    def check_query_result(
+        self,
+        selectStatement,
+        assertion_operator: AssertionOperator,
+        expected_value: Any,
+        row=0,
+        col=0,
+        assertion_message: Optional[str] = None,
+        sansTran: bool = False,
+        alias: Optional[str] = None,
+        parameters: Optional[Tuple] = None,
+    ):
+        """
+        Check value in query result returned from ``selectStatement`` using ``assertion_operator`` and ``expected_value``.
+        The value position in results can be adjusted using ``row`` and ``col`` parameters (0-based).
+        See `Inline assertions` for more details.
+
+        *The assertion in this keyword is type sensitive!*
+        The ``expected_value`` is taken as a string, no argument conversion is performed.
+        Use RF syntax like ``${1}`` for numeric values.
+
+        Use optional ``assertion_message`` to override the default error message.
+
+        Set optional input ``sansTran`` to _True_ to run command without an explicit transaction commit or rollback.
+
+        Use optional ``alias`` parameter to specify what connection should be used for the query if you have more
+        than one connection open.
+
+        Use optional ``parameters`` for query variable substitution (variable substitution syntax may be different
+        depending on the database client).
+
+        Examples:
+        | Check Query Result | SELECT first_name FROM person | *contains* | Allan |
+        | Check Query Result | SELECT first_name, last_name FROM person | *==* | Schneider | row=1 | col=1 |
+        | Check Query Result | SELECT id FROM person WHERE first_name = 'John' | *==* | 2 | # Fails, if query returns an integer value |
+        | Check Query Result | SELECT id FROM person WHERE first_name = 'John' | *==* | ${2} | # Works, if query returns an integer value |
+        | Check Query Result | SELECT first_name FROM person | *equal* | Franz Allan | 2 | assertion_message=my error message |
+        | Check Query Result | SELECT first_name FROM person | *inequal* | John | alias=my_alias |
+        | Check Query Result | SELECT first_name FROM person | *contains* | Allan | sansTran=True |
+        | @{parameters} | Create List |  John |
+        | Check Query Result | SELECT first_name FROM person | *contains* | Allan | parameters=${parameters} |
+        """
+        logger.info(
+            f"Executing : Check Query Results  |  {selectStatement}  |  {assertion_operator}  |  {expected_value}  |  row = {row}  |  col = {col} "
+        )
+        query_results = self.query(selectStatement, sansTran, alias=alias, parameters=parameters)
+
+        row_count = len(query_results)
+        assert row < row_count, f"Checking row '{row}' is not possible, as query results contain {row_count} rows only!"
+        col_count = len(query_results[row])
+        assert (
+            col < col_count
+        ), f"Checking column '{col}' is not possible, as query results contain {col_count} columns only!"
+
+        actual_value = query_results[row][col]
+        return verify_assertion(
+            actual_value, assertion_operator, expected_value, "Wrong query result:", assertion_message
+        )
 
     def table_must_exist(
         self, tableName: str, sansTran: bool = False, msg: Optional[str] = None, alias: Optional[str] = None

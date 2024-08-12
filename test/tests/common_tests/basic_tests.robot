@@ -66,6 +66,21 @@ Retrieve Row Count
 Check Row Count With Assertion Engine
     Check Row Count    SELECT id FROM person    ==    2
 
+Check Query Result With Assertion Engine
+    Check Query Result    SELECT first_name FROM person    contains   Allan
+
+Check Query Result With Assertion Engine - Different Row And Col
+    Check Query Result    SELECT first_name, last_name, id FROM person    >=   ${2}    row=1    col=2
+
+Check Query Result With Assertion Engine - Row Out Of Range
+    Run Keyword And Expect Error    Checking row '2' is not possible, as query results contain 2 rows only!
+    ...    Check Query Result    SELECT first_name FROM person    ==   Blah    row=2
+
+Check Query Result With Assertion Engine - Col Out Of Range
+    Run Keyword And Expect Error    Checking column '5' is not possible, as query results contain 2 columns only!
+    ...    Check Query Result    SELECT id, first_name FROM person    ==   Blah    col=5
+
+
 Retrieve records from person table
     ${output}=    Execute SQL String    SELECT * FROM person
     Log    ${output}
