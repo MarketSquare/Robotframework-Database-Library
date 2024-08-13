@@ -315,6 +315,7 @@ class Assertion:
                 check_ok = True
             except AssertionError as e:
                 if time_counter >= timestr_to_secs(retry_timeout):
+                    logger.info(f"Timeout '{retry_timeout}' reached")
                     raise e
                 BuiltIn().sleep(retry_pause)
                 time_counter += timestr_to_secs(retry_pause)
@@ -390,6 +391,7 @@ class Assertion:
                 check_ok = True
             except AssertionError as e:
                 if time_counter >= timestr_to_secs(retry_timeout):
+                    logger.info(f"Timeout '{retry_timeout}' reached")
                     raise e
                 BuiltIn().sleep(retry_pause)
                 time_counter += timestr_to_secs(retry_pause)
