@@ -85,8 +85,9 @@ class Query:
             logger.info(f"Executing : Query  |  {selectStatement} ")
             self.__execute_sql(cur, selectStatement, parameters=parameters)
             all_rows = cur.fetchall()
+            col_names = [c[0] for c in cur.description]
+            self._log_query_result(col_names, all_rows)
             if returnAsDict:
-                col_names = [c[0] for c in cur.description]
                 return [dict(zip(col_names, row)) for row in all_rows]
             return all_rows
         finally:
@@ -125,11 +126,13 @@ class Query:
             logger.info(f"Executing : Row Count  |  {selectStatement}")
             self.__execute_sql(cur, selectStatement, parameters=parameters)
             data = cur.fetchall()
+            col_names = [c[0] for c in cur.description]
             if db_connection.module_name in ["sqlite3", "ibm_db", "ibm_db_dbi", "pyodbc"]:
                 current_row_count = len(data)
             else:
                 current_row_count = cur.rowcount
             logger.info(f"Retrieved {current_row_count} rows")
+            self._log_query_result(col_names, data)
             return current_row_count
         finally:
             if cur and not sansTran:
@@ -573,3 +576,41 @@ class Query:
         else:
             logger.debug(f"Executing sql '{sql_statement}' with parameters: {parameters}")
             return cur.execute(sql_statement, parameters)
+
+    def _log_query_result(self, col_names, result_rows, log_head=50):
+        """
+        Logs the `result_rows` of a query in RF log as a HTML table.
+        The `col_names` are needed for the table header.
+        Max. `log_head` rows are logged (`0` disables the limit).
+        """
+        cell_border_and_align = "border: 1px solid rgb(160 160 160);padding: 8px 10px;text-align: center;"
+        table_border = "2px solid rgb(140 140 140)"
+        row_index_color = "#d6ecd4"
+        msg = f'<div style="max-width: 100%; overflow-x: auto;">'
+        msg += f'<table style="width: auto; border-collapse: collapse; border: {table_border}">'
+        msg += f'<caption style="text-align: left; font-weight: bold; padding: 5px;">Query returned {len(result_rows)} rows</caption>'
+        msg += "<tr>"
+        msg += f'<th scope="col" style="background-color: {row_index_color}; {cell_border_and_align}">Row</th>'
+        for col in col_names:
+            msg += f'<th scope="col" style="background-color: #505050; color: #fff;{cell_border_and_align}">{col}</th>'
+        msg += "</tr>"
+        table_truncated = False
+        for i, row in enumerate(result_rows):
+            if log_head and i >= log_head:
+                table_truncated = True
+                break
+            row_style = ""
+            if i % 2 == 0:
+                row_style = ' style="background-color: #eee;"'
+            msg += f"<tr{row_style}>"
+            msg += f'<th scope="row" style="background-color: {row_index_color};{cell_border_and_align}">{i}</th>'
+            for cell in row:
+                msg += f'<td style="{cell_border_and_align}">{cell}</td>'
+            msg += "</tr>"
+        msg += "</table>"
+        if table_truncated:
+            msg += (
+                f'<p style="font-weight: bold;">Log limit of {log_head} rows was reached, the table was truncated</p>'
+            )
+        msg += "</div>"
+        logger.info(msg, html=True)
