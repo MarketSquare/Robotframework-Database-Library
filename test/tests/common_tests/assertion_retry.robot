@@ -13,8 +13,6 @@ ${Tolerance}    ${0.5}
 ${Request}    SELECT first_name FROM person
 
 *** Test Cases ***
-
-
 Check Query Results With Timeout - Fast If DB Ready    
     Check Query Result    ${Request}    contains   Allan    retry_timeout=${Timeout} seconds
     ${End time}=    Get Current Date
