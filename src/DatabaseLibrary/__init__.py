@@ -94,7 +94,7 @@ class DatabaseLibrary(ConnectionManager, Query, Assertion):
     |
 
     = Inline assertions =
-    Keywords that accept arguments ``assertion_operator`` <`AssertionOperator`> and ``expected_value``
+    Keywords, that accept arguments ``assertion_operator`` <`AssertionOperator`> and ``expected_value``,
     perform a check according to the specified condition - using the [https://github.com/MarketSquare/AssertionEngine|Assertion Engine].
 
     Examples:
@@ -102,7 +102,7 @@ class DatabaseLibrary(ConnectionManager, Query, Assertion):
     | Check Query Result | SELECT first_name FROM person | *contains* | Allan |
 
     = Retry mechanism =
-    Assertion keywords that accept arguments ``retry_timeout`` and ``retry_pause`` support waiting for assertion to pass.
+    Assertion keywords, that accept arguments ``retry_timeout`` and ``retry_pause``, support waiting for assertion to pass.
 
     Setting the ``retry_timeout`` argument enables the mechanism -
     in this case the SQL request and the assertion are executed in a loop,
@@ -118,6 +118,27 @@ class DatabaseLibrary(ConnectionManager, Query, Assertion):
     | Check Row Count | SELECT id FROM person | *==* | 2 | retry_timeout=10 seconds |
     | Check Query Result | SELECT first_name FROM person | *contains* | Allan | retry_timeout=5s | retry_timeout=1s |
 
+    = Logging query results =
+    Keywords, that fetch results of a SQL query, print the result rows as a table in RF log.
+    - A log head limit of *50 rows* is applied, other table rows are truncated in the log message.
+    - The limit and the logging in general can be adjusted any time in your tests using the Keyword `Set Logging Query Results`.
+
+    You can also setup the limit or disable the logging during the library import.
+    Examples:
+
+    | # Default behavior - logging of query results is enabled, log head is 50 rows.
+    | *** Settings ***
+    | Library    DatabaseLibrary
+    |
+    | # Logging of query results is disabled, log head is 50 rows (default).
+    | Library    DatabaseLibrary    log_query_results=False
+    |
+    | # Logging of query results is enabled (default), log head is 10 rows.
+    | Library    DatabaseLibrary    log_query_results_head=10
+    |
+    | # Logging of query results is enabled (default), log head limit is disabled (log all rows).
+    | Library    DatabaseLibrary    log_query_results_head=0
+
     = Database modules compatibility =
     The library is basically compatible with any [https://peps.python.org/pep-0249|Python Database API Specification 2.0] module.
 
@@ -128,3 +149,15 @@ class DatabaseLibrary(ConnectionManager, Query, Assertion):
     """
 
     ROBOT_LIBRARY_SCOPE = "GLOBAL"
+
+    def __init__(self, log_query_results=True, log_query_results_head=50):
+        """
+        The library can be imported without any arguments:
+        | *** Settings ***
+        | Library    DatabaseLibrary
+        Use optional library import parameters to disable `Logging query results` or setup the log head.
+        """
+        ConnectionManager.__init__(self)
+        if log_query_results_head < 0:
+            raise ValueError(f"Wrong log head value provided: {log_query_results_head}. The value can't be negative!")
+        Query.__init__(self, log_query_results=log_query_results, log_query_results_head=log_query_results_head)

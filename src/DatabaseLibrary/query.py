@@ -25,6 +25,10 @@ class Query:
     Query handles all the querying done by the Database Library.
     """
 
+    def __init__(self, log_query_results, log_query_results_head):
+        self.LOG_QUERY_RESULTS = log_query_results
+        self.LOG_QUERY_RESULTS_HEAD = log_query_results_head
+
     def query(
         self,
         selectStatement: str,
@@ -86,7 +90,7 @@ class Query:
             self._execute_sql(cur, selectStatement, parameters=parameters)
             all_rows = cur.fetchall()
             col_names = [c[0] for c in cur.description]
-            self._log_query_result(col_names, all_rows)
+            self._log_query_results(col_names, all_rows)
             if returnAsDict:
                 return [dict(zip(col_names, row)) for row in all_rows]
             return all_rows
@@ -132,7 +136,7 @@ class Query:
             else:
                 current_row_count = cur.rowcount
             logger.info(f"Retrieved {current_row_count} rows")
-            self._log_query_result(col_names, data)
+            self._log_query_results(col_names, data)
             return current_row_count
         finally:
             if cur and not sansTran:
@@ -552,6 +556,24 @@ class Query:
             if cur and not sansTran:
                 db_connection.client.rollback()
 
+    def set_logging_query_results(self, enabled: Optional[bool] = None, log_head: Optional[int] = None):
+        """
+        Allows to enable/disable logging of query results and to adjust the log head value.
+        - Overrides the values, which were set during the library import.
+        - See `Logging query results` for details.
+
+        Examples:
+        | Set Logging Query Results | enabled=False |
+        | Set Logging Query Results | enabled=True | log_head=0 |
+        | Set Logging Query Results | log_head=10 |
+        """
+        if enabled is not None:
+            self.LOG_QUERY_RESULTS = enabled
+        if log_head is not None:
+            if log_head < 0:
+                raise ValueError(f"Wrong log head value provided: {log_head}. The value can't be negative!")
+            self.LOG_QUERY_RESULTS_HEAD = log_head
+
     def _execute_sql(
         self,
         cur,
@@ -577,12 +599,17 @@ class Query:
             logger.debug(f"Executing sql '{sql_statement}' with parameters: {parameters}")
             return cur.execute(sql_statement, parameters)
 
-    def _log_query_result(self, col_names, result_rows, log_head=50):
+    def _log_query_results(self, col_names, result_rows, log_head: Optional[int] = None):
         """
         Logs the `result_rows` of a query in RF log as a HTML table.
         The `col_names` are needed for the table header.
         Max. `log_head` rows are logged (`0` disables the limit).
         """
+        if not self.LOG_QUERY_RESULTS:
+            return
+
+        if log_head is None:
+            log_head = self.LOG_QUERY_RESULTS_HEAD
         cell_border_and_align = "border: 1px solid rgb(160 160 160);padding: 8px 10px;text-align: center;"
         table_border = "2px solid rgb(140 140 140)"
         row_index_color = "#d6ecd4"
