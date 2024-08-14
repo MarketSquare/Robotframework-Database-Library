@@ -83,7 +83,7 @@ class Query:
         try:
             cur = db_connection.client.cursor()
             logger.info(f"Executing : Query  |  {selectStatement} ")
-            self.__execute_sql(cur, selectStatement, parameters=parameters)
+            self._execute_sql(cur, selectStatement, parameters=parameters)
             all_rows = cur.fetchall()
             col_names = [c[0] for c in cur.description]
             self._log_query_result(col_names, all_rows)
@@ -124,7 +124,7 @@ class Query:
         try:
             cur = db_connection.client.cursor()
             logger.info(f"Executing : Row Count  |  {selectStatement}")
-            self.__execute_sql(cur, selectStatement, parameters=parameters)
+            self._execute_sql(cur, selectStatement, parameters=parameters)
             data = cur.fetchall()
             col_names = [c[0] for c in cur.description]
             if db_connection.module_name in ["sqlite3", "ibm_db", "ibm_db_dbi", "pyodbc"]:
@@ -178,7 +178,7 @@ class Query:
         try:
             cur = db_connection.client.cursor()
             logger.info("Executing : Description  |  {selectStatement}")
-            self.__execute_sql(cur, selectStatement, parameters=parameters)
+            self._execute_sql(cur, selectStatement, parameters=parameters)
             description = list(cur.description)
             if sys.version_info[0] < 3:
                 for row in range(0, len(description)):
@@ -208,7 +208,7 @@ class Query:
         try:
             cur = db_connection.client.cursor()
             logger.info(f"Executing : Delete All Rows From Table  |  {query}")
-            result = self.__execute_sql(cur, query)
+            result = self._execute_sql(cur, query)
             if result is not None:
                 if not sansTran:
                     db_connection.client.commit()
@@ -292,7 +292,7 @@ class Query:
                 logger.info(f"Executing : Execute SQL Script  |  {sqlScriptFileName}")
                 if not split:
                     logger.info("Statements splitting disabled - pass entire script content to the database module")
-                    self.__execute_sql(cur, sql_file.read())
+                    self._execute_sql(cur, sql_file.read())
                 else:
                     logger.info("Splitting script file into statements...")
                     statements_to_execute = []
@@ -358,7 +358,7 @@ class Query:
                         logger.info(f"Executing statement from script file: {statement}")
                         line_ends_with_proc_end = re.compile(r"(\s|;)" + proc_end_pattern.pattern + "$")
                         omit_semicolon = not line_ends_with_proc_end.search(statement.lower())
-                        self.__execute_sql(cur, statement, omit_semicolon)
+                        self._execute_sql(cur, statement, omit_semicolon)
                 if not sansTran:
                     db_connection.client.commit()
             finally:
@@ -403,7 +403,7 @@ class Query:
         try:
             cur = db_connection.client.cursor()
             logger.info(f"Executing : Execute SQL String  |  {sqlString}")
-            self.__execute_sql(cur, sqlString, omit_trailing_semicolon=omitTrailingSemicolon, parameters=parameters)
+            self._execute_sql(cur, sqlString, omit_trailing_semicolon=omitTrailingSemicolon, parameters=parameters)
             if not sansTran:
                 db_connection.client.commit()
         finally:
@@ -552,7 +552,7 @@ class Query:
             if cur and not sansTran:
                 db_connection.client.rollback()
 
-    def __execute_sql(
+    def _execute_sql(
         self,
         cur,
         sql_statement: str,
