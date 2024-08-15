@@ -419,7 +419,6 @@ class ConnectionManager:
         | Disconnect From Database | # disconnects from current connection to the database |
         | Disconnect From Database | alias=my_alias | # disconnects from current connection to the database |
         """
-        logger.info("Executing : Disconnect From Database")
         db_connection = self.connection_store.pop_connection(alias)
         if db_connection is None:
             log_msg = "No open database connection to close"
@@ -437,7 +436,6 @@ class ConnectionManager:
         For example:
         | Disconnect From All Databases | # Closes connections to all databases |
         """
-        logger.info("Executing : Disconnect From All Databases")
         for db_connection in self.connection_store:
             db_connection.client.close()
         self.connection_store.clear()
@@ -459,7 +457,6 @@ class ConnectionManager:
         | # Explicitly set the desired state
         | Set Auto Commit | False
         """
-        logger.info("Executing : Set Auto Commit")
         db_connection = self.connection_store.get_connection(alias)
         db_connection.client.autocommit = autoCommit
 

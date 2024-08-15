@@ -86,7 +86,6 @@ class Query:
         cur = None
         try:
             cur = db_connection.client.cursor()
-            logger.info(f"Executing : Query  |  {selectStatement} ")
             self._execute_sql(cur, selectStatement, parameters=parameters)
             all_rows = cur.fetchall()
             col_names = [c[0] for c in cur.description]
@@ -127,7 +126,6 @@ class Query:
         cur = None
         try:
             cur = db_connection.client.cursor()
-            logger.info(f"Executing : Row Count  |  {selectStatement}")
             self._execute_sql(cur, selectStatement, parameters=parameters)
             data = cur.fetchall()
             col_names = [c[0] for c in cur.description]
@@ -181,7 +179,6 @@ class Query:
         cur = None
         try:
             cur = db_connection.client.cursor()
-            logger.info("Executing : Description  |  {selectStatement}")
             self._execute_sql(cur, selectStatement, parameters=parameters)
             description = list(cur.description)
             if sys.version_info[0] < 3:
@@ -211,7 +208,6 @@ class Query:
         query = f"DELETE FROM {tableName}"
         try:
             cur = db_connection.client.cursor()
-            logger.info(f"Executing : Delete All Rows From Table  |  {query}")
             result = self._execute_sql(cur, query)
             if result is not None:
                 if not sansTran:
@@ -293,7 +289,6 @@ class Query:
             cur = None
             try:
                 cur = db_connection.client.cursor()
-                logger.info(f"Executing : Execute SQL Script  |  {sqlScriptFileName}")
                 if not split:
                     logger.info("Statements splitting disabled - pass entire script content to the database module")
                     self._execute_sql(cur, sql_file.read())
@@ -359,7 +354,6 @@ class Query:
                         statements_to_execute.append(current_statement)
 
                     for statement in statements_to_execute:
-                        logger.info(f"Executing statement from script file: {statement}")
                         line_ends_with_proc_end = re.compile(r"(\s|;)" + proc_end_pattern.pattern + "$")
                         omit_semicolon = not line_ends_with_proc_end.search(statement.lower())
                         self._execute_sql(cur, statement, omit_semicolon)
@@ -406,7 +400,6 @@ class Query:
         cur = None
         try:
             cur = db_connection.client.cursor()
-            logger.info(f"Executing : Execute SQL String  |  {sqlString}")
             self._execute_sql(cur, sqlString, omit_trailing_semicolon=omitTrailingSemicolon, parameters=parameters)
             if not sansTran:
                 db_connection.client.commit()
@@ -461,7 +454,6 @@ class Query:
             spParams = []
         cur = None
         try:
-            logger.info(f"Executing : Call Stored Procedure  |  {spName}  |  {spParams}")
             if db_connection.module_name == "pymssql":
                 cur = db_connection.client.cursor(as_dict=False)
             else:
@@ -593,10 +585,13 @@ class Query:
         if omit_trailing_semicolon:
             sql_statement = sql_statement.rstrip(";")
         if parameters is None:
-            logger.debug(f"Executing sql '{sql_statement}' without parameters")
+            logger.info(f'Executing sql:<br><code style="font-weight: bold;">{sql_statement}</code>', html=True)
             return cur.execute(sql_statement)
         else:
-            logger.debug(f"Executing sql '{sql_statement}' with parameters: {parameters}")
+            logger.info(
+                f'Executing sql:<br><code style="font-weight: bold;">{sql_statement}</code><br>Parameters: <code style="font-weight: bold;">{parameters}</code>',
+                html=True,
+            )
             return cur.execute(sql_statement, parameters)
 
     def _log_query_results(self, col_names, result_rows, log_head: Optional[int] = None):

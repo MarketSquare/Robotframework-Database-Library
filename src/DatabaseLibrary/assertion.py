@@ -58,7 +58,6 @@ class Assertion:
         | @{parameters} | Create List |  John |
         | Check If Exists In Database | SELECT id FROM person WHERE first_name = %s | parameters=${parameters} |
         """
-        logger.info(f"Executing : Check If Exists In Database  |  {selectStatement}")
         if not self.query(selectStatement, sansTran, alias=alias, parameters=parameters):
             raise AssertionError(
                 msg or f"Expected to have have at least one row, but got 0 rows from: '{selectStatement}'"
@@ -99,7 +98,6 @@ class Assertion:
         | @{parameters} | Create List |  John |
         | Check If Not Exists In Database | SELECT id FROM person WHERE first_name = %s | parameters=${parameters} |
         """
-        logger.info(f"Executing : Check If Not Exists In Database  |  {selectStatement}")
         query_results = self.query(selectStatement, sansTran, alias=alias, parameters=parameters)
         if query_results:
             raise AssertionError(
@@ -140,7 +138,6 @@ class Assertion:
         | @{parameters} | Create List |  John |
         | Row Count is 0 | SELECT id FROM person WHERE first_name = %s | parameters=${parameters} |
         """
-        logger.info(f"Executing : Row Count Is 0  |  {selectStatement}")
         num_rows = self.row_count(selectStatement, sansTran, alias=alias, parameters=parameters)
         if num_rows > 0:
             raise AssertionError(msg or f"Expected 0 rows, but {num_rows} were returned from: '{selectStatement}'")
@@ -179,7 +176,6 @@ class Assertion:
         | @{parameters} | Create List |  John |
         | Row Count Is Equal To X | SELECT id FROM person WHERE first_name = %s | 0 | parameters=${parameters} |
         """
-        logger.info(f"Executing : Row Count Is Equal To X  |  {selectStatement}  |  {numRows}")
         num_rows = self.row_count(selectStatement, sansTran, alias=alias, parameters=parameters)
         if num_rows != int(numRows.encode("ascii")):
             raise AssertionError(
@@ -220,7 +216,6 @@ class Assertion:
         | @{parameters} | Create List |  John |
         | Row Count Is Greater Than X | SELECT id FROM person WHERE first_name = %s | 0 | parameters=${parameters} |
         """
-        logger.info(f"Executing : Row Count Is Greater Than X  |  {selectStatement}  |  {numRows}")
         num_rows = self.row_count(selectStatement, sansTran, alias=alias, parameters=parameters)
         if num_rows <= int(numRows.encode("ascii")):
             raise AssertionError(
@@ -261,7 +256,6 @@ class Assertion:
         | @{parameters} | Create List |  John |
         | Row Count Is Less Than X | SELECT id FROM person WHERE first_name = %s | 5 | parameters=${parameters} |
         """
-        logger.info(f"Executing : Row Count Is Less Than X  |  {selectStatement}  |  {numRows}")
         num_rows = self.row_count(selectStatement, sansTran, alias=alias, parameters=parameters)
         if num_rows >= int(numRows.encode("ascii")):
             raise AssertionError(
@@ -305,7 +299,6 @@ class Assertion:
         | @{parameters} | Create List |  John |
         | Check Row Count | SELECT id FROM person WHERE first_name = %s | *equals* | 5 | parameters=${parameters} |
         """
-        logger.info(f"Executing : Check Row Count  |  {selectStatement}  | {assertion_operator} | {expected_value}")
         check_ok = False
         time_counter = 0
         while not check_ok:
@@ -367,10 +360,6 @@ class Assertion:
         | @{parameters} | Create List |  John |
         | Check Query Result | SELECT first_name FROM person | *contains* | Allan | parameters=${parameters} |
         """
-        logger.info(
-            f"Executing : Check Query Results  |  {selectStatement}  |  {assertion_operator}  |  {expected_value}  |  row = {row}  |  col = {col} "
-        )
-
         check_ok = False
         time_counter = 0
         while not check_ok:
@@ -416,7 +405,6 @@ class Assertion:
         | Table Must Exist | person | alias=my_alias |
         | Table Must Exist | person | sansTran=True |
         """
-        logger.info(f"Executing : Table Must Exist  |  {tableName}")
         db_connection = self.connection_store.get_connection(alias)
         if db_connection.module_name in ["cx_Oracle", "oracledb"]:
             query = (
