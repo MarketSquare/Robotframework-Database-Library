@@ -12,6 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import importlib
 import inspect
 import re
 import sys
@@ -408,50 +409,200 @@ class Query:
                 db_connection.client.rollback()
 
     def call_stored_procedure(
-        self, spName: str, spParams: Optional[List[str]] = None, sansTran: bool = False, alias: Optional[str] = None
+        self,
+        spName: str,
+        spParams: Optional[List] = None,
+        sansTran: bool = False,
+        alias: Optional[str] = None,
+        additional_output_params: Optional[List] = None,
     ):
         """
         Calls a stored procedure `spName` with the `spParams` - a *list* of parameters the procedure requires.
-        Use the special *CURSOR* value for OUT params, which should receive result sets -
-        they will be converted to appropriate DB variables before calling the procedure.
-        This is necessary only for some databases (e.g. Oracle or PostgreSQL).
+        *Returns two lists* - the _parameter values_ and the _result sets_.
 
-        The keywords always *returns two lists*:
-        - *Param values* - the copy of procedure parameters (modified, if the procedure changes the OUT params).
-        The list is empty, if procedures receives no params.
-        - *Result sets* - the list of lists, each of them containing results of some query, if the procedure
-        returns them or put them in the OUT params of type *CURSOR* (like in Oracle or PostgreSQL).
+        Use the special *CURSOR* value for OUT params, which should receive result sets - relevant only for some databases (e.g. Oracle or PostgreSQL).
 
-        It also depends on the database, how the procedure returns the values - as params or as result sets.
-        E.g. calling a procedure in *PostgreSQL* returns even a single value of an OUT param as a result set.
-
-        Simple example:
-        | @{Params} = | Create List | Jerry | out_second_name |
-        | @{Param values}    @{Result sets} = | Call Stored Procedure | Get_second_name | ${Params} |
-        | # ${Param values} = ['Jerry', 'Schneider'] |
-        | # ${result sets} = [] |
-
-        Example with a single CURSOR parameter (Oracle DB):
-        | @{Params} = | Create List | CURSOR |
-        | @{Param values}    @{Result sets} = | Call Stored Procedure | Get_all_second_names | ${Params} |
-        | # ${Param values} = [<oracledb.Cursor on <oracledb.Connection ...>>] |
-        | # ${result sets} = [[('See',), ('Schneider',)]] |
-
-        Example with multiple CURSOR parameters (Oracle DB):
-        | @{Params} = | Create List | CURSOR | CURSOR |
-        | @{Param values}    @{Result sets} = | Call Stored Procedure | Get_all_first_and_second_names | ${Params} |
-        | # ${Param values} = [<oracledb.Cursor on <oracledb.Connection ...>>, <oracledb.Cursor on <oracledb.Connection ...>>] |
-        | # ${result sets} = [[('Franz Allan',), ('Jerry',)], [('See',), ('Schneider',)]] |
+        Use the `additional_output_params` list for OUT params of a procedure in MSSQL.
 
         Use optional ``alias`` parameter to specify what connection should be used for the query if you have more
         than one connection open.
 
-        Use optional `sansTran` to run command without an explicit transaction commit or rollback:
-        | @{Param values}    @{Result sets} = | Call Stored Procedure | DBName.SchemaName.StoredProcName | ${Params} | True |
+        Use optional `sansTran` to run command without an explicit transaction commit or rollback.
+
+        = Handling parameters and result sets =
+        Handling the input and output parameters and the result sets is very different
+        depending on the database itself and on the Python database driver - i.e. how it implements the `cursor.callproc()` function.
+
+        == Common case (e.g. MySQL) ==
+        Generally a procedure call requires all parameter values (IN and OUT) put together in a list - `spParams`.
+
+        Calling the procedure returns *two lists*:
+        - *Param values* - the copy of procedure parameters (modified, if the procedure changes the OUT params). The list is empty, if procedures receives no params.
+        - *Result sets* - the list of lists, each of them containing results of some query, if the procedure returns them.
+
+        == Oracle (oracledb, cx_Oracle) ==
+        Oracle procedures work fine with simple IN and OUT params, but require some special handling of result sets.
+
+        === Simple case with IN and OUT params (no result sets) ===
+        Consider the following procedure:
+        | CREATE OR REPLACE PROCEDURE
+        | get_second_name (person_first_name IN VARCHAR, person_second_name OUT VARCHAR) AS
+        | BEGIN
+        |   SELECT last_name
+        |   INTO person_second_name
+        |   FROM person
+        |   WHERE first_name = person_first_name;
+        | END;
+
+        Calling the procedure in Robot Framework:
+        | @{params}=         Create List    Jerry    OUTPUT
+        | # Second parameter value can be anything, it will be replaced anyway
+        |
+        | ${param values}    ${result sets}=    Call Stored Procedure    get_second_name    ${params}
+        | # ${param values} = ['Jerry', 'Schneider']
+        | # ${result sets} = []
+
+        === Oracle procedure returning a result set ===
+        If a procedure in Oracle should return a result set, it must take OUT parameters of a special type -
+        _SYS_REFCURSOR_.
+
+        Consider the following procedure:
+        | get_all_second_names (second_names_cursor OUT SYS_REFCURSOR) AS
+        | BEGIN
+        |   OPEN second_names_cursor for
+        |   SELECT LAST_NAME FROM person;
+        | END;
+
+        Calling the procedure in Robot Framework requires the special value *CURSOR* for the OUT parameters,
+        they will be converted to appropriate DB variables before calling the procedure.
+        | @{params}=    Create List    CURSOR
+        | # The parameter must have this special value CURSOR
+        |
+        | ${param values}    ${result sets}=    Call Stored Procedure    get_all_second_names    ${params}
+        | # ${param values} = [<oracledb.Cursor on <oracledb.Connection ...>>]
+        | # ${result sets} = [[('Franz Allan',), ('Jerry',)], [('See',), ('Schneider',)]]
+
+        === Oracle procedure returning multiple result sets ===
+        If a procedure takes multiple OUT parameters of the _SYS_REFCURSOR_ type, they all must have
+        the special *CURSOR* value when calling the procedure:
+        | @{params} =        Create List         CURSOR    CURSOR
+        | ${param values}    ${result sets} =    Call Stored Procedure    Get_all_first_and_second_names    ${params}
+        | # ${param values} = [<oracledb.Cursor on <oracledb.Connection ...>>, <oracledb.Cursor on <oracledb.Connection ...>>]
+        | # ${result sets}  = [[('Franz Allan',), ('Jerry',)], [('See',), ('Schneider',)]]
+
+        == PostgreSQL (psycopg2, psycopg3) ==
+        PostgreSQL doesn't return single values as params, only as result sets.
+        It also supports special handling of result sets over OUT params of a special type (like Oracle).
+
+        === Simple case with IN and OUT params (no CURSOR parameters) ===
+        Consider the following procedure:
+        | CREATE FUNCTION
+        | get_second_name (IN person_first_name VARCHAR(20),
+        | OUT person_second_name VARCHAR(20))
+        | LANGUAGE plpgsql
+        | AS
+        | '
+        | BEGIN
+        |   SELECT LAST_NAME INTO person_second_name
+        |   FROM person
+        |   WHERE FIRST_NAME = person_first_name;
+        | END
+        | ';
+
+        Calling the procedure in Robot Framework:
+        | @{params}=    Create List    Jerry
+        | ${param values}    ${result sets}=    Call Stored Procedure    get_second_name    ${params}
+        | # ${param values} = ['Jerry']
+        | # ${result sets} = [[('Schneider',)]]
+
+        === PostgreSQL procedure with CURSOR parameters ===
+        If a procedure in PostgreSQL should return a proper result set, it must take OUT parameters of a special type -
+        _refcursor_.
+
+        Consider the following procedure:
+        | CREATE FUNCTION
+        | get_all_first_and_second_names(result1 refcursor, result2 refcursor)
+        | RETURNS SETOF refcursor
+        | LANGUAGE plpgsql
+        | AS
+        | '
+        | BEGIN
+        |   OPEN result1 FOR SELECT FIRST_NAME FROM person;
+        |   RETURN NEXT result1;
+        |   OPEN result2 FOR SELECT LAST_NAME FROM person;
+        |   RETURN NEXT result2;
+        | END
+        | ';
+
+        Calling the procedure in Robot Framework requires the special value *CURSOR* for the OUT parameters,
+        they will be converted to appropriate DB variables before calling the procedure.
+        | @{params}=    Create List    CURSOR    CURSOR
+        | # The parameters must have this special value CURSOR
+        |
+        | ${param values}    ${result sets}=    Call Stored Procedure    get_all_first_and_second_names    ${params}
+        | # ${param values} = ['CURSOR_0', 'CURSOR_1']
+        | # ${result sets} = [[('Franz Allan',), ('Jerry',)], [('See',), ('Schneider',)]
+
+        == MS SQL Server (pymssql) ==
+        The _pymssql_ driver doesn't natively support getting the OUT parameter values after calling a procedure.
+        - This requires special handling of OUT parameters using the `additional_output_params` argument.
+        - Furthermore, it's not possible to fetch the OUT parameter values for a procedure, which returns a result set AND has OUT parameters.
+
+        === Simple case with IN and OUT params (no result sets) ===
+        Consider the following procedure:
+        | CREATE PROCEDURE
+        | return_out_param_without_result_sets
+        | @my_input VARCHAR(20),
+        | @my_output INT OUTPUT
+        | AS
+        | BEGIN
+        |  IF @my_input = 'give me 1'
+        |     BEGIN
+        |         SELECT @my_output = 1;
+        |     END
+        |     ELSE
+        |     BEGIN
+        |         SELECT @my_output = 0;
+        |     END
+        | END;
+
+        Calling the procedure in Robot Framework requires putting the IN parameters as usual in the `spParams` argument,
+        but the sample values of OUT parameters must be put in the argument `additional_output_params`.
+
+        | @{params}=    Create List    give me 1
+        | @{out_params}=    Create List    ${9}
+        | ${param values}    ${result sets}=    Call Stored Procedure    return_out_param_without_result_sets
+        | ...    ${params}    additional_output_params=${out_params}
+        | # ${result sets} = [[('Franz Allan',), ('Jerry',)], [('See',), ('Schneider',)]]
+        | # ${param values} = ('give me 1', 1)
+
+        The library uses the sample values in the `additional_output_params` list to determine the number and the type
+        of OUT parameters - so they are type-sensitive, the type must be the same as in the procedure itself.
+
+        === MS SQL procedure returning a result set (no OUT params) ===
+        If a procedure doesn't have any OUT params and returns only result sets, they are handled in a normal way.
+        Consider the following procedure:
+        | CREATE PROCEDURE get_all_first_and_second_names
+        | AS
+        | BEGIN
+        |   SELECT FIRST_NAME FROM person;
+        |   SELECT LAST_NAME FROM person;
+        |   RETURN;
+        | END;
+
+        Calling the procedure in Robot Framework:
+        | ${param values}    ${result sets}=    Call Stored Procedure    get_all_first_and_second_names
+        | ${param values} = ()
+        | ${result sets} = [[('Franz Allan',), ('Jerry',)], [('See',), ('Schneider',)]]
+
+        === MS SQL procedure returning result sets AND OUT params ===
+        This case is *not fully supported* by the library - the OUT params won't be fetched.
         """
         db_connection = self.connection_store.get_connection(alias)
         if spParams is None:
             spParams = []
+        if additional_output_params is None:
+            additional_output_params = []
         cur = None
         try:
             if db_connection.module_name == "pymssql":
@@ -494,7 +645,6 @@ class Query:
                     result_sets.append(list(result_set))
 
             elif db_connection.module_name in ["psycopg2", "psycopg3"]:
-                cur = db_connection.client.cursor()
                 # check if "CURSOR" params were passed - they will be replaced
                 # with cursor variables for storing the result sets
                 params_substituted = spParams.copy()
@@ -521,13 +671,20 @@ class Query:
                         result_sets.append(list(result_set))
 
             else:
-                logger.info(
-                    f"CAUTION! Calling a stored procedure for '{db_connection.module_name}' is not tested, "
-                    "results might be invalid!"
-                )
-                cur = db_connection.client.cursor()
+                if db_connection.module_name == "pymssql":
+                    mssql = importlib.import_module("pymssql")
+                    spParams = spParams.copy()
+                    for param in additional_output_params:
+                        spParams.append(mssql.output(type(param), param))
+
+                else:
+                    logger.info(
+                        f"Calling a stored procedure for '{db_connection.module_name}'. "
+                        "No special handling is known, so trying the common way with return params and result sets."
+                    )
+
                 param_values = cur.callproc(spName, spParams)
-                logger.info("Reading the procedure results..")
+                logger.info("Reading the procedure result sets..")
                 result_sets_available = True
                 while result_sets_available:
                     result_set = []
