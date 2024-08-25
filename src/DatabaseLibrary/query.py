@@ -573,7 +573,7 @@ class Query:
         | @{out_params}=    Create List    ${9}
         | ${param values}    ${result sets}=    Call Stored Procedure    return_out_param_without_result_sets
         | ...    ${params}    additional_output_params=${out_params}
-        | # ${result sets} = [[('Franz Allan',), ('Jerry',)], [('See',), ('Schneider',)]]
+        | # ${result sets} = []
         | # ${param values} = ('give me 1', 1)
 
         The library uses the sample values in the `additional_output_params` list to determine the number and the type
