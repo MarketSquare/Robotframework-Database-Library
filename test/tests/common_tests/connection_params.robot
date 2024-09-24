@@ -18,8 +18,8 @@ Test Teardown       Disconnect From Database
 ...    missing basic params=OperationalError: (20002, b'DB-Lib error message 20002, severity 9*
 ...    invalid custom param=TypeError: connect() got an unexpected keyword argument 'blah'
 &{Errors pymysql}
-...    missing basic params=OperationalError: (20002, b'DB-Lib error message 20002, severity 9*
-...    invalid custom param=TypeError: connect() got an unexpected keyword argument 'blah'
+...    missing basic params=OperationalError: (1045, "Access denied*
+...    invalid custom param=TypeError: __init__() got an unexpected keyword argument 'blah'
 &{Errors pyodbc}
 ...    missing basic params=OperationalError: (20002, b'DB-Lib error message 20002, severity 9*
 ...    invalid custom param=TypeError: connect() got an unexpected keyword argument 'blah'
