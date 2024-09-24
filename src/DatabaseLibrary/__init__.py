@@ -93,6 +93,51 @@ class DatabaseLibrary(ConnectionManager, Query, Assertion):
     |     Execute Sql String    drop table XYZ
     |
 
+    = Using configuration file =
+    The `Connect To Database` keyword allows providing the connection parameters in two ways:
+    - As keyword arguments
+    - In a configuration file - a simple list of _key=value_ pairs, set inside an _alias_ section.
+
+    You can use only one way or you can combine them:
+    - The keyword arguments are taken by default
+    - If no keyword argument is provided, a parameter value is searched in the config file
+
+    Along with commonly used connection parameters, named exactly as keyword arguments, a config file
+    can contain any other DB module specific parameters as key/value pairs.
+    If same custom parameter is provided both as a keyword argument *and* in config file,
+    the *keyword argument value takes precedence*.
+
+    The path to the config file is set by default to `./resources/db.cfg`.
+    You can change it using an according parameter in the `Connect To Database` keyword.
+
+    == Config file examples ==
+    === Config file with default alias (equal to using no aliases at all) ===
+    | [default]
+    | dbapiModuleName=psycopg2
+    | dbName=yourdbname
+    | dbUsername=yourusername
+    | dbPassword=yourpassword
+    | dbHost=yourhost
+    | dbPort=yourport
+
+    === Config file with a specific alias ===
+    | [myoracle]
+    | dbapiModuleName=oracledb
+    | dbName=yourdbname
+    | dbUsername=yourusername
+    | dbPassword=yourpassword
+    | dbHost=yourhost
+    | dbPort=yourport
+
+    === Config file with some params only ===
+    | [default]
+    | dbPassword=mysecret
+
+    === Config file with some custom DB module specific params ===
+    | [default]
+    | my_custom_param=value
+
+
     = Inline assertions =
     Keywords, that accept arguments ``assertion_operator`` <`AssertionOperator`> and ``expected_value``,
     perform a check according to the specified condition - using the [https://github.com/MarketSquare/AssertionEngine|Assertion Engine].

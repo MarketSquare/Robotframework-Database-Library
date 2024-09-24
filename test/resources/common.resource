@@ -6,6 +6,7 @@ Library             Collections
 Library             OperatingSystem
 Library             DatabaseLibrary
 Library             DateTime
+Resource            config_files/connect_config_file.resource
 
 
 *** Variables ***
@@ -26,8 +27,10 @@ Connect To DB
     [Documentation]    Connects to the database based on the current DB module under test
     ...    and connection params set in global variables with alias
     [Arguments]    ${alias}=${None}
-    ${DB_KWARGS}    Create Dictionary
-    IF    $alias is not None    Set To Dictionary    ${DB_KWARGS}    alias=${alias}
+    ${DB_KWARGS}=    Create Dictionary
+    IF    $alias is not None
+        Set To Dictionary    ${DB_KWARGS}    alias=${alias}
+    END
     IF    "${DB_MODULE_MODE}" == "custom"
         IF    "${DB_MODULE}" == "sqlite3"
             Remove File    ${DBName}.db
@@ -38,8 +41,16 @@ Connect To DB
             Connect To Database Using Custom Connection String    ${DB_MODULE}    ${Connection String}    &{DB_KWARGS}
         END
     ELSE IF    "${DB_MODULE_MODE}" == "standard"
-        ${DB_ARGS}    Create List    ${DB_MODULE}    ${DB_NAME}    ${DB_USER}    ${DB_PASS}    ${DB_HOST}    ${DB_PORT}
-        IF    "${DB_MODULE}" == "pyodbc"    Set To Dictionary    ${DB_KWARGS}    dbDriver=${DB_DRIVER}
+        ${DB_ARGS}=    Create List
+        ...    ${DB_MODULE}
+        ...    ${DB_NAME}
+        ...    ${DB_USER}
+        ...    ${DB_PASS}
+        ...    ${DB_HOST}
+        ...    ${DB_PORT}
+        IF    "${DB_MODULE}" == "pyodbc"
+            Set To Dictionary    ${DB_KWARGS}    dbDriver=${DB_DRIVER}
+        END
         Connect To Database    @{DB_ARGS}    &{DB_KWARGS}
     ELSE
         Fail    Unexpected mode - ${DB_MODULE_MODE}
