@@ -142,14 +142,14 @@ class ConnectionManager:
         self.connection_store: ConnectionStore = ConnectionStore()
 
     @staticmethod
-    def _hide_password_values(string_with_pass):
+    def _hide_password_values(string_with_pass, params_separator=","):
         string_with_hidden_pass = string_with_pass
         for pass_param_name in ["pass", "passwd", "password", "pwd", "PWD"]:
             pass_param_name += "="
             splitted = string_with_hidden_pass.split(pass_param_name)
             if len(splitted) < 2:
                 continue
-            splitted = splitted[1].split(",")
+            splitted = splitted[1].split(params_separator)
             value_to_hide = splitted[0]
             string_with_hidden_pass = string_with_hidden_pass.replace(
                 f"{pass_param_name}{value_to_hide}", f"{pass_param_name}***"
@@ -223,8 +223,10 @@ class ConnectionManager:
         def _log_all_connection_params(*, connection_object=None, connection_string=None, **connection_params):
             connection_object = connection_object or dbapiModuleName
             msg = f"Connect to DB using : {connection_object}.connect("
+            params_separator = ","
             if connection_string:
                 msg += f'"{connection_string}"'
+                params_separator = ";"
             for param_name, param_value in connection_params.items():
                 msg += f", {param_name}="
                 if isinstance(param_value, str):
@@ -233,7 +235,7 @@ class ConnectionManager:
                     msg += f"{param_value}"
             if dbPassword:
                 msg = msg.replace(f"'{dbPassword}'", "***")
-            msg = self._hide_password_values(msg)
+            msg = self._hide_password_values(msg, params_separator)
             msg = msg.replace("connect(, ", "connect(")
             msg += ")"
             logger.info(msg)
