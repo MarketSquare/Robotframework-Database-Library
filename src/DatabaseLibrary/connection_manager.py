@@ -314,6 +314,7 @@ class ConnectionManager:
             if dbDriver:
                 con_str = f"DRIVER={dbDriver};"
             else:
+                con_str = ""
                 logger.info("No ODBC driver specified")
                 logger.info(f"List of installed ODBC drivers: {db_api_2.drivers()}")
             con_str += f"DATABASE={dbName};UID={dbUsername};PWD={dbPassword};charset={dbCharset};"
