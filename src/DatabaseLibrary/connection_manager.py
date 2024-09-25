@@ -311,9 +311,13 @@ class ConnectionManager:
         elif dbapiModuleName in ["pyodbc", "pypyodbc"]:
             dbPort = dbPort or 1433
             dbCharset = dbCharset or "utf8mb4"
-            dbDriver = dbDriver or "{SQL Server}"
-            con_str = f"DRIVER={dbDriver};DATABASE={dbName};UID={dbUsername};PWD={dbPassword};charset={dbCharset};"
-            if "mysql" in dbDriver.lower():
+            if dbDriver:
+                con_str = f"DRIVER={dbDriver};"
+            else:
+                logger.info("No ODBC driver specified")
+                logger.info(f"List of installed ODBC drivers: {db_api_2.drivers()}")
+            con_str += f"DATABASE={dbName};UID={dbUsername};PWD={dbPassword};charset={dbCharset};"
+            if dbDriver and "mysql" in dbDriver.lower():
                 con_str += f"SERVER={dbHost}:{dbPort}"
             else:
                 con_str += f"SERVER={dbHost},{dbPort}"
