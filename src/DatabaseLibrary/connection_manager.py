@@ -186,10 +186,11 @@ class ConnectionManager:
         they are normally not passed to the Python DB module at all, except:
         - _dbPort_ - commonly used port number for known databases is set as fallback
         - _dbCharset_ - _UTF8_ is used as fallback for _pymysql_, _pymssql_ and _pyodbc_
-        - _dbDriver_ - _{SQL Server}_ is used as fallback for _pyodbc_
         - _driverMode_ - _thin_ is used as fallback for _oracledb_
 
-        Other params are passed to the Python DB module module as provided.
+        Other custom params from keyword arguments and config file are passed to the Python DB module as provided -
+        normally as arguments for the _connect()_ function. However, when using *pyodbc*, the connection is established
+        using a connection string - so all the custom params are added into it instead of function arguments.
 
         Optional ``alias`` parameter can be used for creating multiple open connections, even for different databases.
         If the same alias is given twice then previous connection will be overridden.
@@ -311,21 +312,33 @@ class ConnectionManager:
         elif dbapiModuleName in ["pyodbc", "pypyodbc"]:
             dbPort = dbPort or 1433
             dbCharset = dbCharset or "utf8mb4"
+
             if dbDriver:
                 con_str = f"DRIVER={dbDriver};"
             else:
                 con_str = ""
                 logger.info("No ODBC driver specified")
                 logger.info(f"List of installed ODBC drivers: {db_api_2.drivers()}")
-            con_str += f"DATABASE={dbName};UID={dbUsername};PWD={dbPassword};charset={dbCharset};"
-            if dbDriver and "mysql" in dbDriver.lower():
-                con_str += f"SERVER={dbHost}:{dbPort}"
-            else:
-                con_str += f"SERVER={dbHost},{dbPort}"
+            if dbName:
+                con_str += f"DATABASE={dbName};"
+            if dbUsername:
+                con_str += f"UID={dbUsername};"
+            if dbPassword:
+                con_str += f"PWD={dbPassword};"
+            if dbCharset:
+                con_str += f"charset={dbCharset};"
+            if dbHost and dbPort:
+                if dbDriver and "mysql" in dbDriver.lower():
+                    con_str += f"SERVER={dbHost}:{dbPort};"
+                else:
+                    con_str += f"SERVER={dbHost},{dbPort};"
+
             for param_name, param_value in custom_connection_params.items():
-                con_str += f";{param_name}={param_value}"
+                con_str += f"{param_name}={param_value};"
+
             for param_name, param_value in other_config_file_params.items():
-                con_str += f";{param_name}={param_value}"
+                con_str += f"{param_name}={param_value};"
+
             _log_all_connection_params(connection_string=con_str)
             db_connection = db_api_2.connect(con_str)
 
