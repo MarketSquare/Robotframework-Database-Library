@@ -20,7 +20,7 @@ from typing import Any, Dict, Optional
 
 from robot.api import logger
 
-from .params_decorator import renamed_args
+from .params_decorator import deprecated_positional_args, renamed_args
 
 
 @dataclass
@@ -172,6 +172,7 @@ class ConnectionManager:
             "driverMode": "oracle_driver_mode",
         }
     )
+    @deprecated_positional_args(1)
     def connect_to_database(
         self,
         python_module: Optional[str] = None,
@@ -185,6 +186,17 @@ class ConnectionManager:
         config_file: Optional[str] = None,
         oracle_driver_mode: Optional[str] = None,
         alias: str = "default",
+        *,
+        dbapiModuleName: Optional[str] = None,
+        dbName: Optional[str] = None,
+        dbUsername: Optional[str] = None,
+        dbPassword: Optional[str] = None,
+        dbHost: Optional[str] = None,
+        dbPort: Optional[int] = None,
+        dbCharset: Optional[str] = None,
+        dbDriver: Optional[str] = None,
+        dbConfigFile: Optional[str] = None,
+        driverMode: Optional[str] = None,
         **custom_connection_params,
     ):
         """
@@ -454,8 +466,14 @@ class ConnectionManager:
 
         self.connection_store.register_connection(db_connection, db_api_module_name, alias)
 
+    @renamed_args(mapping={"dbapiModuleName": "python_module"})
     def connect_to_database_using_custom_params(
-        self, python_module: Optional[str] = None, db_connect_string: str = "", alias: str = "default"
+        self,
+        python_module: Optional[str] = None,
+        db_connect_string: str = "",
+        alias: str = "default",
+        *,
+        dbapiModuleName: Optional[str] = None,
     ):
         """
         *DEPRECATED* Use new `Connect To Database` keyword with custom parameters instead.
@@ -467,6 +485,9 @@ class ConnectionManager:
 
         Use `connect_to_database_using_custom_connection_string` for passing
         all params in a single connection string or URI.
+
+        The old ``dbapiModuleName`` param duplicates new ``python_module``.
+        The old naming is deprecated and will be removed in future versions.
 
         Example usage:
         | Connect To Database Using Custom Params | psycopg2 | database='my_db_test', user='postgres', password='s3cr3t', host='tiger.foobar.com', port=5432 |
@@ -485,8 +506,15 @@ class ConnectionManager:
         db_connection = eval(db_connect_string)
         self.connection_store.register_connection(db_connection, db_api_module_name, alias)
 
+    @renamed_args(mapping={"dbapiModuleName": "python_module"})
+    @deprecated_positional_args(2)
     def connect_to_database_using_custom_connection_string(
-        self, python_module: Optional[str] = None, db_connect_string: str = "", alias: str = "default"
+        self,
+        python_module: Optional[str] = None,
+        db_connect_string: str = "",
+        alias: str = "default",
+        *,
+        dbapiModuleName: Optional[str] = None,
     ):
         """
         Loads the DB API 2.0 module given `python_module` then uses it to
@@ -495,6 +523,9 @@ class ConnectionManager:
 
         Use `connect_to_database_using_custom_params` for passing
         connection params as named arguments.
+
+        The old ``dbapiModuleName`` param duplicates new ``python_module``.
+        The old naming is deprecated and will be removed in future versions.
 
         Example usage:
         | Connect To Database Using Custom Connection String | psycopg2 | postgresql://postgres:s3cr3t@tiger.foobar.com:5432/my_db_test |
@@ -509,6 +540,7 @@ class ConnectionManager:
         db_connection = db_api_2.connect(db_connect_string)
         self.connection_store.register_connection(db_connection, db_api_module_name, alias)
 
+    @deprecated_positional_args(0)
     def disconnect_from_database(self, error_if_no_connection: bool = False, alias: Optional[str] = None):
         """
         Disconnects from the database.
@@ -542,7 +574,11 @@ class ConnectionManager:
             db_connection.client.close()
         self.connection_store.clear()
 
-    def set_auto_commit(self, autoCommit: bool = True, alias: Optional[str] = None):
+    @renamed_args(mapping={"autoCommit": "auto_commit"})
+    @deprecated_positional_args(1)
+    def set_auto_commit(
+        self, auto_commit: bool = True, alias: Optional[str] = None, *, autoCommit: Optional[bool] = None
+    ):
         """
         Turn the autocommit on the database connection ON or OFF.
 
@@ -552,6 +588,9 @@ class ConnectionManager:
         or database snapshot. By turning on auto commit on the database connection these actions
         can be performed.
 
+        The old ``autoCommit`` param duplicates new ``auto_commit``.
+        The old naming is deprecated and will be removed in future versions.
+
         Example usage:
         | # Default behaviour, sets auto commit to true
         | Set Auto Commit
@@ -560,7 +599,7 @@ class ConnectionManager:
         | Set Auto Commit | False
         """
         db_connection = self.connection_store.get_connection(alias)
-        db_connection.client.autocommit = autoCommit
+        db_connection.client.autocommit = auto_commit
 
     def switch_database(self, alias: str):
         """
