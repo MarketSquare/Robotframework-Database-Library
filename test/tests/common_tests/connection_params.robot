@@ -141,7 +141,7 @@ MSSQL / PyODBC specific - charset in config file - invalid
 
 MySQL specific - charset in config file - invalid
     Skip If    $DB_MODULE not in ["pymysql"]
-    Run Keyword And Expect Error    AttributeError: 'NoneType' object has no attribute 'encoding''
+    Run Keyword And Expect Error    AttributeError: 'NoneType' object has no attribute 'encoding'
     ...    Connect Using Config File    ${DB_MODULE}/charset_invalid
 
 
