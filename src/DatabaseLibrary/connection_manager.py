@@ -242,9 +242,9 @@ class ConnectionManager:
 
         def _arg_or_config(arg_value, param_name, mandatory=False):
             val_from_config = config.pop(param_name)
-            if arg_value:
+            if arg_value is not None:
                 final_value = arg_value
-                if val_from_config:
+                if val_from_config is not None:
                     logger.info(
                         f"Parameter '{param_name}' set both as keyword argument and in config file, "
                         "but keyword arguments take precedence"
@@ -266,7 +266,7 @@ class ConnectionManager:
         dbPassword = _arg_or_config(dbPassword, "dbPassword")
         dbHost = _arg_or_config(dbHost, "dbHost")
         dbPort = _arg_or_config(dbPort, "dbPort")
-        if dbPort:
+        if dbPort is not None:
             dbPort = int(dbPort)
         dbCharset = _arg_or_config(dbCharset, "dbCharset")
         dbDriver = _arg_or_config(dbDriver, "dbDriver")
