@@ -29,11 +29,11 @@ Test Setup    Connect To My Oracle DB
 Connect To My Oracle DB
     Connect To Database
     ...    oracledb
-    ...    dbName=db
-    ...    dbUsername=my_user
-    ...    dbPassword=my_pass
-    ...    dbHost=127.0.0.1
-    ...    dbPort=1521
+    ...    db_name=db
+    ...    db_user=my_user
+    ...    db_password=my_pass
+    ...    db_host=127.0.0.1
+    ...    db_port=1521
 
 *** Test Cases ***
 Person Table Contains Expected Records
@@ -83,7 +83,7 @@ Therefore there are some modules, which are "natively" supported in the library 
 ## Python modules currently "natively" supported
 ### Oracle
 - [oracledb](https://oracle.github.io/python-oracledb/)
-    - Both thick and thin client modes are supported - you can select one using the `driverMode` parameter.
+    - Both thick and thin client modes are supported - you can select one using the `oracle_driver_mode` parameter.
     - However, due to current limitations of the oracledb module, **it's not possible to switch between thick and thin modes during a test execution session** - even in different suites.
 - [cx_Oracle](https://oracle.github.io/python-cx_Oracle/)
 ### MySQL

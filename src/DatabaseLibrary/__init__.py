@@ -49,11 +49,11 @@ class DatabaseLibrary(ConnectionManager, Query, Assertion):
     | Connect To My Oracle DB
     |     Connect To Database
     |     ...    oracledb
-    |     ...    dbName=db
-    |     ...    dbUsername=my_user
-    |     ...    dbPassword=my_pass
-    |     ...    dbHost=127.0.0.1
-    |     ...    dbPort=1521
+    |     ...    db_name=db
+    |     ...    db_user=my_user
+    |     ...    db_password=my_pass
+    |     ...    db_host=127.0.0.1
+    |     ...    db_port=1521
     |
     | *** Test Cases ***
     | Person Table Contains Expected Records
@@ -117,25 +117,25 @@ class DatabaseLibrary(ConnectionManager, Query, Assertion):
     == Config file examples ==
     === Config file with default alias (equal to using no aliases at all) ===
     | [default]
-    | dbapiModuleName=psycopg2
-    | dbName=yourdbname
-    | dbUsername=yourusername
-    | dbPassword=yourpassword
-    | dbHost=yourhost
-    | dbPort=yourport
+    | python_module=psycopg2
+    | db_name=yourdbname
+    | db_user=yourusername
+    | db_password=yourpassword
+    | db_host=yourhost
+    | db_port=yourport
 
     === Config file with a specific alias ===
     | [myoracle]
-    | dbapiModuleName=oracledb
-    | dbName=yourdbname
-    | dbUsername=yourusername
-    | dbPassword=yourpassword
-    | dbHost=yourhost
-    | dbPort=yourport
+    | python_module=oracledb
+    | db_name=yourdbname
+    | db_user=yourusername
+    | db_password=yourpassword
+    | db_host=yourhost
+    | db_port=yourport
 
     === Config file with some params only ===
     | [default]
-    | dbPassword=mysecret
+    | db_password=mysecret
 
     === Config file with some custom DB module specific params ===
     | [default]

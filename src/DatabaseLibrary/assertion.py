@@ -18,6 +18,8 @@ from robot.api import logger
 from robot.libraries.BuiltIn import BuiltIn
 from robot.utils import timestr_to_secs
 
+from .params_decorator import renamed_args
+
 
 class Assertion:
     """
@@ -26,8 +28,9 @@ class Assertion:
 
     def check_if_exists_in_database(
         self,
-        selectStatement: str,
-        sansTran: bool = False,
+        select_statement: str,
+        *,
+        no_transaction: bool = False,
         msg: Optional[str] = None,
         alias: Optional[str] = None,
         parameters: Optional[Tuple] = None,
@@ -36,10 +39,10 @@ class Assertion:
         *DEPRECATED* Use new `Check Row Count` keyword with assertion engine instead.
         The deprecated keyword will be removed in future versions.
 
-        Check if any row would be returned by given the input ``selectStatement``. If there are no results, then this will
+        Check if any row would be returned by given the input ``select_statement``. If there are no results, then this will
         throw an AssertionError.
 
-        Set optional input ``sansTran`` to _True_ to run command without an explicit transaction
+        Set optional input ``no_transaction`` to _True_ to run command without an explicit transaction
         commit or rollback.
 
         The default error message can be overridden with the ``msg`` argument.
@@ -54,13 +57,13 @@ class Assertion:
         | Check If Exists In Database | SELECT id FROM person WHERE first_name = 'Franz Allan' |
         | Check If Exists In Database | SELECT id FROM person WHERE first_name = 'John' | msg=my error message |
         | Check If Exists In Database | SELECT id FROM person WHERE first_name = 'Franz Allan' | alias=my_alias |
-        | Check If Exists In Database | SELECT id FROM person WHERE first_name = 'John' | sansTran=True |
+        | Check If Exists In Database | SELECT id FROM person WHERE first_name = 'John' | no_transaction=True |
         | @{parameters} | Create List |  John |
         | Check If Exists In Database | SELECT id FROM person WHERE first_name = %s | parameters=${parameters} |
         """
-        if not self.query(selectStatement, sansTran, alias=alias, parameters=parameters):
+        if not self.query(select_statement, no_transaction, alias=alias, parameters=parameters):
             raise AssertionError(
-                msg or f"Expected to have have at least one row, but got 0 rows from: '{selectStatement}'"
+                msg or f"Expected to have have at least one row, but got 0 rows from: '{select_statement}'"
             )
 
     def check_if_not_exists_in_database(
@@ -262,40 +265,47 @@ class Assertion:
                 msg or f"Expected less than {numRows} rows, but {num_rows} were returned from '{selectStatement}'"
             )
 
+    @renamed_args(mapping={"selectStatement": "select_statement", "sansTran": "no_transaction"})
     def check_row_count(
         self,
-        selectStatement: str,
+        select_statement: str,
         assertion_operator: AssertionOperator,
         expected_value: int,
         assertion_message: Optional[str] = None,
-        sansTran: bool = False,
+        no_transaction: bool = False,
         alias: Optional[str] = None,
         parameters: Optional[Tuple] = None,
         retry_timeout="0 seconds",
         retry_pause="0.5 seconds",
+        *,
+        selectStatement: Optional[str] = None,
+        sansTran: Optional[bool] = None,
     ):
         """
-        Check the number of rows returned from ``selectStatement`` using ``assertion_operator``
+        Check the number of rows returned from ``select_statement`` using ``assertion_operator``
         and ``expected_value``. See `Inline assertions` for more details.
 
-        Use optional ``assertion_message`` to override the default error message.
+        Use ``assertion_message`` to override the default error message.
 
-        Set optional input ``sansTran`` to _True_ to run command without an explicit transaction commit or rollback.
+        Set ``no_transaction`` to _True_ to run command without an explicit transaction commit or rollback.
 
-        Use optional ``alias`` parameter to specify what connection should be used for the query if you have more
+        Use ``alias`` to specify what connection should be used for the query if you have more
         than one connection open.
 
-        Use optional ``parameters`` for query variable substitution (variable substitution syntax may be different
+        Use ``parameters`` for query variable substitution (variable substitution syntax may be different
         depending on the database client).
 
         Use ``retry_timeout`` and ``retry_pause`` parameters to enable waiting for assertion to pass.
         See `Retry mechanism` for more details.
 
+        The old ``selectStatement`` and ``sansTran`` params duplicate new ``select_statement`` and ``no_transaction``.
+        The old naming is deprecated and will be removed in future versions.
+
         Examples:
         | Check Row Count | SELECT id FROM person WHERE first_name = 'John' | *==* | 1 |
         | Check Row Count | SELECT id FROM person WHERE first_name = 'John' | *>=* | 2 | assertion_message=my error message |
         | Check Row Count | SELECT id FROM person WHERE first_name = 'John' | *inequal* | 3 | alias=my_alias |
-        | Check Row Count | SELECT id FROM person WHERE first_name = 'John' | *less than* | 4 | sansTran=True |
+        | Check Row Count | SELECT id FROM person WHERE first_name = 'John' | *less than* | 4 | no_transaction=True |
         | @{parameters} | Create List |  John |
         | Check Row Count | SELECT id FROM person WHERE first_name = %s | *equals* | 5 | parameters=${parameters} |
         """
@@ -303,7 +313,9 @@ class Assertion:
         time_counter = 0
         while not check_ok:
             try:
-                num_rows = self.row_count(selectStatement, sansTran, alias=alias, parameters=parameters)
+                num_rows = self.row_count(
+                    select_statement, no_transaction=no_transaction, alias=alias, parameters=parameters
+                )
                 verify_assertion(num_rows, assertion_operator, expected_value, "Wrong row count:", assertion_message)
                 check_ok = True
             except AssertionError as e:
@@ -313,22 +325,26 @@ class Assertion:
                 BuiltIn().sleep(retry_pause)
                 time_counter += timestr_to_secs(retry_pause)
 
+    @renamed_args(mapping={"selectStatement": "select_statement", "sansTran": "no_transaction"})
     def check_query_result(
         self,
-        selectStatement,
+        select_statement: str,
         assertion_operator: AssertionOperator,
         expected_value: Any,
         row=0,
         col=0,
         assertion_message: Optional[str] = None,
-        sansTran: bool = False,
+        no_transaction: bool = False,
         alias: Optional[str] = None,
         parameters: Optional[Tuple] = None,
         retry_timeout="0 seconds",
         retry_pause="0.5 seconds",
+        *,
+        selectStatement: Optional[str] = None,
+        sansTran: Optional[bool] = None,
     ):
         """
-        Check value in query result returned from ``selectStatement`` using ``assertion_operator`` and ``expected_value``.
+        Check value in query result returned from ``select_statement`` using ``assertion_operator`` and ``expected_value``.
         The value position in results can be adjusted using ``row`` and ``col`` parameters (0-based).
         See `Inline assertions` for more details.
 
@@ -338,7 +354,7 @@ class Assertion:
 
         Use optional ``assertion_message`` to override the default error message.
 
-        Set optional input ``sansTran`` to _True_ to run command without an explicit transaction commit or rollback.
+        Set optional input ``no_transaction`` to _True_ to run command without an explicit transaction commit or rollback.
 
         Use optional ``alias`` parameter to specify what connection should be used for the query if you have more
         than one connection open.
@@ -349,6 +365,9 @@ class Assertion:
         Use ``retry_timeout`` and ``retry_pause`` parameters to enable waiting for assertion to pass.
         See `Retry mechanism` for more details.
 
+        The old ``selectStatement`` and ``sansTran`` params duplicate new ``select_statement`` and ``no_transaction``.
+        The old naming is deprecated and will be removed in future versions.
+
         Examples:
         | Check Query Result | SELECT first_name FROM person | *contains* | Allan |
         | Check Query Result | SELECT first_name, last_name FROM person | *==* | Schneider | row=1 | col=1 |
@@ -356,7 +375,7 @@ class Assertion:
         | Check Query Result | SELECT id FROM person WHERE first_name = 'John' | *==* | ${2} | # Works, if query returns an integer value |
         | Check Query Result | SELECT first_name FROM person | *equal* | Franz Allan | assertion_message=my error message |
         | Check Query Result | SELECT first_name FROM person | *inequal* | John | alias=my_alias |
-        | Check Query Result | SELECT first_name FROM person | *contains* | Allan | sansTran=True |
+        | Check Query Result | SELECT first_name FROM person | *contains* | Allan | no_transaction=True |
         | @{parameters} | Create List |  John |
         | Check Query Result | SELECT first_name FROM person | *contains* | Allan | parameters=${parameters} |
         """
@@ -364,7 +383,9 @@ class Assertion:
         time_counter = 0
         while not check_ok:
             try:
-                query_results = self.query(selectStatement, sansTran, alias=alias, parameters=parameters)
+                query_results = self.query(
+                    select_statement, no_transaction=no_transaction, alias=alias, parameters=parameters
+                )
                 row_count = len(query_results)
                 assert (
                     row < row_count
@@ -385,13 +406,21 @@ class Assertion:
                 BuiltIn().sleep(retry_pause)
                 time_counter += timestr_to_secs(retry_pause)
 
+    @renamed_args(mapping={"tableName": "table_name", "sansTran": "no_transaction"})
     def table_must_exist(
-        self, tableName: str, sansTran: bool = False, msg: Optional[str] = None, alias: Optional[str] = None
+        self,
+        table_name: str,
+        no_transaction: bool = False,
+        msg: Optional[str] = None,
+        alias: Optional[str] = None,
+        *,
+        tableName: Optional[str] = None,
+        sansTran: Optional[bool] = None,
     ):
         """
         Check if the given table exists in the database.
 
-        Set optional input ``sansTran`` to True to run command without an
+        Set optional input ``no_transaction`` to True to run command without an
         explicit transaction commit or rollback.
 
         The default error message can be overridden with the ``msg`` argument.
@@ -399,38 +428,41 @@ class Assertion:
         Use optional ``alias`` parameter to specify what connection should be used for the query if you have more
         than one connection open.
 
+        The old ``tableName`` and ``sansTran`` params duplicate new ``table_name`` and ``no_transaction``.
+        The old naming is deprecated and will be removed in future versions.
+
         Examples:
         | Table Must Exist | person |
         | Table Must Exist | person | msg=my error message |
         | Table Must Exist | person | alias=my_alias |
-        | Table Must Exist | person | sansTran=True |
+        | Table Must Exist | person | no_transaction=True |
         """
         db_connection = self.connection_store.get_connection(alias)
         if db_connection.module_name in ["cx_Oracle", "oracledb"]:
             query = (
                 "SELECT * FROM all_objects WHERE object_type IN ('TABLE','VIEW') AND "
-                f"owner = SYS_CONTEXT('USERENV', 'SESSION_USER') AND object_name = UPPER('{tableName}')"
+                f"owner = SYS_CONTEXT('USERENV', 'SESSION_USER') AND object_name = UPPER('{table_name}')"
             )
-            table_exists = self.row_count(query, sansTran, alias=alias) > 0
+            table_exists = self.row_count(query, no_transaction=no_transaction, alias=alias) > 0
         elif db_connection.module_name in ["sqlite3"]:
-            query = f"SELECT name FROM sqlite_master WHERE type='table' AND name='{tableName}' COLLATE NOCASE"
-            table_exists = self.row_count(query, sansTran, alias=alias) > 0
+            query = f"SELECT name FROM sqlite_master WHERE type='table' AND name='{table_name}' COLLATE NOCASE"
+            table_exists = self.row_count(query, no_transaction=no_transaction, alias=alias) > 0
         elif db_connection.module_name in ["ibm_db", "ibm_db_dbi"]:
-            query = f"SELECT name FROM SYSIBM.SYSTABLES WHERE type='T' AND name=UPPER('{tableName}')"
-            table_exists = self.row_count(query, sansTran, alias=alias) > 0
+            query = f"SELECT name FROM SYSIBM.SYSTABLES WHERE type='T' AND name=UPPER('{table_name}')"
+            table_exists = self.row_count(query, no_transaction=no_transaction, alias=alias) > 0
         elif db_connection.module_name in ["teradata"]:
-            query = f"SELECT TableName FROM DBC.TablesV WHERE TableKind='T' AND TableName='{tableName}'"
-            table_exists = self.row_count(query, sansTran, alias=alias) > 0
+            query = f"SELECT TableName FROM DBC.TablesV WHERE TableKind='T' AND TableName='{table_name}'"
+            table_exists = self.row_count(query, no_transaction=no_transaction, alias=alias) > 0
         else:
             try:
-                query = f"SELECT * FROM information_schema.tables WHERE table_name='{tableName}'"
-                table_exists = self.row_count(query, sansTran, alias=alias) > 0
+                query = f"SELECT * FROM information_schema.tables WHERE table_name='{table_name}'"
+                table_exists = self.row_count(query, no_transaction=no_transaction, alias=alias) > 0
             except:
                 logger.info("Database doesn't support information schema, try using a simple SQL request")
                 try:
-                    query = f"SELECT 1 from {tableName} where 1=0"
-                    self.row_count(query, sansTran, alias=alias)
+                    query = f"SELECT 1 from {table_name} where 1=0"
+                    self.row_count(query, no_transaction=no_transaction, alias=alias)
                     table_exists = True
                 except:
                     table_exists = False
-        assert table_exists, msg or f"Table '{tableName}' does not exist in the db"
+        assert table_exists, msg or f"Table '{table_name}' does not exist in the db"

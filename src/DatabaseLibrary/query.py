@@ -20,6 +20,8 @@ from typing import List, Optional, Tuple
 
 from robot.api import logger
 
+from .params_decorator import renamed_args
+
 
 class Query:
     """
@@ -30,16 +32,23 @@ class Query:
         self.LOG_QUERY_RESULTS = log_query_results
         self.LOG_QUERY_RESULTS_HEAD = log_query_results_head
 
+    @renamed_args(
+        mapping={"selectStatement": "select_statement", "sansTran": "no_transaction", "returnAsDict": "return_dict"}
+    )
     def query(
         self,
-        selectStatement: str,
-        sansTran: bool = False,
-        returnAsDict: bool = False,
+        select_statement: str,
+        no_transaction: bool = False,
+        return_dict: bool = False,
         alias: Optional[str] = None,
         parameters: Optional[Tuple] = None,
+        *,
+        selectStatement: Optional[str] = None,
+        sansTran: Optional[bool] = None,
+        returnAsDict: Optional[bool] = None,
     ):
         """
-        Runs a query with the ``selectStatement`` and returns the result as a list of rows.
+        Runs a query with the ``select_statement`` and returns the result as a list of rows.
         The type of row values depends on the database module -
         usually they are tuples or tuple-like objects.
 
@@ -54,7 +63,7 @@ class Query:
         | @{parameters} | Create List |  person |
         | Query | SELECT * FROM %s | parameters=${parameters} |
 
-        Use optional ``sansTran`` to run command without an explicit transaction commit or rollback:
+        Use optional ``no_transaction`` to run command without an explicit transaction commit or rollback:
         | @{queryResults} | Query | SELECT * FROM person | True |
 
         Tip: Unless you want to log all column values of the specified rows,
@@ -82,43 +91,54 @@ class Query:
 
         And get the following
         See, Franz Allan
+
+        The old ``selectStatement``, ``sansTran`` and ``returnAsDict`` params
+        duplicate new ``select_statement``, ``no_transaction`` and ``return_dict``.
+        The old naming is deprecated and will be removed in future versions.
         """
         db_connection = self.connection_store.get_connection(alias)
         cur = None
         try:
             cur = db_connection.client.cursor()
-            self._execute_sql(cur, selectStatement, parameters=parameters)
+            self._execute_sql(cur, select_statement, parameters=parameters)
             all_rows = cur.fetchall()
             col_names = [c[0] for c in cur.description]
             self._log_query_results(col_names, all_rows)
-            if returnAsDict:
+            if return_dict:
                 return [dict(zip(col_names, row)) for row in all_rows]
             return all_rows
         finally:
-            if cur and not sansTran:
+            if cur and not no_transaction:
                 db_connection.client.rollback()
 
+    @renamed_args(mapping={"selectStatement": "select_statement", "sansTran": "no_transaction"})
     def row_count(
         self,
-        selectStatement: str,
-        sansTran: bool = False,
+        select_statement: str,
+        no_transaction: bool = False,
         alias: Optional[str] = None,
         parameters: Optional[Tuple] = None,
+        *,
+        selectStatement: Optional[str] = None,
+        sansTran: Optional[bool] = None,
     ):
         """
-        Uses the input ``selectStatement`` to query the database and returns the number of rows from the query.
+        Uses the input ``select_statement`` to query the database and returns the number of rows from the query.
 
         Use optional ``alias`` parameter to specify what connection should be used for the query if you have more
         than one connection open.
 
-        Use optional ``sansTran`` to run command without an explicit transaction commit or rollback:
+        Use optional ``no_transaction`` to run command without an explicit transaction commit or rollback:
 
         Use optional ``parameters`` for query variable substitution (variable substitution syntax may be different
         depending on the database client):
 
+        The old ``selectStatement`` and ``sansTran`` params duplicate new ``select_statement`` and ``no_transaction``.
+        The old naming is deprecated and will be removed in future versions.
+
         Examples:
         | ${rowCount} | Row Count | SELECT * FROM person |
-        | ${rowCount} | Row Count | SELECT * FROM person | sansTran=True |
+        | ${rowCount} | Row Count | SELECT * FROM person | no_transaction=True |
         | ${rowCount} | Row Count | SELECT * FROM person | alias=my_alias |
         | @{parameters} | Create List |  person |
         | ${rowCount} | Row Count | SELECT * FROM %s | parameters=${parameters} |
@@ -127,7 +147,7 @@ class Query:
         cur = None
         try:
             cur = db_connection.client.cursor()
-            self._execute_sql(cur, selectStatement, parameters=parameters)
+            self._execute_sql(cur, select_statement, parameters=parameters)
             data = cur.fetchall()
             col_names = [c[0] for c in cur.description]
             if db_connection.module_name in ["sqlite3", "ibm_db", "ibm_db_dbi", "pyodbc"]:
@@ -138,18 +158,22 @@ class Query:
             self._log_query_results(col_names, data)
             return current_row_count
         finally:
-            if cur and not sansTran:
+            if cur and not no_transaction:
                 db_connection.client.rollback()
 
+    @renamed_args(mapping={"selectStatement": "select_statement", "sansTran": "no_transaction"})
     def description(
         self,
-        selectStatement: str,
-        sansTran: bool = False,
+        select_statement: str,
+        no_transaction: bool = False,
         alias: Optional[str] = None,
         parameters: Optional[Tuple] = None,
+        *,
+        selectStatement: Optional[str] = None,
+        sansTran: Optional[bool] = None,
     ):
         """
-        Uses the input ``selectStatement`` to query a table in the db which will be used to determine the description.
+        Uses the input ``select_statement`` to query a table in the db which will be used to determine the description.
 
         For example, given we have a table `person` with the following data:
         | id | first_name  | last_name |
@@ -173,58 +197,81 @@ class Query:
         | @{parameters} | Create List |  person |
         | ${desc} | Description | SELECT * FROM %s | parameters=${parameters} |
 
-        Using optional `sansTran` to run command without an explicit transaction commit or rollback:
+        Using optional `no_transaction` to run command without an explicit transaction commit or rollback:
         | @{queryResults} | Description | SELECT * FROM person | True |
+
+        The old ``selectStatement`` and ``sansTran`` params duplicate new ``select_statement`` and ``no_transaction``.
+        The old naming is deprecated and will be removed in future versions.
         """
         db_connection = self.connection_store.get_connection(alias)
         cur = None
         try:
             cur = db_connection.client.cursor()
-            self._execute_sql(cur, selectStatement, parameters=parameters)
+            self._execute_sql(cur, select_statement, parameters=parameters)
             description = list(cur.description)
             if sys.version_info[0] < 3:
                 for row in range(0, len(description)):
                     description[row] = (description[row][0].encode("utf-8"),) + description[row][1:]
             return description
         finally:
-            if cur and not sansTran:
+            if cur and not no_transaction:
                 db_connection.client.rollback()
 
-    def delete_all_rows_from_table(self, tableName: str, sansTran: bool = False, alias: Optional[str] = None):
+    @renamed_args(mapping={"tableName": "table_name", "sansTran": "no_transaction"})
+    def delete_all_rows_from_table(
+        self,
+        table_name: str,
+        no_transaction: bool = False,
+        alias: Optional[str] = None,
+        *,
+        tableName: Optional[str] = None,
+        sansTran: Optional[bool] = None,
+    ):
         """
         Delete all the rows within a given table.
 
-        Use optional `sansTran` to run command without an explicit transaction commit or rollback.
+        Use optional `no_transaction` to run command without an explicit transaction commit or rollback.
 
         Use optional ``alias`` parameter to specify what connection should be used for the query if you have more
         than one connection open.
 
+        The old ``tableName`` and ``sansTran`` params duplicate new ``table_name`` and ``no_transaction``.
+        The old naming is deprecated and will be removed in future versions.
+
         Examples:
         | Delete All Rows From Table | person |
         | Delete All Rows From Table | person | alias=my_alias |
-        | Delete All Rows From Table | person | sansTran=True |
+        | Delete All Rows From Table | person | no_transaction=True |
         """
         db_connection = self.connection_store.get_connection(alias)
         cur = None
-        query = f"DELETE FROM {tableName}"
+        query = f"DELETE FROM {table_name}"
         try:
             cur = db_connection.client.cursor()
             result = self._execute_sql(cur, query)
             if result is not None:
-                if not sansTran:
+                if not no_transaction:
                     db_connection.client.commit()
                 return result
-            if not sansTran:
+            if not no_transaction:
                 db_connection.client.commit()
         finally:
-            if cur and not sansTran:
+            if cur and not no_transaction:
                 db_connection.client.rollback()
 
+    @renamed_args(mapping={"sqlScriptFileName": "script_path", "sansTran": "no_transaction"})
     def execute_sql_script(
-        self, sqlScriptFileName: str, sansTran: bool = False, alias: Optional[str] = None, split: bool = True
+        self,
+        script_path: str,
+        no_transaction: bool = False,
+        alias: Optional[str] = None,
+        split: bool = True,
+        *,
+        sqlScriptFileName: Optional[str] = None,
+        sansTran: Optional[bool] = None,
     ):
         """
-        Executes the content of the `sqlScriptFileName` as SQL commands. Useful for setting the database to a known
+        Executes the content of the SQL script with `script_path` provided as SQL commands. Useful for setting the database to a known
         state before running your tests, or clearing out your test data after running each a test.
 
         SQL commands are expected to be delimited by a semicolon (';') - they will be split and executed separately.
@@ -282,11 +329,14 @@ class Query:
         Use optional ``alias`` parameter to specify what connection should be used for the query if you have more
         than one connection open.
 
-        Use optional `sansTran` to run command without an explicit transaction commit or rollback:
+        The old ``sqlScriptFileName`` and ``sansTran`` params duplicate new ``script_path`` and ``no_transaction``.
+        The old naming is deprecated and will be removed in future versions.
+
+        Use optional `no_transaction` to run command without an explicit transaction commit or rollback:
         | Execute Sql Script | ${EXECDIR}${/}resources${/}DDL-setup.sql | True |
         """
         db_connection = self.connection_store.get_connection(alias)
-        with open(sqlScriptFileName, encoding="UTF-8") as sql_file:
+        with open(script_path, encoding="UTF-8") as sql_file:
             cur = None
             try:
                 cur = db_connection.client.cursor()
@@ -358,26 +408,37 @@ class Query:
                         line_ends_with_proc_end = re.compile(r"(\s|;)" + proc_end_pattern.pattern + "$")
                         omit_semicolon = not line_ends_with_proc_end.search(statement.lower())
                         self._execute_sql(cur, statement, omit_semicolon)
-                if not sansTran:
+                if not no_transaction:
                     db_connection.client.commit()
             finally:
-                if cur and not sansTran:
+                if cur and not no_transaction:
                     db_connection.client.rollback()
 
+    @renamed_args(
+        mapping={
+            "sqlString": "sql_string",
+            "sansTran": "no_transaction",
+            "omitTrailingSemicolon": "omit_trailing_semicolon",
+        }
+    )
     def execute_sql_string(
         self,
-        sqlString: str,
-        sansTran: bool = False,
+        sql_string: str,
+        no_transaction: bool = False,
         alias: Optional[str] = None,
         parameters: Optional[Tuple] = None,
+        omit_trailing_semicolon: Optional[bool] = None,
+        *,
+        sqlString: Optional[str] = None,
+        sansTran: Optional[bool] = None,
         omitTrailingSemicolon: Optional[bool] = None,
     ):
         """
-        Executes the ``sqlString`` as a single SQL command.
+        Executes the ``sql_string`` as a single SQL command.
 
-        Use optional ``sansTran`` to run command without an explicit transaction commit or rollback.
+        Use optional ``no_transaction`` to run command without an explicit transaction commit or rollback.
 
-        Use optional ``omitTrailingSemicolon`` parameter for explicit instruction,
+        Use optional ``omit_trailing_semicolon`` parameter for explicit instruction,
         if the trailing semicolon (;) at the SQL string end should be removed or not:
         - Some database modules (e.g. Oracle) throw an exception, if you leave a semicolon at the string end
         - However, there are exceptional cases, when you need it even for Oracle - e.g. at the end of a PL/SQL block.
@@ -389,11 +450,15 @@ class Query:
         Use optional ``parameters`` for query variable substitution (variable substitution syntax may be different
         depending on the database client).
 
+        The old ``sqlString``, ``sansTran`` and ``omitTrailingSemicolon`` params
+        duplicate new ``sql_string``, ``no_transaction`` and ``omitTrailingSemicolon``.
+        The old naming is deprecated and will be removed in future versions.
+
         For example:
         | Execute Sql String | DELETE FROM person_employee_table; DELETE FROM person_table |
         | Execute Sql String | DELETE FROM person_employee_table; DELETE FROM person_table | alias=my_alias |
-        | Execute Sql String | DELETE FROM person_employee_table; DELETE FROM person_table | sansTran=True |
-        | Execute Sql String | CREATE PROCEDURE proc AS BEGIN DBMS_OUTPUT.PUT_LINE('Hello!'); END; | omitTrailingSemicolon=False |
+        | Execute Sql String | DELETE FROM person_employee_table; DELETE FROM person_table | no_transaction=True |
+        | Execute Sql String | CREATE PROCEDURE proc AS BEGIN DBMS_OUTPUT.PUT_LINE('Hello!'); END; | omit_trailing_semicolon=False |
         | @{parameters} | Create List |  person_employee_table |
         | Execute Sql String | SELECT * FROM %s | parameters=${parameters} |
         """
@@ -401,23 +466,28 @@ class Query:
         cur = None
         try:
             cur = db_connection.client.cursor()
-            self._execute_sql(cur, sqlString, omit_trailing_semicolon=omitTrailingSemicolon, parameters=parameters)
-            if not sansTran:
+            self._execute_sql(cur, sql_string, omit_trailing_semicolon=omit_trailing_semicolon, parameters=parameters)
+            if not no_transaction:
                 db_connection.client.commit()
         finally:
-            if cur and not sansTran:
+            if cur and not no_transaction:
                 db_connection.client.rollback()
 
+    @renamed_args(mapping={"spName": "procedure_name", "spParams": "procedure_params", "sansTran": "no_transaction"})
     def call_stored_procedure(
         self,
-        spName: str,
-        spParams: Optional[List] = None,
-        sansTran: bool = False,
+        procedure_name: str,
+        procedure_params: Optional[List] = None,
+        no_transaction: bool = False,
         alias: Optional[str] = None,
         additional_output_params: Optional[List] = None,
+        *,
+        spName: Optional[str] = None,
+        spParams: Optional[List] = None,
+        sansTran: Optional[bool] = None,
     ):
         """
-        Calls a stored procedure `spName` with the `spParams` - a *list* of parameters the procedure requires.
+        Calls a stored procedure `procedure_name` with the `procedure_params` - a *list* of parameters the procedure requires.
         *Returns two lists* - the _parameter values_ and the _result sets_.
 
         Use the special *CURSOR* value for OUT params, which should receive result sets - relevant only for some databases (e.g. Oracle or PostgreSQL).
@@ -427,14 +497,18 @@ class Query:
         Use optional ``alias`` parameter to specify what connection should be used for the query if you have more
         than one connection open.
 
-        Use optional `sansTran` to run command without an explicit transaction commit or rollback.
+        Use optional `no_transaction` to run command without an explicit transaction commit or rollback.
+
+        The old ``spName``, ``spParams`` and ``sansTran`` params
+        duplicate new ``procedure_name``, ``procedure_params`` and ``no_transaction``.
+        The old naming is deprecated and will be removed in future versions.
 
         = Handling parameters and result sets =
         Handling the input and output parameters and the result sets is very different
         depending on the database itself and on the Python database driver - i.e. how it implements the `cursor.callproc()` function.
 
         == Common case (e.g. MySQL) ==
-        Generally a procedure call requires all parameter values (IN and OUT) put together in a list - `spParams`.
+        Generally a procedure call requires all parameter values (IN and OUT) put together in a list - `procedure_params`.
 
         Calling the procedure returns *two lists*:
         - *Param values* - the copy of procedure parameters (modified, if the procedure changes the OUT params). The list is empty, if procedures receives no params.
@@ -566,7 +640,7 @@ class Query:
         |     END
         | END;
 
-        Calling the procedure in Robot Framework requires putting the IN parameters as usual in the `spParams` argument,
+        Calling the procedure in Robot Framework requires putting the IN parameters as usual in the `procedure_params` argument,
         but the sample values of OUT parameters must be put in the argument `additional_output_params`.
 
         | @{params}=    Create List    give me 1
@@ -599,8 +673,8 @@ class Query:
         This case is *not fully supported* by the library - the OUT params won't be fetched.
         """
         db_connection = self.connection_store.get_connection(alias)
-        if spParams is None:
-            spParams = []
+        if procedure_params is None:
+            procedure_params = []
         if additional_output_params is None:
             additional_output_params = []
         cur = None
@@ -614,7 +688,7 @@ class Query:
             result_sets = []
 
             if db_connection.module_name == "pymysql":
-                cur.callproc(spName, spParams)
+                cur.callproc(procedure_name, procedure_params)
 
                 # first proceed the result sets if available
                 result_sets_available = True
@@ -626,35 +700,35 @@ class Query:
                 result_sets.pop()
 
                 # now go on with single values - modified input params
-                for i in range(0, len(spParams)):
-                    cur.execute(f"select @_{spName}_{i}")
+                for i in range(0, len(procedure_params)):
+                    cur.execute(f"select @_{procedure_name}_{i}")
                     param_values.append(cur.fetchall()[0][0])
 
             elif db_connection.module_name in ["oracledb", "cx_Oracle"]:
                 # check if "CURSOR" params were passed - they will be replaced
                 # with cursor variables for storing the result sets
-                params_substituted = spParams.copy()
+                params_substituted = procedure_params.copy()
                 cursor_params = []
-                for i in range(0, len(spParams)):
-                    if spParams[i] == "CURSOR":
+                for i in range(0, len(procedure_params)):
+                    if procedure_params[i] == "CURSOR":
                         cursor_param = db_connection.client.cursor()
                         params_substituted[i] = cursor_param
                         cursor_params.append(cursor_param)
-                param_values = cur.callproc(spName, params_substituted)
+                param_values = cur.callproc(procedure_name, params_substituted)
                 for result_set in cursor_params:
                     result_sets.append(list(result_set))
 
             elif db_connection.module_name in ["psycopg2", "psycopg3"]:
                 # check if "CURSOR" params were passed - they will be replaced
                 # with cursor variables for storing the result sets
-                params_substituted = spParams.copy()
+                params_substituted = procedure_params.copy()
                 cursor_params = []
-                for i in range(0, len(spParams)):
-                    if spParams[i] == "CURSOR":
+                for i in range(0, len(procedure_params)):
+                    if procedure_params[i] == "CURSOR":
                         cursor_param = f"CURSOR_{i}"
                         params_substituted[i] = cursor_param
                         cursor_params.append(cursor_param)
-                param_values = cur.callproc(spName, params_substituted)
+                param_values = cur.callproc(procedure_name, params_substituted)
                 if cursor_params:
                     for cursor_param in cursor_params:
                         cur.execute(f'FETCH ALL IN "{cursor_param}"')
@@ -673,9 +747,9 @@ class Query:
             else:
                 if db_connection.module_name == "pymssql":
                     mssql = importlib.import_module("pymssql")
-                    spParams = spParams.copy()
+                    procedure_params = procedure_params.copy()
                     for param in additional_output_params:
-                        spParams.append(mssql.output(type(param), param))
+                        procedure_params.append(mssql.output(type(param), param))
 
                 else:
                     logger.info(
@@ -683,7 +757,7 @@ class Query:
                         "No special handling is known, so trying the common way with return params and result sets."
                     )
 
-                param_values = cur.callproc(spName, spParams)
+                param_values = cur.callproc(procedure_name, procedure_params)
                 logger.info("Reading the procedure result sets..")
                 result_sets_available = True
                 while result_sets_available:
@@ -697,12 +771,12 @@ class Query:
                     else:
                         result_sets_available = False
 
-            if not sansTran:
+            if not no_transaction:
                 db_connection.client.commit()
 
             return param_values, result_sets
         finally:
-            if cur and not sansTran:
+            if cur and not no_transaction:
                 db_connection.client.rollback()
 
     def set_logging_query_results(self, enabled: Optional[bool] = None, log_head: Optional[int] = None):
