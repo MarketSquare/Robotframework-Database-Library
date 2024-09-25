@@ -230,11 +230,11 @@ class ConnectionManager:
                     msg += f"'{param_value}'"
                 else:
                     msg += f"{param_value}"
-            msg += ")"
             if dbPassword:
                 msg = msg.replace(f"'{dbPassword}'", "***")
             msg = self._hide_password_values(msg)
             msg = msg.replace("connect(, ", "connect(")
+            msg += ")"
             logger.info(msg)
 
         def _arg_or_config(arg_value, param_name, mandatory=False):
