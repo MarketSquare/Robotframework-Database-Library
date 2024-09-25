@@ -110,6 +110,10 @@ class DatabaseLibrary(ConnectionManager, Query, Assertion):
     The path to the config file is set by default to `./resources/db.cfg`.
     You can change it using an according parameter in the `Connect To Database` keyword.
 
+    A config file *must* contain at least one section name -
+    the connection alias, if used (see `Handling multiple database connections`), or
+    `[default]` if no aliases are used.
+
     == Config file examples ==
     === Config file with default alias (equal to using no aliases at all) ===
     | [default]
