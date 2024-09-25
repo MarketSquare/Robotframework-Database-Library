@@ -280,10 +280,9 @@ class ConnectionManager:
 
         if dbapiModuleName == "excel" or dbapiModuleName == "excelrw":
             db_api_module_name = "pyodbc"
-            db_api_2 = importlib.import_module("pyodbc")
         else:
             db_api_module_name = dbapiModuleName
-            db_api_2 = importlib.import_module(dbapiModuleName)
+        db_api_2 = importlib.import_module(db_api_module_name)
 
         if dbapiModuleName in ["MySQLdb", "pymysql"]:
             dbPort = dbPort or 3306
