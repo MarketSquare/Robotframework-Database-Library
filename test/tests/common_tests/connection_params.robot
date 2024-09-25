@@ -21,7 +21,7 @@ Test Teardown       Disconnect From Database
 ...    missing basic params=OperationalError: (1045, "Access denied*
 ...    invalid custom param=TypeError: __init__() got an unexpected keyword argument 'blah'
 &{Errors pyodbc}
-...    missing basic params=OperationalError: (20002, b'DB-Lib error message 20002, severity 9*
+...    missing basic params=REGEXP: InterfaceError.*Data source name not found and no default driver specified.*
 ...    invalid custom param=TypeError: connect() got an unexpected keyword argument 'blah'
 
 &{Errors}
@@ -46,6 +46,7 @@ All basic params, no config file
     ...    dbPassword=${DB_PASS}
     ...    dbHost=${DB_HOST}
     ...    dbPort=${DB_PORT}
+    ...    dbDriver=${DB_DRIVER}
 
 Missing basic params are accepted, error from Python DB module
     Run Keyword And Expect Error    
@@ -59,6 +60,7 @@ Custom params as keyword args - valid
     ...    dbName=${DB_NAME}    
     ...    dbHost=${DB_HOST}
     ...    dbPort=${DB_PORT}
+    ...    dbDriver=${DB_DRIVER}
     ...    user=${DB_USER}
     ...    password=${DB_PASS}
 
@@ -72,6 +74,7 @@ Custom params as keyword args - invalid, error from Python DB module
     ...    dbPort=${DB_PORT}
     ...    dbUsername=${DB_USER}
     ...    dbPassword=${DB_PASS}
+    ...    dbDriver=${DB_DRIVER}
     ...    blah=blah
 
 All basic params in config file
@@ -132,6 +135,7 @@ MSSQL / MySQL / PyODBC specific - charset as keyword argument
     ...    dbPassword=${DB_PASS}
     ...    dbHost=${DB_HOST}
     ...    dbPort=${DB_PORT}
+    ...    dbDriver=${DB_DRIVER}
     ...    dbCharset=LATIN1
 
 MSSQL / PyODBC specific - charset in config file - invalid
