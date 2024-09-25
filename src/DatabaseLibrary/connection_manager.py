@@ -201,9 +201,9 @@ class ConnectionManager:
         - _thick,lib_dir=<PATH_TO_ORACLE_CLIENT>_
 
         Examples
-        | Connect To Database | psycopg2 | my_db | postgres | s3cr3t | tiger.foobar.com | 5432 |
-        | Connect To Database | psycopg2 | my_db | postgres | s3cr3t | tiger.foobar.com | 5432 | my_custom_param=value |
-        | Connect To Database | psycopg2 | my_db | postgres | s3cr3t | tiger.foobar.com | 5432 | alias=my_alias |
+        | Connect To Database | psycopg2 | my_db | user | pass | tiger.foobar.com | 5432 |
+        | Connect To Database | psycopg2 | my_db | user | pass | tiger.foobar.com | 5432 | my_custom_param=value |
+        | Connect To Database | psycopg2 | my_db | user | pass | tiger.foobar.com | 5432 | alias=my_alias |
         | Connect To Database | dbConfigFile=my_db_params.cfg |
         """
         config = ConfigReader(dbConfigFile, alias)
