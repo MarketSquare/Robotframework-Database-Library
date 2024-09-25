@@ -182,7 +182,7 @@ class ConnectionManager:
         See `Using configuration file` for more details.
 
         All params are optional, although ``dbapiModuleName`` must be set - either as keyword argument or in config file.
-        If some of the listed keyword arguments (`dbName`, `dbHost` etc.) are not provided (i.e. left on dafault value `None`),
+        If some of the listed keyword arguments (`dbName`, `dbHost` etc.) are not provided (i.e. left on default value `None`),
         they are normally not passed to the Python DB module at all, except:
         - _dbPort_ - commonly used port number for known databases is set as fallback
         - _dbCharset_ - _UTF8_ is used as fallback for _pymysql_, _pymssql_ and _pyodbc_
