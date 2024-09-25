@@ -337,7 +337,7 @@ class ConnectionManager:
             elif dbapiModuleName == "excelrw":
                 con_str += "0;"
             con_str += 'Extended Properties="Excel 8.0;HDR=YES";)'
-            logger.info(f"Connecting using : {dbapiModuleName}.connect({con_str}, autocommit=True)")
+            logger.info(f"Connecting using : {db_api_module_name}.connect({con_str}, autocommit=True)")
             db_connection = db_api_2.connect(con_str, autocommit=True)
 
         elif dbapiModuleName in ["ibm_db", "ibm_db_dbi"]:
