@@ -134,10 +134,16 @@ MSSQL / MySQL / PyODBC specific - charset as keyword argument
     ...    dbPort=${DB_PORT}
     ...    dbCharset=LATIN1
 
-MSSQL / MySQL / PyODBC specific - charset in config file - invalid
-    Skip If    $DB_MODULE not in ["pymssql", "pymysql", "pyodbc"]
+MSSQL / PyODBC specific - charset in config file - invalid
+    Skip If    $DB_MODULE not in ["pymssql", "pyodbc"]
     Run Keyword And Expect Error    OperationalError: (20002, b'Unknown error')
     ...    Connect Using Config File    ${DB_MODULE}/charset_invalid
+
+MySQL specific - charset in config file - invalid
+    Skip If    $DB_MODULE not in ["pymysql"]
+    Run Keyword And Expect Error    AttributeError: 'NoneType' object has no attribute 'encoding''
+    ...    Connect Using Config File    ${DB_MODULE}/charset_invalid
+
 
 SQlite specific - connection params as custom keyword args
     [Setup]    Skip If    $DB_MODULE != "sqlite3"
