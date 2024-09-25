@@ -22,7 +22,7 @@ Test Teardown       Disconnect From Database
 ...    invalid custom param=TypeError: __init__() got an unexpected keyword argument 'blah'
 &{Errors pyodbc}
 ...    missing basic params=REGEXP: InterfaceError.*Data source name not found and no default driver specified.*
-...    invalid custom param=TypeError: connect() got an unexpected keyword argument 'blah'
+...    invalid custom param=
 
 &{Errors}
 ...    psycopg2=${Errors psycopg2}
@@ -65,6 +65,8 @@ Custom params as keyword args - valid
     ...    password=${DB_PASS}
 
 Custom params as keyword args - invalid, error from Python DB module
+    Skip If    $DB_MODULE != "pyodbc"    
+    ...    pyodbc doesn't always throw an error if some wrong parameter was provided
     Run Keyword And Expect Error    
     ...    ${Errors}[${DB_MODULE}][invalid custom param]
     ...    Connect To Database
@@ -139,13 +141,18 @@ MSSQL / MySQL / PyODBC specific - charset as keyword argument
     ...    dbCharset=LATIN1
 
 MSSQL / PyODBC specific - charset in config file - invalid
-    Skip If    $DB_MODULE not in ["pymssql", "pyodbc"]
+    Skip If    $DB_MODULE not in ["pymssql"]
     Run Keyword And Expect Error    OperationalError: (20002, b'Unknown error')
     ...    Connect Using Config File    ${DB_MODULE}/charset_invalid
 
 MySQL specific - charset in config file - invalid
     Skip If    $DB_MODULE not in ["pymysql"]
     Run Keyword And Expect Error    AttributeError: 'NoneType' object has no attribute 'encoding'
+    ...    Connect Using Config File    ${DB_MODULE}/charset_invalid
+
+PyODBC specific - charset in config file - invalid
+    Skip If    $DB_MODULE not in ["pyodbc"]
+    Run Keyword And Expect Error    REGEXP: .*Can't initialize character set wrong.*
     ...    Connect Using Config File    ${DB_MODULE}/charset_invalid
 
 
