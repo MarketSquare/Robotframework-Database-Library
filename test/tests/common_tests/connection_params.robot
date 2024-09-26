@@ -81,6 +81,9 @@ Custom params as keyword args - invalid, error from Python DB module
 All basic params in config file
     Connect Using Config File    ${DB_MODULE}/simple_default_alias
 
+Deprecated basic params in config file
+    Connect Using Config File    ${DB_MODULE}/old_param_names
+
 Missing basic params in config file are accepted, error from Python DB module
     Run Keyword And Expect Error    
     ...    ${Errors}[${DB_MODULE}][missing basic params]

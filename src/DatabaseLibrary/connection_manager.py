@@ -274,8 +274,15 @@ class ConnectionManager:
             msg += ")"
             logger.info(msg)
 
-        def _arg_or_config(arg_value, param_name, mandatory=False):
+        def _arg_or_config(arg_value, param_name, *, old_param_name=None, mandatory=False):
             val_from_config = config.pop(param_name)
+
+            # support deprecated old param names
+            if val_from_config is None and old_param_name is not None:
+                val_from_config = config.pop(old_param_name)
+                if val_from_config is not None:
+                    logger.warn(f"Config file: argument '{old_param_name}' is deprecated, use '{param_name}' instead")
+
             if arg_value is not None:
                 final_value = arg_value
                 if val_from_config is not None:
@@ -293,18 +300,18 @@ class ConnectionManager:
             return final_value
 
         # mandatory parameter
-        db_module = _arg_or_config(db_module, "db_module", mandatory=True)
+        db_module = _arg_or_config(db_module, "db_module", mandatory=True, old_param_name="dbapiModuleName")
         # optional named params - named because of custom module specific handling
-        db_name = _arg_or_config(db_name, "db_name")
-        db_user = _arg_or_config(db_user, "db_user")
-        db_password = _arg_or_config(db_password, "db_password")
-        db_host = _arg_or_config(db_host, "db_host")
-        db_port = _arg_or_config(db_port, "db_port")
+        db_name = _arg_or_config(db_name, "db_name", old_param_name="dbName")
+        db_user = _arg_or_config(db_user, "db_user", old_param_name="dbUsername")
+        db_password = _arg_or_config(db_password, "db_password", old_param_name="dbPassword")
+        db_host = _arg_or_config(db_host, "db_host", old_param_name="dbHost")
+        db_port = _arg_or_config(db_port, "db_port", old_param_name="dbPort")
         if db_port is not None:
             db_port = int(db_port)
-        db_charset = _arg_or_config(db_charset, "db_charset")
-        odbc_driver = _arg_or_config(odbc_driver, "odbc_driver")
-        oracle_driver_mode = _arg_or_config(oracle_driver_mode, "oracle_driver_mode")
+        db_charset = _arg_or_config(db_charset, "db_charset", old_param_name="dbCharset")
+        odbc_driver = _arg_or_config(odbc_driver, "odbc_driver", old_param_name="dbDriver")
+        oracle_driver_mode = _arg_or_config(oracle_driver_mode, "oracle_driver_mode", old_param_name="driverMode")
 
         for param_name, param_value in custom_connection_params.items():
             _arg_or_config(param_value, param_name)

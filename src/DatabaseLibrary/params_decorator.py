@@ -22,7 +22,7 @@ def renamed_args(mapping):
             for old_name, new_name in mapping.items():
                 if old_name in kwargs:
                     # Issue a warning to the user
-                    logger.warn(f"The argument '{old_name}' is deprecated, use '{new_name}' instead.")
+                    logger.warn(f"Argument '{old_name}' is deprecated, use '{new_name}' instead")
                     # Move the argument value to the new name
                     logger.info(f"Replacing '{old_name}' with '{new_name}'")
                     kwargs[new_name] = kwargs.pop(old_name)
