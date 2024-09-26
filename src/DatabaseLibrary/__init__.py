@@ -39,8 +39,7 @@ class DatabaseLibrary(ConnectionManager, Query, Assertion):
     | pip install robotframework-databaselibrary
     Don't forget to install the required Python database module!
 
-    = Usage example =
-    == Basic usage ==
+    = Basic usage examples =
     | *** Settings ***
     | Library       DatabaseLibrary
     | Test Setup    Connect To My Oracle DB
@@ -56,19 +55,28 @@ class DatabaseLibrary(ConnectionManager, Query, Assertion):
     |     ...    db_port=1521
     |
     | *** Test Cases ***
+    | Get All First Names
+    |     ${Results}=    Query    select FIRST_NAME from person
+    |
     | Person Table Contains Expected Records
-    |     ${output}=    Query    select LAST_NAME from person
-    |     Length Should Be    ${output}    2
-    |     Should Be Equal    ${output}[0][0]    See
-    |     Should Be Equal    ${output}[1][0]    Schneider
+    |     ${sql}=    Catenate    select LAST_NAME from person
+    |     Check Query Result    ${sql}    contains    See
+    |     Check Query Result    ${sql}    equals      Schneider    row=1
+    |
+    | Wait Until Table Gets New Record
+    |     ${sql}=    Catenate    select LAST_NAME from person
+    |     Check Row Count    ${sql}    >    2    retry_timeout=5s
     |
     | Person Table Contains No Joe
     |     ${sql}=    Catenate    SELECT id FROM person
     |     ...                    WHERE FIRST_NAME= 'Joe'
-    |     Check If Not Exists In Database    ${sql}
+    |     Check Row Count    ${sql}   ==    0
     |
 
-    == Handling multiple database connections ==
+    = Handling multiple database connections =
+    The library can handle multiple connections to different databases using *aliases*.
+    An alias is set while creating a connection and can be passed to library keywords in a corresponding argument.
+    == Example ==
     | *** Settings ***
     | Library          DatabaseLibrary
     | Test Setup       Connect To All Databases
@@ -76,9 +84,21 @@ class DatabaseLibrary(ConnectionManager, Query, Assertion):
     |
     | *** Keywords ***
     | Connect To All Databases
-    |     Connect To Database    psycopg2    db    db_user    pass    127.0.0.1    5432
+    |     Connect To Database
+    |     ...    psycopg2
+    |     ...    db_name=db
+    |     ...    db_user=db_user
+    |     ...    db_password=pass
+    |     ...    db_host=127.0.0.1
+    |     ...    db_port=5432
     |     ...    alias=postgres
-    |     Connect To Database    pymysql    db    db_user    pass    127.0.0.1    3306
+    |     Connect To Database
+    |     ...    pymysql
+    |     ...    db_name=db
+    |     ...    db_user=db_user
+    |     ...    db_password=pass
+    |     ...    db_host=127.0.0.1
+    |     ...    db_port=3306
     |     ...    alias=mysql
     |
     | *** Test Cases ***
@@ -188,13 +208,55 @@ class DatabaseLibrary(ConnectionManager, Query, Assertion):
     | # Logging of query results is enabled (default), log head limit is disabled (log all rows).
     | Library    DatabaseLibrary    log_query_results_head=0
 
+    = Commit behavior =
+    While creating a database connection, the library doesn't explicitly set the _autocommit_ behavior -
+    so the default value of the Python DB module is used.
+    According to Python DB API specification it should be disabled by default -
+    which means each SQL transaction must contain a dedicated commit statement, if necessary.
+
+    The library manages it for you:
+    - Keywords like `Execute SQL String` perform automatically a commit after running the query - or a rollback in case of error
+    - Keywords like `Query` don't perform a commit, but also do a rollback in case of error
+
+    You can turn off this automatic commit/rollback behavior using the ``no_transaction`` parameter.
+    See docs of a particular keyword.
+
+    It's also possible to explicitly set the _autocommit_ behavior on the Python DB module level -
+    using the `Set Auto Commit` keyword.
+
     = Database modules compatibility =
     The library is basically compatible with any [https://peps.python.org/pep-0249|Python Database API Specification 2.0] module.
 
     However, the actual implementation in existing Python modules is sometimes quite different, which requires custom handling in the library.
     Therefore, there are some modules, which are "natively" supported in the library - and others, which may work and may not.
 
-    See more on the [https://github.com/MarketSquare/Robotframework-Database-Library|project page on GitHub].
+    == Python modules currently "natively" supported ==
+    === Oracle ===
+    [https://oracle.github.io/python-oracledb/|oracledb]
+    - Both thick and thin client modes are supported - you can select one using the `oracle_driver_mode` parameter.
+    - However, due to current limitations of the oracledb module, **it's not possible to switch between thick and thin modes during a test execution session** - even in different suites.
+
+    [https://oracle.github.io/python-cx_Oracle/|cx_Oracle]
+
+    === MySQL ===
+    - [https://github.com/PyMySQL/PyMySQL|pymysql]
+    - [https://mysqlclient.readthedocs.io/index.html|MySQLdb]
+    === PostgreSQL ===
+    - [https://www.psycopg.org/docs/|psycopg2]
+    === MS SQL Server ===
+    - [https://github.com/pymssql/pymssql|pymssql]
+    === SQLite ===
+    - [https://docs.python.org/3/library/sqlite3.html|sqlite3]
+    === Teradata ===
+    - [https://github.com/teradata/PyTd|teradata]
+    === IBM DB2 ===
+    - [https://github.com/ibmdb/python-ibmdb|ibm_db]
+    - [https://github.com/ibmdb/python-ibmdb|ibm_db_dbi]
+    === ODBC ===
+    - [https://github.com/mkleehammer/pyodbc|pyodbc]
+    - [https://github.com/pypyodbc/pypyodbc|pypyodbc]
+    === Kingbase ===
+    - ksycopg2
     """
 
     ROBOT_LIBRARY_SCOPE = "GLOBAL"

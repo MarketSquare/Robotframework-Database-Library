@@ -50,7 +50,7 @@ class Assertion:
         Use optional ``alias`` parameter to specify what connection should be used for the query if you have more
         than one connection open.
 
-        Use optional ``parameters`` for query variable substitution (variable substitution syntax may be different
+        Use ``parameters`` for query variable substitution (variable substitution syntax may be different
         depending on the database client).
 
         Examples:
@@ -90,7 +90,7 @@ class Assertion:
         Use optional ``alias`` parameter to specify what connection should be used for the query if you have more
         than one connection open.
 
-        Use optional ``parameters`` for query variable substitution (variable substitution syntax may be different
+        Use ``parameters`` for query variable substitution (variable substitution syntax may be different
         depending on the database client).
 
         Examples:
@@ -130,7 +130,7 @@ class Assertion:
         Use optional ``alias`` parameter to specify what connection should be used for the query if you have more
         than one connection open.
 
-        Use optional ``parameters`` for query variable substitution (variable substitution syntax may be different
+        Use ``parameters`` for query variable substitution (variable substitution syntax may be different
         depending on the database client).
 
         Examples:
@@ -168,7 +168,7 @@ class Assertion:
         Use optional ``alias`` parameter to specify what connection should be used for the query if you have more
         than one connection open.
 
-        Use optional ``parameters`` for query variable substitution (variable substitution syntax may be different
+        Use ``parameters`` for query variable substitution (variable substitution syntax may be different
         depending on the database client).
 
         Examples:
@@ -208,7 +208,7 @@ class Assertion:
         Use optional ``alias`` parameter to specify what connection should be used for the query if you have more
         than one connection open.
 
-        Use optional ``parameters`` for query variable substitution (variable substitution syntax may be different
+        Use ``parameters`` for query variable substitution (variable substitution syntax may be different
         depending on the database client).
 
         Examples:
@@ -248,7 +248,7 @@ class Assertion:
         Use optional ``alias`` parameter to specify what connection should be used for the query if you have more
         than one connection open.
 
-        Use optional ``parameters`` for query variable substitution (variable substitution syntax may be different
+        Use ``parameters`` for query variable substitution (variable substitution syntax may be different
         depending on the database client).
 
         Examples:
@@ -287,10 +287,10 @@ class Assertion:
 
         Use ``assertion_message`` to override the default error message.
 
-        Set ``no_transaction`` to _True_ to run command without an explicit transaction commit or rollback.
+        Set ``no_transaction`` to _True_ to run command without explicit transaction rollback in case of error.
+        See `Commit behavior` for details.
 
-        Use ``alias`` to specify what connection should be used for the query if you have more
-        than one connection open.
+        Use ``alias`` to specify what connection should be used if `Handling multiple database connections`.
 
         Use ``parameters`` for query variable substitution (variable substitution syntax may be different
         depending on the database client).
@@ -298,10 +298,13 @@ class Assertion:
         Use ``retry_timeout`` and ``retry_pause`` parameters to enable waiting for assertion to pass.
         See `Retry mechanism` for more details.
 
-        The old ``selectStatement`` and ``sansTran`` params duplicate new ``select_statement`` and ``no_transaction``.
-        The old naming is deprecated and will be removed in future versions.
+        === Some parameters were renamed in version 2.0 ===
+        The old parameters ``selectStatement`` and ``sansTran`` are *deprecated*,
+        please use new parameters ``select_statement`` and ``no_transaction`` instead.
 
-        Examples:
+        *The old parameters will be removed in future versions.*
+
+        === Examples ===
         | Check Row Count | SELECT id FROM person WHERE first_name = 'John' | *==* | 1 |
         | Check Row Count | SELECT id FROM person WHERE first_name = 'John' | *>=* | 2 | assertion_message=my error message |
         | Check Row Count | SELECT id FROM person WHERE first_name = 'John' | *inequal* | 3 | alias=my_alias |
@@ -354,21 +357,24 @@ class Assertion:
 
         Use optional ``assertion_message`` to override the default error message.
 
-        Set optional input ``no_transaction`` to _True_ to run command without an explicit transaction commit or rollback.
+        Set ``no_transaction`` to _True_ to run command without explicit transaction rollback in case of error.
+        See `Commit behavior` for details.
 
-        Use optional ``alias`` parameter to specify what connection should be used for the query if you have more
-        than one connection open.
+        Use ``alias`` to specify what connection should be used if `Handling multiple database connections`.
 
-        Use optional ``parameters`` for query variable substitution (variable substitution syntax may be different
+        Use ``parameters`` for query variable substitution (variable substitution syntax may be different
         depending on the database client).
 
         Use ``retry_timeout`` and ``retry_pause`` parameters to enable waiting for assertion to pass.
         See `Retry mechanism` for more details.
 
-        The old ``selectStatement`` and ``sansTran`` params duplicate new ``select_statement`` and ``no_transaction``.
-        The old naming is deprecated and will be removed in future versions.
+        === Some parameters were renamed in version 2.0 ===
+        The old parameters ``selectStatement`` and ``sansTran`` are *deprecated*,
+        please use new parameters ``select_statement`` and ``no_transaction`` instead.
 
-        Examples:
+        *The old parameters will be removed in future versions.*
+
+        === Examples ===
         | Check Query Result | SELECT first_name FROM person | *contains* | Allan |
         | Check Query Result | SELECT first_name, last_name FROM person | *==* | Schneider | row=1 | col=1 |
         | Check Query Result | SELECT id FROM person WHERE first_name = 'John' | *==* | 2 | # Fails, if query returns an integer value |
@@ -418,20 +424,22 @@ class Assertion:
         sansTran: Optional[bool] = None,
     ):
         """
-        Check if the given table exists in the database.
+        Check if the table with `table_name` exists in the database.
 
-        Set optional input ``no_transaction`` to True to run command without an
-        explicit transaction commit or rollback.
+        Use ``msg`` for custom error message.
 
-        The default error message can be overridden with the ``msg`` argument.
+        Set ``no_transaction`` to _True_ to run command without explicit transaction rollback in case of error.
+        See `Commit behavior` for details.
 
-        Use optional ``alias`` parameter to specify what connection should be used for the query if you have more
-        than one connection open.
+        Use ``alias`` to specify what connection should be used if `Handling multiple database connections`.
 
-        The old ``tableName`` and ``sansTran`` params duplicate new ``table_name`` and ``no_transaction``.
-        The old naming is deprecated and will be removed in future versions.
+        === Some parameters were renamed in version 2.0 ===
+        The old parameters ``tableName`` and ``sansTran`` are *deprecated*,
+        please use new parameters ``table_name`` and ``no_transaction`` instead.
 
-        Examples:
+        *The old parameters will be removed in future versions.*
+
+        === Examples ===
         | Table Must Exist | person |
         | Table Must Exist | person | msg=my error message |
         | Table Must Exist | person | alias=my_alias |

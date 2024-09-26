@@ -188,7 +188,7 @@ class ConnectionManager:
         **custom_connection_params,
     ):
         """
-        Creates a database connection using the DB API 2.0 module ``db_module`` and the parameters provided.
+        Creates a database connection using the DB API 2.0 ``db_module`` and the parameters provided.
         Along with listed commonly used arguments (`db_name`, `db_host` etc.)
         you can set any other DB module specific parameters as key/value pairs.
 
@@ -208,8 +208,8 @@ class ConnectionManager:
         normally as arguments for the _connect()_ function. However, when using *pyodbc*, the connection is established
         using a connection string - so all the custom params are added into it instead of function arguments.
 
-        Optional ``alias`` parameter can be used for creating multiple open connections, even for different databases.
-        If the same alias is given twice then previous connection will be overridden.
+        Set ``alias`` for `Handling multiple database connections`.
+        If the same alias is given twice, then previous connection will be overridden.
 
         The ``oracle_driver_mode`` is used to select the *oracledb* client mode.
         Allowed values are:
@@ -217,13 +217,17 @@ class ConnectionManager:
         - _thick_
         - _thick,lib_dir=<PATH_TO_ORACLE_CLIENT>_
 
-        The following old parameters duplicate the new ones:
-        ``dbapiModuleName``:``db_module``, ``dbName``:``db_name``, ``dbUsername``:``db_user``, ``dbPassword``:``db_password``,
-        ``dbHost``:``db_host``, ``dbPort``:``db_port``, ``dbCharset``:``db_charset``, ``dbDriver``:``odbc_driver``,
-        ``dbConfigFile``:``config_file``, ``driverMode``:``oracle_driver_mode``.
-        The old naming is deprecated and will be removed in future versions.
+        === Some parameters were renamed in version 2.0 ===
+        The old parameters ``dbapiModuleName``, ``dbName``, ``dbUsername``,
+        ``dbPassword``, ``dbHost``, ``dbPort``, ``dbCharset``, ``dbDriver``,
+        ``dbConfigFile`` and ``driverMode`` are *deprecated*,
+        please use new parameters ``db_module``, ``db_name``, ``db_user``,
+        ``db_password``, ``db_host``, ``db_port``, ``db_charset``, ``odbc_driver``,
+        ``config_file`` and ``oracle_driver_mode`` instead.
 
-        Examples
+        *The old parameters will be removed in future versions.*
+
+        === Examples ===
         | Connect To Database | psycopg2 | my_db | user | pass | tiger.foobar.com | 5432 |
         | Connect To Database | psycopg2 | my_db | user | pass | tiger.foobar.com | 5432 | my_custom_param=value |
         | Connect To Database | psycopg2 | my_db | user | pass | tiger.foobar.com | 5432 | alias=my_alias |
@@ -474,17 +478,20 @@ class ConnectionManager:
         *DEPRECATED* Use new `Connect To Database` keyword with custom parameters instead.
         The deprecated keyword will be removed in future versions.
 
-        Loads the DB API 2.0 module given `db_module` then uses it to
-        connect to the database using the map string `db_connect_string`
+        Loads the DB API 2.0 module given ``db_module`` then uses it to
+        connect to the database using the map string ``db_connect_string``
         (parsed as a list of named arguments).
 
         Use `connect_to_database_using_custom_connection_string` for passing
         all params in a single connection string or URI.
 
-        The old ``dbapiModuleName`` param duplicates new ``db_module``.
-        The old naming is deprecated and will be removed in future versions.
+        === Some parameters were renamed in version 2.0 ===
+        The old parameter ``dbapiModuleName`` is *deprecated*,
+        please use new parameter ``db_module`` instead.
 
-        Example usage:
+        *The old parameter will be removed in future versions.*
+
+        === Examples ===
         | Connect To Database Using Custom Params | psycopg2 | database='my_db_test', user='postgres', password='s3cr3t', host='tiger.foobar.com', port=5432 |
         | Connect To Database Using Custom Params | jaydebeapi | 'oracle.jdbc.driver.OracleDriver', 'my_db_test', 'system', 's3cr3t' |
         | Connect To Database Using Custom Params | oracledb | user="username", password="pass", dsn="localhost/orclpdb" |
@@ -511,15 +518,17 @@ class ConnectionManager:
         dbapiModuleName: Optional[str] = None,
     ):
         """
-        Loads the DB API 2.0 module given `db_module` then uses it to
-        connect to the database using the `db_connect_string`
+        Loads the DB API 2.0 module given ``db_module`` then uses it to
+        connect to the database using the ``db_connect_string``
         (parsed as single connection string or URI).
 
-        Use `connect_to_database_using_custom_params` for passing
-        connection params as named arguments.
+        Use `Connect To Database` for passing custom connection params as named arguments.
 
-        The old ``dbapiModuleName`` param duplicates new ``db_module``.
-        The old naming is deprecated and will be removed in future versions.
+        === Some parameters were renamed in version 2.0 ===
+        The old parameter ``dbapiModuleName`` is *deprecated*,
+        please use new parameter ``db_module`` instead.
+
+        *The old parameter will be removed in future versions.*
 
         Example usage:
         | Connect To Database Using Custom Connection String | psycopg2 | postgresql://postgres:s3cr3t@tiger.foobar.com:5432/my_db_test |
@@ -540,11 +549,13 @@ class ConnectionManager:
 
         By default, it's not an error if there was no open database connection -
         suitable for usage as a teardown.
-        However, you can enforce it using the `error_if_no_connection` parameter.
+        However, you can enforce it using the ``error_if_no_connection`` parameter.
 
-        Example usage:
-        | Disconnect From Database | # disconnects from current connection to the database |
-        | Disconnect From Database | alias=my_alias | # disconnects from current connection to the database |
+        Use ``alias`` to specify what connection should be closed if `Handling multiple database connections`.
+
+        === Examples ===
+        | Disconnect From Database |
+        | Disconnect From Database | alias=postgres |
         """
         db_connection = self.connection_store.pop_connection(alias)
         if db_connection is None:
@@ -559,33 +570,34 @@ class ConnectionManager:
         """
         Disconnects from all the databases -
         useful when testing with multiple database connections (aliases).
-
-        For example:
-        | Disconnect From All Databases | # Closes connections to all databases |
         """
         for db_connection in self.connection_store:
             db_connection.client.close()
         self.connection_store.clear()
 
-    def set_auto_commit(self, autoCommit: bool = True, alias: Optional[str] = None):
+    @renamed_args(mapping={"autoCommit": "auto_commit"})
+    def set_auto_commit(
+        self, auto_commit: bool = True, alias: Optional[str] = None, *, autoCommit: Optional[bool] = None
+    ):
         """
-        Turn the autocommit on the database connection ON or OFF.
+        Explicitly sets the autocommit behavior of the database connection to ``auto_commit``.
+        See `Commit behavior` for details.
 
-        The default behaviour on a newly created database connection is to automatically start a
-        transaction, which means that database actions that won't work if there is an active
-        transaction will fail. Common examples of these actions are creating or deleting a database
-        or database snapshot. By turning on auto commit on the database connection these actions
-        can be performed.
+        Use ``alias`` to specify what connection should be used if `Handling multiple database connections`.
 
-        Example usage:
-        | # Default behaviour, sets auto commit to true
+        === Some parameters were renamed in version 2.0 ===
+        The old parameter ``autoCommit`` is *deprecated*,
+        please use new parameter ``auto_commit`` instead.
+
+        *The old parameter will be removed in future versions.*
+
+        === Examples ===
         | Set Auto Commit
-        | Set Auto Commit | alias=my_alias |
-        | # Explicitly set the desired state
-        | Set Auto Commit | False
+        | Set Auto Commit | False |
+        | Set Auto Commit | True  | alias=postgres |
         """
         db_connection = self.connection_store.get_connection(alias)
-        db_connection.client.autocommit = autoCommit
+        db_connection.client.autocommit = auto_commit
 
     def switch_database(self, alias: str):
         """
