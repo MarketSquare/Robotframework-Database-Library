@@ -20,7 +20,7 @@ from typing import Any, Dict, Optional
 
 from robot.api import logger
 
-from .params_decorator import deprecated_positional_args, renamed_args
+from .params_decorator import renamed_args
 
 
 @dataclass
@@ -172,7 +172,6 @@ class ConnectionManager:
             "driverMode": "oracle_driver_mode",
         }
     )
-    @deprecated_positional_args(1)
     def connect_to_database(
         self,
         db_module: Optional[str] = None,
@@ -186,17 +185,6 @@ class ConnectionManager:
         config_file: Optional[str] = None,
         oracle_driver_mode: Optional[str] = None,
         alias: str = "default",
-        *,
-        dbapiModuleName: Optional[str] = None,
-        dbName: Optional[str] = None,
-        dbUsername: Optional[str] = None,
-        dbPassword: Optional[str] = None,
-        dbHost: Optional[str] = None,
-        dbPort: Optional[int] = None,
-        dbCharset: Optional[str] = None,
-        dbDriver: Optional[str] = None,
-        dbConfigFile: Optional[str] = None,
-        driverMode: Optional[str] = None,
         **custom_connection_params,
     ):
         """
@@ -514,7 +502,6 @@ class ConnectionManager:
         self.connection_store.register_connection(db_connection, db_api_module_name, alias)
 
     @renamed_args(mapping={"dbapiModuleName": "db_module"})
-    @deprecated_positional_args(2)
     def connect_to_database_using_custom_connection_string(
         self,
         db_module: Optional[str] = None,
@@ -547,7 +534,6 @@ class ConnectionManager:
         db_connection = db_api_2.connect(db_connect_string)
         self.connection_store.register_connection(db_connection, db_api_module_name, alias)
 
-    @deprecated_positional_args(0)
     def disconnect_from_database(self, error_if_no_connection: bool = False, alias: Optional[str] = None):
         """
         Disconnects from the database.
@@ -581,11 +567,7 @@ class ConnectionManager:
             db_connection.client.close()
         self.connection_store.clear()
 
-    @renamed_args(mapping={"autoCommit": "auto_commit"})
-    @deprecated_positional_args(1)
-    def set_auto_commit(
-        self, auto_commit: bool = True, alias: Optional[str] = None, *, autoCommit: Optional[bool] = None
-    ):
+    def set_auto_commit(self, autoCommit: bool = True, alias: Optional[str] = None):
         """
         Turn the autocommit on the database connection ON or OFF.
 
@@ -595,9 +577,6 @@ class ConnectionManager:
         or database snapshot. By turning on auto commit on the database connection these actions
         can be performed.
 
-        The old ``autoCommit`` param duplicates new ``auto_commit``.
-        The old naming is deprecated and will be removed in future versions.
-
         Example usage:
         | # Default behaviour, sets auto commit to true
         | Set Auto Commit
@@ -606,7 +585,7 @@ class ConnectionManager:
         | Set Auto Commit | False
         """
         db_connection = self.connection_store.get_connection(alias)
-        db_connection.client.autocommit = auto_commit
+        db_connection.client.autocommit = autoCommit
 
     def switch_database(self, alias: str):
         """

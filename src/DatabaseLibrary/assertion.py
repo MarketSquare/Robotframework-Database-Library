@@ -18,7 +18,7 @@ from robot.api import logger
 from robot.libraries.BuiltIn import BuiltIn
 from robot.utils import timestr_to_secs
 
-from .params_decorator import deprecated_positional_args, renamed_args
+from .params_decorator import renamed_args
 
 
 class Assertion:
@@ -266,7 +266,6 @@ class Assertion:
             )
 
     @renamed_args(mapping={"selectStatement": "select_statement", "sansTran": "no_transaction"})
-    @deprecated_positional_args(4)
     def check_row_count(
         self,
         select_statement: str,
@@ -327,7 +326,6 @@ class Assertion:
                 time_counter += timestr_to_secs(retry_pause)
 
     @renamed_args(mapping={"selectStatement": "select_statement", "sansTran": "no_transaction"})
-    @deprecated_positional_args(3)
     def check_query_result(
         self,
         select_statement: str,
@@ -409,7 +407,6 @@ class Assertion:
                 time_counter += timestr_to_secs(retry_pause)
 
     @renamed_args(mapping={"tableName": "table_name", "sansTran": "no_transaction"})
-    @deprecated_positional_args(1)
     def table_must_exist(
         self,
         table_name: str,
