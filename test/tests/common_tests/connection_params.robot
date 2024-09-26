@@ -34,12 +34,12 @@ Test Teardown       Disconnect From Database
 *** Test Cases ***
 Mandatory params can't be missing
     Run Keyword And Expect Error    
-    ...    ValueError: Required parameter 'python_module' was not provided*
+    ...    ValueError: Required parameter 'db_module' was not provided*
     ...    Connect To Database    db_name=${DB_NAME}
 
 All basic params, no config file
     Connect To Database
-    ...    python_module=${DB_MODULE}
+    ...    db_module=${DB_MODULE}
     ...    db_name=${DB_NAME}
     ...    db_user=${DB_USER}
     ...    db_password=${DB_PASS}
@@ -51,11 +51,11 @@ Missing basic params are accepted, error from Python DB module
     Run Keyword And Expect Error    
     ...    ${Errors}[${DB_MODULE}][missing basic params]
     ...    Connect To Database
-    ...    python_module=${DB_MODULE}
+    ...    db_module=${DB_MODULE}
 
 Custom params as keyword args - valid
     Connect To Database
-    ...    python_module=${DB_MODULE}
+    ...    db_module=${DB_MODULE}
     ...    db_name=${DB_NAME}    
     ...    db_host=${DB_HOST}
     ...    db_port=${DB_PORT}
@@ -69,7 +69,7 @@ Custom params as keyword args - invalid, error from Python DB module
     Run Keyword And Expect Error    
     ...    ${Errors}[${DB_MODULE}][invalid custom param]
     ...    Connect To Database
-    ...    python_module=${DB_MODULE}
+    ...    db_module=${DB_MODULE}
     ...    db_name=${DB_NAME}    
     ...    db_host=${DB_HOST}
     ...    db_port=${DB_PORT}
@@ -113,7 +113,7 @@ Keyword args override config file values - custom params
 Oracle specific - basic params, no config file, oracle_driver_mode
     Skip If    $DB_MODULE != "oracledb"
     Connect To Database
-    ...    python_module=${DB_MODULE}
+    ...    db_module=${DB_MODULE}
     ...    db_name=${DB_NAME}
     ...    db_user=${DB_USER}
     ...    db_password=${DB_PASS}
@@ -132,7 +132,7 @@ Oracle specific - thick mode in config file - invalid
 MSSQL / MySQL / PyODBC specific - charset as keyword argument
     Skip If    $DB_MODULE not in ["pymssql", "pymysql", "pyodbc"]
     Connect To Database
-    ...    python_module=${DB_MODULE}
+    ...    db_module=${DB_MODULE}
     ...    db_name=${DB_NAME}
     ...    db_user=${DB_USER}
     ...    db_password=${DB_PASS}
@@ -161,7 +161,7 @@ SQlite specific - connection params as custom keyword args
     [Setup]    Skip If    $DB_MODULE != "sqlite3"
     Remove File    ${DBName}.db
     Connect To Database
-    ...    python_module=${DB_MODULE}
+    ...    db_module=${DB_MODULE}
     ...    database=./${DBName}.db
     ...    isolation_level=${EMPTY}
 

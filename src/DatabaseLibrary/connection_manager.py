@@ -160,7 +160,7 @@ class ConnectionManager:
 
     @renamed_args(
         mapping={
-            "dbapiModuleName": "python_module",
+            "dbapiModuleName": "db_module",
             "dbName": "db_name",
             "dbUsername": "db_user",
             "dbPassword": "db_password",
@@ -175,7 +175,7 @@ class ConnectionManager:
     @deprecated_positional_args(1)
     def connect_to_database(
         self,
-        python_module: Optional[str] = None,
+        db_module: Optional[str] = None,
         db_name: Optional[str] = None,
         db_user: Optional[str] = None,
         db_password: Optional[str] = None,
@@ -200,7 +200,7 @@ class ConnectionManager:
         **custom_connection_params,
     ):
         """
-        Creates a database connection using the DB API 2.0 module ``python_module`` and the parameters provided.
+        Creates a database connection using the DB API 2.0 module ``db_module`` and the parameters provided.
         Along with listed commonly used arguments (`db_name`, `db_host` etc.)
         you can set any other DB module specific parameters as key/value pairs.
 
@@ -209,7 +209,7 @@ class ConnectionManager:
         If no specified, it defaults to `./resources/db.cfg`.
         See `Using configuration file` for more details.
 
-        All params are optional, although ``python_module`` must be set - either as keyword argument or in config file.
+        All params are optional, although ``db_module`` must be set - either as keyword argument or in config file.
         If some of the listed keyword arguments (`db_name`, `db_host` etc.) are not provided (i.e. left on default value `None`),
         they are normally not passed to the Python DB module at all, except:
         - _db_port_ - commonly used port number for known databases is set as fallback
@@ -230,7 +230,7 @@ class ConnectionManager:
         - _thick,lib_dir=<PATH_TO_ORACLE_CLIENT>_
 
         The following old parameters duplicate the new ones:
-        ``dbapiModuleName``:``python_module``, ``dbName``:``db_name``, ``dbUsername``:``db_user``, ``dbPassword``:``db_password``,
+        ``dbapiModuleName``:``db_module``, ``dbName``:``db_name``, ``dbUsername``:``db_user``, ``dbPassword``:``db_password``,
         ``dbHost``:``db_host``, ``dbPort``:``db_port``, ``dbCharset``:``db_charset``, ``dbDriver``:``odbc_driver``,
         ``dbConfigFile``:``config_file``, ``driverMode``:``oracle_driver_mode``.
         The old naming is deprecated and will be removed in future versions.
@@ -255,7 +255,7 @@ class ConnectionManager:
             return con_params
 
         def _log_all_connection_params(*, connection_object=None, connection_string=None, **connection_params):
-            connection_object = connection_object or python_module
+            connection_object = connection_object or db_module
             msg = f"Connect to DB using : {connection_object}.connect("
             params_separator = ","
             if connection_string:
@@ -293,7 +293,7 @@ class ConnectionManager:
             return final_value
 
         # mandatory parameter
-        python_module = _arg_or_config(python_module, "python_module", mandatory=True)
+        db_module = _arg_or_config(db_module, "db_module", mandatory=True)
         # optional named params - named because of custom module specific handling
         db_name = _arg_or_config(db_name, "db_name")
         db_user = _arg_or_config(db_user, "db_user")
@@ -312,13 +312,13 @@ class ConnectionManager:
         if other_config_file_params:
             logger.info(f"Other params from configuration file: {list(other_config_file_params.keys())}")
 
-        if python_module == "excel" or python_module == "excelrw":
+        if db_module == "excel" or db_module == "excelrw":
             db_api_module_name = "pyodbc"
         else:
-            db_api_module_name = python_module
+            db_api_module_name = db_module
         db_api_2 = importlib.import_module(db_api_module_name)
 
-        if python_module in ["MySQLdb", "pymysql"]:
+        if db_module in ["MySQLdb", "pymysql"]:
             db_port = db_port or 3306
             db_charset = db_charset or "utf8mb4"
             con_params = _build_connection_params(
@@ -327,7 +327,7 @@ class ConnectionManager:
             _log_all_connection_params(**con_params)
             db_connection = db_api_2.connect(**con_params)
 
-        elif python_module in ["pymssql"]:
+        elif db_module in ["pymssql"]:
             db_port = db_port or 1433
             db_charset = db_charset or "UTF-8"
             con_params = _build_connection_params(
@@ -336,7 +336,7 @@ class ConnectionManager:
             _log_all_connection_params(**con_params)
             db_connection = db_api_2.connect(**con_params)
 
-        elif python_module in ["psycopg2"]:
+        elif db_module in ["psycopg2"]:
             db_port = db_port or 5432
             con_params = _build_connection_params(
                 database=db_name, user=db_user, password=db_password, host=db_host, port=db_port
@@ -344,7 +344,7 @@ class ConnectionManager:
             _log_all_connection_params(**con_params)
             db_connection = db_api_2.connect(**con_params)
 
-        elif python_module in ["pyodbc", "pypyodbc"]:
+        elif db_module in ["pyodbc", "pypyodbc"]:
             db_port = db_port or 1433
             db_charset = db_charset or "utf8mb4"
 
@@ -377,18 +377,18 @@ class ConnectionManager:
             _log_all_connection_params(connection_string=con_str)
             db_connection = db_api_2.connect(con_str)
 
-        elif python_module in ["excel", "excelrw"]:
+        elif db_module in ["excel", "excelrw"]:
             con_str = f"DRIVER={{Microsoft Excel Driver (*.xls, *.xlsx, *.xlsm, *.xlsb)}};DBQ={db_name};"
             con_str += "ReadOnly="
-            if python_module == "excel":
+            if db_module == "excel":
                 con_str += "1;"
-            elif python_module == "excelrw":
+            elif db_module == "excelrw":
                 con_str += "0;"
             con_str += 'Extended Properties="Excel 8.0;HDR=YES";)'
             logger.info(f"Connecting using : {db_api_module_name}.connect({con_str}, autocommit=True)")
             db_connection = db_api_2.connect(con_str, autocommit=True)
 
-        elif python_module in ["ibm_db", "ibm_db_dbi"]:
+        elif db_module in ["ibm_db", "ibm_db_dbi"]:
             db_port = db_port or 50000
             con_str = (
                 f"DATABASE={db_name};HOSTNAME={db_host};PORT={db_port};PROTOCOL=TCPIP;UID={db_user};PWD={db_password};"
@@ -397,7 +397,7 @@ class ConnectionManager:
             _log_all_connection_params(connection_string=con_str, **con_params)
             db_connection = db_api_2.connect(con_str, **con_params)
 
-        elif python_module in ["cx_Oracle"]:
+        elif db_module in ["cx_Oracle"]:
             db_port = db_port or 1521
             oracle_dsn = db_api_2.makedsn(host=db_host, port=db_port, service_name=db_name)
             con_params = _build_connection_params(user=db_user, password=db_password, dsn=oracle_dsn)
@@ -405,7 +405,7 @@ class ConnectionManager:
             db_connection = db_api_2.connect(**con_params)
             self.omit_trailing_semicolon = True
 
-        elif python_module in ["oracledb"]:
+        elif db_module in ["oracledb"]:
             db_port = db_port or 1521
             oracle_driver_mode = oracle_driver_mode or "thin"
             oracle_connection_params = db_api_2.ConnectParams(host=db_host, port=db_port, service_name=db_name)
@@ -434,7 +434,7 @@ class ConnectionManager:
             )
             self.omit_trailing_semicolon = True
 
-        elif python_module in ["teradata"]:
+        elif db_module in ["teradata"]:
             db_port = db_port or 1025
             teradata_udaExec = db_api_2.UdaExec(appName="RobotFramework", version="1.0", logConsole=False)
             con_params = _build_connection_params(
@@ -446,10 +446,10 @@ class ConnectionManager:
                 host=db_host,
                 port=db_port,
             )
-            _log_all_connection_params(connection_object=f"{python_module}.UdaExec", **con_params)
+            _log_all_connection_params(connection_object=f"{db_module}.UdaExec", **con_params)
             db_connection = teradata_udaExec.connect(**con_params)
 
-        elif python_module in ["ksycopg2"]:
+        elif db_module in ["ksycopg2"]:
             db_port = db_port or 54321
             con_params = _build_connection_params(
                 database=db_name, user=db_user, password=db_password, host=db_host, port=db_port
@@ -466,10 +466,10 @@ class ConnectionManager:
 
         self.connection_store.register_connection(db_connection, db_api_module_name, alias)
 
-    @renamed_args(mapping={"dbapiModuleName": "python_module"})
+    @renamed_args(mapping={"dbapiModuleName": "db_module"})
     def connect_to_database_using_custom_params(
         self,
-        python_module: Optional[str] = None,
+        db_module: Optional[str] = None,
         db_connect_string: str = "",
         alias: str = "default",
         *,
@@ -479,14 +479,14 @@ class ConnectionManager:
         *DEPRECATED* Use new `Connect To Database` keyword with custom parameters instead.
         The deprecated keyword will be removed in future versions.
 
-        Loads the DB API 2.0 module given `python_module` then uses it to
+        Loads the DB API 2.0 module given `db_module` then uses it to
         connect to the database using the map string `db_connect_string`
         (parsed as a list of named arguments).
 
         Use `connect_to_database_using_custom_connection_string` for passing
         all params in a single connection string or URI.
 
-        The old ``dbapiModuleName`` param duplicates new ``python_module``.
+        The old ``dbapiModuleName`` param duplicates new ``db_module``.
         The old naming is deprecated and will be removed in future versions.
 
         Example usage:
@@ -495,46 +495,46 @@ class ConnectionManager:
         | Connect To Database Using Custom Params | oracledb | user="username", password="pass", dsn="localhost/orclpdb" |
         | Connect To Database Using Custom Params | sqlite3 | database="./my_database.db", isolation_level=None |
         """
-        db_api_2 = importlib.import_module(python_module)
-        db_api_module_name = python_module
+        db_api_2 = importlib.import_module(db_module)
+        db_api_module_name = db_module
         db_connect_string = f"db_api_2.connect({db_connect_string})"
         logger.info(
-            f"Executing : Connect To Database Using Custom Params : {python_module}.connect("
+            f"Executing : Connect To Database Using Custom Params : {db_module}.connect("
             f"{self._hide_password_values(db_connect_string)})"
         )
 
         db_connection = eval(db_connect_string)
         self.connection_store.register_connection(db_connection, db_api_module_name, alias)
 
-    @renamed_args(mapping={"dbapiModuleName": "python_module"})
+    @renamed_args(mapping={"dbapiModuleName": "db_module"})
     @deprecated_positional_args(2)
     def connect_to_database_using_custom_connection_string(
         self,
-        python_module: Optional[str] = None,
+        db_module: Optional[str] = None,
         db_connect_string: str = "",
         alias: str = "default",
         *,
         dbapiModuleName: Optional[str] = None,
     ):
         """
-        Loads the DB API 2.0 module given `python_module` then uses it to
+        Loads the DB API 2.0 module given `db_module` then uses it to
         connect to the database using the `db_connect_string`
         (parsed as single connection string or URI).
 
         Use `connect_to_database_using_custom_params` for passing
         connection params as named arguments.
 
-        The old ``dbapiModuleName`` param duplicates new ``python_module``.
+        The old ``dbapiModuleName`` param duplicates new ``db_module``.
         The old naming is deprecated and will be removed in future versions.
 
         Example usage:
         | Connect To Database Using Custom Connection String | psycopg2 | postgresql://postgres:s3cr3t@tiger.foobar.com:5432/my_db_test |
         | Connect To Database Using Custom Connection String | oracledb | username/pass@localhost:1521/orclpdb |
         """
-        db_api_2 = importlib.import_module(python_module)
-        db_api_module_name = python_module
+        db_api_2 = importlib.import_module(db_module)
+        db_api_module_name = db_module
         logger.info(
-            f"Executing : Connect To Database Using Custom Connection String : {python_module}.connect("
+            f"Executing : Connect To Database Using Custom Connection String : {db_module}.connect("
             f"'{db_connect_string}')"
         )
         db_connection = db_api_2.connect(db_connect_string)

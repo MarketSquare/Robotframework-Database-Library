@@ -15,7 +15,7 @@ class TestConnectWithConfigFile:
         config_path = str(TEST_DATA / "empty.cfg")
         with pytest.raises(
             ValueError,
-            match="Required parameter 'python_module' was not provided - neither in keyword arguments nor in config file",
+            match="Required parameter 'db_module' was not provided - neither in keyword arguments nor in config file",
         ):
             conn_manager.connect_to_database(config_file=config_path)
 

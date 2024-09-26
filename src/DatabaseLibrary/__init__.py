@@ -117,7 +117,7 @@ class DatabaseLibrary(ConnectionManager, Query, Assertion):
     == Config file examples ==
     === Config file with default alias (equal to using no aliases at all) ===
     | [default]
-    | python_module=psycopg2
+    | db_module=psycopg2
     | db_name=yourdbname
     | db_user=yourusername
     | db_password=yourpassword
@@ -126,7 +126,7 @@ class DatabaseLibrary(ConnectionManager, Query, Assertion):
 
     === Config file with a specific alias ===
     | [myoracle]
-    | python_module=oracledb
+    | db_module=oracledb
     | db_name=yourdbname
     | db_user=yourusername
     | db_password=yourpassword
