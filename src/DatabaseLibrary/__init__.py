@@ -185,7 +185,7 @@ class DatabaseLibrary(ConnectionManager, Query, Assertion):
     The argument values are set in [http://robotframework.org/robotframework/latest/RobotFrameworkUserGuide.html#time-format|Robot Framework time format] -
     e.g. ``5 seconds``.
 
-    The retry mechanism is disabled by default - the ``retry_timeout`` is set to ``0``.
+    The retry mechanism is disabled by default - ``retry_timeout`` is set to ``0``.
 
     Examples:
     | Check Row Count | SELECT id FROM person | *==* | 2 | retry_timeout=10 seconds |
@@ -199,8 +199,8 @@ class DatabaseLibrary(ConnectionManager, Query, Assertion):
     You can also setup the limit or disable the logging during the library import.
     Examples:
 
-    | # Default behavior - logging of query results is enabled, log head is 50 rows.
     | *** Settings ***
+    | # Default behavior - logging of query results is enabled, log head is 50 rows.
     | Library    DatabaseLibrary
     |
     | # Logging of query results is disabled, log head is 50 rows (default).
