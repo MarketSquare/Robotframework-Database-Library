@@ -88,23 +88,48 @@ class ConfigReader:
     @staticmethod
     def _load_config(config_file: str) -> Optional[ConfigParser]:
         config_path = Path(config_file)
+        logger.info(f"Looking for configuration file: '{config_path}'")
         if not config_path.exists():
+            logger.info("Configuration file doesn't exist")
             return None
         config = ConfigParser()
         config.read([config_path])
+        logger.info("Successfully loaded configuration file")
         return config
 
-    def get(self, param: str) -> str:
+    def pop(self, param: str) -> Optional[str]:
+        """
+        Returns the `param` value read from the config file and deletes it from the list of all params read
+        """
         if self.config is None:
-            raise ValueError(f"Required '{param}' parameter was not provided in keyword arguments.") from None
+            logger.debug("Configuration file not loaded")
+            return None
         try:
-            return self.config.get(self.alias, param)
+            logger.debug(f"Looking for parameter '{param}' in configuration file")
+            param_value = self.config.get(self.alias, param)
+            logger.info(f"Found parameter '{param}' in configuration file")
+            self.config.remove_option(self.alias, param)
+            return param_value
         except NoSectionError:
-            raise ValueError(f"Configuration file does not have [{self.alias}] section.") from None
+            logger.debug(f"Configuration file does not have [{self.alias}] section.")
         except NoOptionError:
-            raise ValueError(
-                f"Required '{param}' parameter missing in both keyword arguments and configuration file."
-            ) from None
+            logger.debug(f"Parameter '{param}' missing in configuration file.")
+            return None
+
+    def get_all_available_params(self) -> Dict:
+        """
+        Returns a dictionary of all params read from the config file, which are currently available
+        (some of them might have been removed using the `pop` function)
+        """
+        if self.config is None:
+            logger.debug("Configuration file not loaded")
+            return {}
+        try:
+            all_options = dict(self.config.items(self.alias))
+            return all_options
+        except NoSectionError:
+            logger.debug(f"Configuration file does not have [{self.alias}] section.")
+            return {}
 
 
 class ConnectionManager:
@@ -115,6 +140,21 @@ class ConnectionManager:
     def __init__(self):
         self.omit_trailing_semicolon: bool = False
         self.connection_store: ConnectionStore = ConnectionStore()
+
+    @staticmethod
+    def _hide_password_values(string_with_pass, params_separator=","):
+        string_with_hidden_pass = string_with_pass
+        for pass_param_name in ["pass", "passwd", "password", "pwd", "PWD"]:
+            pass_param_name += "="
+            splitted = string_with_hidden_pass.split(pass_param_name)
+            if len(splitted) < 2:
+                continue
+            splitted = splitted[1].split(params_separator)
+            value_to_hide = splitted[0]
+            string_with_hidden_pass = string_with_hidden_pass.replace(
+                f"{pass_param_name}{value_to_hide}", f"{pass_param_name}***"
+            )
+        return string_with_hidden_pass
 
     def connect_to_database(
         self,
@@ -129,13 +169,31 @@ class ConnectionManager:
         dbConfigFile: Optional[str] = None,
         driverMode: Optional[str] = None,
         alias: str = "default",
+        **custom_connection_params,
     ):
         """
-        Loads the DB API 2.0 module given ``dbapiModuleName`` then uses it to
-        connect to the database using provided parameters such as ``dbName``, ``dbUsername``, and ``dbPassword``.
+        Creates a database connection using the DB API 2.0 module ``dbapiModuleName`` and the parameters provided.
+        Along with listed commonly used arguments (`dbName`, `dbHost` etc.)
+        you can set any other DB module specific parameters as key/value pairs.
+
+        Use ``dbConfigFile`` to provide a path to configuration file with connection parameters
+        to be used along with / instead of keyword arguments.
+        If no specified, it defaults to `./resources/db.cfg`.
+        See `Using configuration file` for more details.
+
+        All params are optional, although ``dbapiModuleName`` must be set - either as keyword argument or in config file.
+        If some of the listed keyword arguments (`dbName`, `dbHost` etc.) are not provided (i.e. left on default value `None`),
+        they are normally not passed to the Python DB module at all, except:
+        - _dbPort_ - commonly used port number for known databases is set as fallback
+        - _dbCharset_ - _UTF8_ is used as fallback for _pymysql_, _pymssql_ and _pyodbc_
+        - _driverMode_ - _thin_ is used as fallback for _oracledb_
+
+        Other custom params from keyword arguments and config file are passed to the Python DB module as provided -
+        normally as arguments for the _connect()_ function. However, when using *pyodbc*, the connection is established
+        using a connection string - so all the custom params are added into it instead of function arguments.
 
         Optional ``alias`` parameter can be used for creating multiple open connections, even for different databases.
-        If the same alias is given twice then previous connection will be overriden.
+        If the same alias is given twice then previous connection will be overridden.
 
         The ``driverMode`` is used to select the *oracledb* client mode.
         Allowed values are:
@@ -143,135 +201,176 @@ class ConnectionManager:
         - _thick_
         - _thick,lib_dir=<PATH_TO_ORACLE_CLIENT>_
 
-        Optionally, you can specify a ``dbConfigFile`` wherein it will load the
-        alias (or alias will be "default") property values for ``dbapiModuleName``, ``dbName`` ``dbUsername``
-        and ``dbPassword`` (note: specifying ``dbapiModuleName``, ``dbName``
-        `dbUsername` or `dbPassword` directly will override the properties of
-        the same key in `dbConfigFile`). If no `dbConfigFile` is specified, it
-        defaults to `./resources/db.cfg`.
-
-        The `dbConfigFile` is useful if you don't want to check into your SCM
-        your database credentials.
-
-        Example db.cfg file
-        | [alias]
-        | dbapiModuleName=pymysqlforexample
-        | dbName=yourdbname
-        | dbUsername=yourusername
-        | dbPassword=yourpassword
-        | dbHost=yourhost
-        | dbPort=yourport
-
-        Example usage:
-        | # explicitly specifies all db property values |
-        | Connect To Database | psycopg2 | my_db | postgres | s3cr3t | tiger.foobar.com | 5432 |
-        | Connect To Database | psycopg2 | my_db | postgres | s3cr3t | tiger.foobar.com | 5432 | alias=my_alias |
-
-        | # loads all property values from default.cfg |
-        | Connect To Database | dbConfigFile=default.cfg |
-
-        | # loads all property values from ./resources/db.cfg |
-        | Connect To Database |
-
-        | # uses explicit `dbapiModuleName` and `dbName` but uses the `dbUsername` and `dbPassword` in 'default.cfg' |
-        | Connect To Database | psycopg2 | my_db_test | dbConfigFile=default.cfg |
-
-        | # uses explicit `dbapiModuleName` and `dbName` but uses the `dbUsername` and `dbPassword` in './resources/db.cfg' |
-        | Connect To Database | psycopg2 | my_db_test |
+        Examples
+        | Connect To Database | psycopg2 | my_db | user | pass | tiger.foobar.com | 5432 |
+        | Connect To Database | psycopg2 | my_db | user | pass | tiger.foobar.com | 5432 | my_custom_param=value |
+        | Connect To Database | psycopg2 | my_db | user | pass | tiger.foobar.com | 5432 | alias=my_alias |
+        | Connect To Database | dbConfigFile=my_db_params.cfg |
         """
         config = ConfigReader(dbConfigFile, alias)
 
-        dbapiModuleName = dbapiModuleName or config.get("dbapiModuleName")
-        dbName = dbName or config.get("dbName")
-        dbUsername = dbUsername or config.get("dbUsername")
-        dbPassword = dbPassword if dbPassword is not None else config.get("dbPassword")
-        dbHost = dbHost or config.get("dbHost") or "localhost"
-        dbPort = int(dbPort if dbPort is not None else config.get("dbPort"))
+        def _build_connection_params(custom_params=True, **basic_params):
+            con_params = basic_params.copy()
+            for param_name, param_val in basic_params.items():
+                if param_val is None:
+                    con_params.pop(param_name, None)
+            if custom_params:
+                con_params.update(custom_connection_params)
+                con_params.update(other_config_file_params)
+
+            return con_params
+
+        def _log_all_connection_params(*, connection_object=None, connection_string=None, **connection_params):
+            connection_object = connection_object or dbapiModuleName
+            msg = f"Connect to DB using : {connection_object}.connect("
+            params_separator = ","
+            if connection_string:
+                msg += f'"{connection_string}"'
+                params_separator = ";"
+            for param_name, param_value in connection_params.items():
+                msg += f", {param_name}="
+                if isinstance(param_value, str):
+                    msg += f"'{param_value}'"
+                else:
+                    msg += f"{param_value}"
+            if dbPassword:
+                msg = msg.replace(f"'{dbPassword}'", "***")
+            msg = self._hide_password_values(msg, params_separator)
+            msg = msg.replace("connect(, ", "connect(")
+            msg += ")"
+            logger.info(msg)
+
+        def _arg_or_config(arg_value, param_name, mandatory=False):
+            val_from_config = config.pop(param_name)
+            if arg_value is not None:
+                final_value = arg_value
+                if val_from_config is not None:
+                    logger.info(
+                        f"Parameter '{param_name}' set both as keyword argument and in config file, "
+                        "but keyword arguments take precedence"
+                    )
+            else:
+                final_value = val_from_config
+                if final_value is None and mandatory:
+                    raise ValueError(
+                        f"Required parameter '{param_name}' was not provided - "
+                        "neither in keyword arguments nor in config file"
+                    )
+            return final_value
+
+        # mandatory parameter
+        dbapiModuleName = _arg_or_config(dbapiModuleName, "dbapiModuleName", mandatory=True)
+        # optional named params - named because of custom module specific handling
+        dbName = _arg_or_config(dbName, "dbName")
+        dbUsername = _arg_or_config(dbUsername, "dbUsername")
+        dbPassword = _arg_or_config(dbPassword, "dbPassword")
+        dbHost = _arg_or_config(dbHost, "dbHost")
+        dbPort = _arg_or_config(dbPort, "dbPort")
+        if dbPort is not None:
+            dbPort = int(dbPort)
+        dbCharset = _arg_or_config(dbCharset, "dbCharset")
+        dbDriver = _arg_or_config(dbDriver, "dbDriver")
+        driverMode = _arg_or_config(driverMode, "driverMode")
+
+        for param_name, param_value in custom_connection_params.items():
+            _arg_or_config(param_value, param_name)
+        other_config_file_params = config.get_all_available_params()
+        if other_config_file_params:
+            logger.info(f"Other params from configuration file: {list(other_config_file_params.keys())}")
 
         if dbapiModuleName == "excel" or dbapiModuleName == "excelrw":
             db_api_module_name = "pyodbc"
-            db_api_2 = importlib.import_module("pyodbc")
         else:
             db_api_module_name = dbapiModuleName
-            db_api_2 = importlib.import_module(dbapiModuleName)
+        db_api_2 = importlib.import_module(db_api_module_name)
 
         if dbapiModuleName in ["MySQLdb", "pymysql"]:
             dbPort = dbPort or 3306
-            logger.info(
-                f"Connecting using : {dbapiModuleName}.connect("
-                f"db={dbName}, user={dbUsername}, passwd=***, host={dbHost}, port={dbPort}, charset={dbCharset})"
+            dbCharset = dbCharset or "utf8mb4"
+            con_params = _build_connection_params(
+                db=dbName, user=dbUsername, passwd=dbPassword, host=dbHost, port=dbPort, charset=dbCharset
             )
-            db_connection = db_api_2.connect(
-                db=dbName,
-                user=dbUsername,
-                passwd=dbPassword,
-                host=dbHost,
-                port=dbPort,
-                charset="utf8mb4" or dbCharset,
+            _log_all_connection_params(**con_params)
+            db_connection = db_api_2.connect(**con_params)
+
+        elif dbapiModuleName in ["pymssql"]:
+            dbPort = dbPort or 1433
+            dbCharset = dbCharset or "UTF-8"
+            con_params = _build_connection_params(
+                database=dbName, user=dbUsername, password=dbPassword, host=dbHost, port=dbPort, charset=dbCharset
             )
+            _log_all_connection_params(**con_params)
+            db_connection = db_api_2.connect(**con_params)
+
         elif dbapiModuleName in ["psycopg2"]:
             dbPort = dbPort or 5432
-            logger.info(
-                f"Connecting using : {dbapiModuleName}.connect("
-                f"database={dbName}, user={dbUsername}, password=***, host={dbHost}, port={dbPort})"
+            con_params = _build_connection_params(
+                database=dbName, user=dbUsername, password=dbPassword, host=dbHost, port=dbPort
             )
-            db_connection = db_api_2.connect(
-                database=dbName,
-                user=dbUsername,
-                password=dbPassword,
-                host=dbHost,
-                port=dbPort,
-            )
+            _log_all_connection_params(**con_params)
+            db_connection = db_api_2.connect(**con_params)
+
         elif dbapiModuleName in ["pyodbc", "pypyodbc"]:
             dbPort = dbPort or 1433
             dbCharset = dbCharset or "utf8mb4"
-            dbDriver = dbDriver or "{SQL Server}"
-            con_str = f"DRIVER={dbDriver};DATABASE={dbName};UID={dbUsername};PWD={dbPassword};charset={dbCharset};"
-            if "mysql" in dbDriver.lower():
-                con_str += f"SERVER={dbHost}:{dbPort}"
+
+            if dbDriver:
+                con_str = f"DRIVER={dbDriver};"
             else:
-                con_str += f"SERVER={dbHost},{dbPort}"
-            logger.info(f'Connecting using : {dbapiModuleName}.connect({con_str.replace(dbPassword, "***")})')
+                con_str = ""
+                logger.info("No ODBC driver specified")
+                logger.info(f"List of installed ODBC drivers: {db_api_2.drivers()}")
+            if dbName:
+                con_str += f"DATABASE={dbName};"
+            if dbUsername:
+                con_str += f"UID={dbUsername};"
+            if dbPassword:
+                con_str += f"PWD={dbPassword};"
+            if dbCharset:
+                con_str += f"charset={dbCharset};"
+            if dbHost and dbPort:
+                if dbDriver and "mysql" in dbDriver.lower():
+                    con_str += f"SERVER={dbHost}:{dbPort};"
+                else:
+                    con_str += f"SERVER={dbHost},{dbPort};"
+
+            for param_name, param_value in custom_connection_params.items():
+                con_str += f"{param_name}={param_value};"
+
+            for param_name, param_value in other_config_file_params.items():
+                con_str += f"{param_name}={param_value};"
+
+            _log_all_connection_params(connection_string=con_str)
             db_connection = db_api_2.connect(con_str)
-        elif dbapiModuleName in ["excel"]:
-            logger.info(
-                f"Connecting using : {dbapiModuleName}.connect("
-                f"DRIVER={{Microsoft Excel Driver (*.xls, *.xlsx, *.xlsm, *.xlsb)}};DBQ={dbName};"
-                f'ReadOnly=1;Extended Properties="Excel 8.0;HDR=YES";)'
-            )
-            db_connection = db_api_2.connect(
-                f"DRIVER={{Microsoft Excel Driver (*.xls, *.xlsx, *.xlsm, *.xlsb)}};DBQ={dbName};"
-                f'ReadOnly=1;Extended Properties="Excel 8.0;HDR=YES";)',
-                autocommit=True,
-            )
-        elif dbapiModuleName in ["excelrw"]:
-            logger.info(
-                f"Connecting using : {dbapiModuleName}.connect("
-                f"DRIVER={{Microsoft Excel Driver (*.xls, *.xlsx, *.xlsm, *.xlsb)}};DBQ={dbName};"
-                f'ReadOnly=0;Extended Properties="Excel 8.0;HDR=YES";)',
-            )
-            db_connection = db_api_2.connect(
-                f"DRIVER={{Microsoft Excel Driver (*.xls, *.xlsx, *.xlsm, *.xlsb)}};DBQ={dbName};"
-                f'ReadOnly=0;Extended Properties="Excel 8.0;HDR=YES";)',
-                autocommit=True,
-            )
+
+        elif dbapiModuleName in ["excel", "excelrw"]:
+            con_str = f"DRIVER={{Microsoft Excel Driver (*.xls, *.xlsx, *.xlsm, *.xlsb)}};DBQ={dbName};"
+            con_str += "ReadOnly="
+            if dbapiModuleName == "excel":
+                con_str += "1;"
+            elif dbapiModuleName == "excelrw":
+                con_str += "0;"
+            con_str += 'Extended Properties="Excel 8.0;HDR=YES";)'
+            logger.info(f"Connecting using : {db_api_module_name}.connect({con_str}, autocommit=True)")
+            db_connection = db_api_2.connect(con_str, autocommit=True)
+
         elif dbapiModuleName in ["ibm_db", "ibm_db_dbi"]:
             dbPort = dbPort or 50000
-            conn_str = f"DATABASE={dbName};HOSTNAME={dbHost};PORT={dbPort};PROTOCOL=TCPIP;UID={dbUsername};"
-            logger.info(f"Connecting using : {dbapiModuleName}.connect(" f"{conn_str};PWD=***;)")
-            db_connection = db_api_2.connect(
-                f"{conn_str};PWD={dbPassword};",
-                "",
-                "",
+            con_str = (
+                f"DATABASE={dbName};HOSTNAME={dbHost};PORT={dbPort};PROTOCOL=TCPIP;UID={dbUsername};PWD={dbPassword};"
             )
+            con_params = _build_connection_params(userID="", userPassword="")
+            _log_all_connection_params(connection_string=con_str, **con_params)
+            db_connection = db_api_2.connect(con_str, **con_params)
+
         elif dbapiModuleName in ["cx_Oracle"]:
             dbPort = dbPort or 1521
             oracle_dsn = db_api_2.makedsn(host=dbHost, port=dbPort, service_name=dbName)
-            logger.info(
-                f"Connecting using: {dbapiModuleName}.connect(user={dbUsername}, password=***, dsn={oracle_dsn})"
-            )
-            db_connection = db_api_2.connect(user=dbUsername, password=dbPassword, dsn=oracle_dsn)
+            con_params = _build_connection_params(user=dbUsername, password=dbPassword, dsn=oracle_dsn)
+            _log_all_connection_params(**con_params)
+            db_connection = db_api_2.connect(**con_params)
             self.omit_trailing_semicolon = True
+
         elif dbapiModuleName in ["oracledb"]:
             dbPort = dbPort or 1521
             driverMode = driverMode or "thin"
@@ -292,24 +391,19 @@ class ConnectionManager:
                 logger.info("Using thin Oracle client mode")
             else:
                 raise ValueError(f"Invalid Oracle client mode provided: {driverMode}")
-            logger.info(
-                f"Connecting using: {dbapiModuleName}.connect("
-                f"user={dbUsername}, password=***, params={oracle_connection_params})"
-            )
-            db_connection = db_api_2.connect(user=dbUsername, password=dbPassword, params=oracle_connection_params)
+            con_params = _build_connection_params(user=dbUsername, password=dbPassword, params=oracle_connection_params)
+            _log_all_connection_params(**con_params)
+            db_connection = db_api_2.connect(**con_params)
             assert db_connection.thin == oracle_thin_mode, (
                 "Expected oracledb to run in thin mode: {oracle_thin_mode}, "
                 f"but the connection has thin mode: {db_connection.thin}"
             )
             self.omit_trailing_semicolon = True
+
         elif dbapiModuleName in ["teradata"]:
             dbPort = dbPort or 1025
             teradata_udaExec = db_api_2.UdaExec(appName="RobotFramework", version="1.0", logConsole=False)
-            logger.info(
-                f"Connecting using : {dbapiModuleName}.connect("
-                f"database={dbName}, user={dbUsername}, password=***, host={dbHost}, port={dbPort})"
-            )
-            db_connection = teradata_udaExec.connect(
+            con_params = _build_connection_params(
                 method="odbc",
                 system=dbHost,
                 database=dbName,
@@ -318,37 +412,33 @@ class ConnectionManager:
                 host=dbHost,
                 port=dbPort,
             )
+            _log_all_connection_params(connection_object=f"{dbapiModuleName}.UdaExec", **con_params)
+            db_connection = teradata_udaExec.connect(**con_params)
+
         elif dbapiModuleName in ["ksycopg2"]:
             dbPort = dbPort or 54321
-            logger.info(
-                f"Connecting using : {dbapiModuleName}.connect("
-                f"database={dbName}, user={dbUsername}, password=***, host={dbHost}, port={dbPort})"
+            con_params = _build_connection_params(
+                database=dbName, user=dbUsername, password=dbPassword, host=dbHost, port=dbPort
             )
-            db_connection = db_api_2.connect(
-                database=dbName,
-                user=dbUsername,
-                password=dbPassword,
-                host=dbHost,
-                port=dbPort,
-            )
+            _log_all_connection_params(**con_params)
+            db_connection = db_api_2.connect(**con_params)
+
         else:
-            logger.info(
-                f"Connecting using : {dbapiModuleName}.connect("
-                f"database={dbName}, user={dbUsername}, password=***, host={dbHost}, port={dbPort}) "
+            con_params = _build_connection_params(
+                database=dbName, user=dbUsername, password=dbPassword, host=dbHost, port=dbPort
             )
-            db_connection = db_api_2.connect(
-                database=dbName,
-                user=dbUsername,
-                password=dbPassword,
-                host=dbHost,
-                port=dbPort,
-            )
+            _log_all_connection_params(**con_params)
+            db_connection = db_api_2.connect(**con_params)
+
         self.connection_store.register_connection(db_connection, db_api_module_name, alias)
 
     def connect_to_database_using_custom_params(
         self, dbapiModuleName: Optional[str] = None, db_connect_string: str = "", alias: str = "default"
     ):
         """
+        *DEPRECATED* Use new `Connect To Database` keyword with custom parameters instead.
+        The deprecated keyword will be removed in future versions.
+
         Loads the DB API 2.0 module given `dbapiModuleName` then uses it to
         connect to the database using the map string `db_connect_string`
         (parsed as a list of named arguments).
@@ -364,20 +454,10 @@ class ConnectionManager:
         """
         db_api_2 = importlib.import_module(dbapiModuleName)
         db_api_module_name = dbapiModuleName
-
         db_connect_string = f"db_api_2.connect({db_connect_string})"
-
-        connection_string_with_hidden_pass = db_connect_string
-        for pass_param_name in ["pass", "passwd", "password", "pwd", "PWD"]:
-            splitted = connection_string_with_hidden_pass.split(pass_param_name + "=")
-            if len(splitted) < 2:
-                continue
-            splitted = splitted[1].split(",")
-            value_to_hide = splitted[0]
-            connection_string_with_hidden_pass = connection_string_with_hidden_pass.replace(value_to_hide, "***")
         logger.info(
             f"Executing : Connect To Database Using Custom Params : {dbapiModuleName}.connect("
-            f"{connection_string_with_hidden_pass})"
+            f"{self._hide_password_values(db_connect_string)})"
         )
 
         db_connection = eval(db_connect_string)

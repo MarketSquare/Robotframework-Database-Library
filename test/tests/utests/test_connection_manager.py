@@ -13,22 +13,11 @@ class TestConnectWithConfigFile:
     def test_connect_with_empty_config(self):
         conn_manager = ConnectionManager()
         config_path = str(TEST_DATA / "empty.cfg")
-        with pytest.raises(ValueError, match=re.escape("Configuration file does not have [default] section.")):
-            conn_manager.connect_to_database("my_client", dbConfigFile=config_path)
-
-    def test_connect_no_params_no_config(self):
-        conn_manager = ConnectionManager()
-        with pytest.raises(ValueError, match="Required 'dbName' parameter was not provided in keyword arguments."):
-            conn_manager.connect_to_database("my_client")
-
-    def test_connect_missing_option(self):
-        conn_manager = ConnectionManager()
-        config_path = str(TEST_DATA / "no_option.cfg")
         with pytest.raises(
             ValueError,
-            match="Required 'dbPassword' parameter missing in both keyword arguments and configuration file.",
+            match="Required parameter 'dbapiModuleName' was not provided - neither in keyword arguments nor in config file",
         ):
-            conn_manager.connect_to_database("my_client", dbConfigFile=config_path)
+            conn_manager.connect_to_database(dbConfigFile=config_path)
 
     def test_aliased_section(self):
         conn_manager = ConnectionManager()
