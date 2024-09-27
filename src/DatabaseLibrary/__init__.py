@@ -55,8 +55,12 @@ class DatabaseLibrary(ConnectionManager, Query, Assertion):
     |     ...    db_port=1521
     |
     | *** Test Cases ***
-    | Get All First Names
-    |     ${Results}=    Query    select FIRST_NAME from person
+    | Get All Names
+    |     ${Rows}=    Query    select FIRST_NAME, LAST_NAME from person
+    |     Should Be Equal    ${Rows}[0][0]    Franz Allan
+    |     Should Be Equal    ${Rows}[0][1]    See
+    |     Should Be Equal    ${Rows}[1][0]    Jerry
+    |     Should Be Equal    ${Rows}[1][1]    Schneider
     |
     | Person Table Contains Expected Records
     |     ${sql}=    Catenate    select LAST_NAME from person
@@ -223,6 +227,7 @@ class DatabaseLibrary(ConnectionManager, Query, Assertion):
 
     It's also possible to explicitly set the _autocommit_ behavior on the Python DB module level -
     using the `Set Auto Commit` keyword.
+    This has no impact on the automatic commit/rollback behavior in library keywords (described above).
 
     = Database modules compatibility =
     The library is basically compatible with any [https://peps.python.org/pep-0249|Python Database API Specification 2.0] module.
