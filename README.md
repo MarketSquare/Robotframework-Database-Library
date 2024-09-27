@@ -161,8 +161,8 @@ perform a check according to the specified condition - using the [Assertion Engi
 
 ## Examples
 ```RobotFramework
-Check Row Count    SELECT id FROM person    ==    2
-Check Query Result    SELECT first_name FROM person    contains    Allan
+Check Row Count     SELECT id FROM person            ==          2
+Check Query Result  SELECT first_name FROM person    contains    Allan
 ```
 
 # Retry mechanism
@@ -179,8 +179,9 @@ The retry mechanism is disabled by default - ``retry_timeout`` is set to ``0``.
 
 ## Examples
 ```RobotFramework
-Check Row Count    SELECT id FROM person    ==    2    retry_timeout=10 seconds
-Check Query Result    SELECT first_name FROM person    contains    Allan    retry_timeout=5s    retry_timeout=1s
+${sql}=   Catenate    SELECT first_name FROM person
+Check Row Count     ${sql}    ==          2        retry_timeout=10 seconds
+Check Query Result  ${sql}    contains    Allan    retry_timeout=5s    retry_pause=1s
 ````
 
 # Logging query results

@@ -189,7 +189,7 @@ class DatabaseLibrary(ConnectionManager, Query, Assertion):
 
     Examples:
     | Check Row Count | SELECT id FROM person | *==* | 2 | retry_timeout=10 seconds |
-    | Check Query Result | SELECT first_name FROM person | *contains* | Allan | retry_timeout=5s | retry_timeout=1s |
+    | Check Query Result | SELECT first_name FROM person | *contains* | Allan | retry_timeout=5s | retry_pause=1s |
 
     = Logging query results =
     Keywords, that fetch results of a SQL query, print the result rows as a table in RF log.
