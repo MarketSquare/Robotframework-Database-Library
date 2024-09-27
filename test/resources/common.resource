@@ -49,7 +49,7 @@ Connect To DB
         ...    ${DB_HOST}
         ...    ${DB_PORT}
         IF    "${DB_MODULE}" == "pyodbc"
-            Set To Dictionary    ${DB_KWARGS}    dbDriver=${DB_DRIVER}
+            Set To Dictionary    ${DB_KWARGS}    odbc_driver=${DB_DRIVER}
         END
         Connect To Database    @{DB_ARGS}    &{DB_KWARGS}
     ELSE

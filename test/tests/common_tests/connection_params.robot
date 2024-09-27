@@ -34,32 +34,32 @@ Test Teardown       Disconnect From Database
 *** Test Cases ***
 Mandatory params can't be missing
     Run Keyword And Expect Error    
-    ...    ValueError: Required parameter 'dbapiModuleName' was not provided*
-    ...    Connect To Database    dbName=${DB_NAME}
+    ...    ValueError: Required parameter 'db_module' was not provided*
+    ...    Connect To Database    db_name=${DB_NAME}
 
 All basic params, no config file
     Connect To Database
-    ...    dbapiModuleName=${DB_MODULE}
-    ...    dbName=${DB_NAME}
-    ...    dbUsername=${DB_USER}
-    ...    dbPassword=${DB_PASS}
-    ...    dbHost=${DB_HOST}
-    ...    dbPort=${DB_PORT}
-    ...    dbDriver=${DB_DRIVER}
+    ...    db_module=${DB_MODULE}
+    ...    db_name=${DB_NAME}
+    ...    db_user=${DB_USER}
+    ...    db_password=${DB_PASS}
+    ...    db_host=${DB_HOST}
+    ...    db_port=${DB_PORT}
+    ...    odbc_driver=${DB_DRIVER}
 
 Missing basic params are accepted, error from Python DB module
     Run Keyword And Expect Error    
     ...    ${Errors}[${DB_MODULE}][missing basic params]
     ...    Connect To Database
-    ...    dbapiModuleName=${DB_MODULE}
+    ...    db_module=${DB_MODULE}
 
 Custom params as keyword args - valid
     Connect To Database
-    ...    dbapiModuleName=${DB_MODULE}
-    ...    dbName=${DB_NAME}    
-    ...    dbHost=${DB_HOST}
-    ...    dbPort=${DB_PORT}
-    ...    dbDriver=${DB_DRIVER}
+    ...    db_module=${DB_MODULE}
+    ...    db_name=${DB_NAME}    
+    ...    db_host=${DB_HOST}
+    ...    db_port=${DB_PORT}
+    ...    odbc_driver=${DB_DRIVER}
     ...    user=${DB_USER}
     ...    password=${DB_PASS}
 
@@ -69,17 +69,20 @@ Custom params as keyword args - invalid, error from Python DB module
     Run Keyword And Expect Error    
     ...    ${Errors}[${DB_MODULE}][invalid custom param]
     ...    Connect To Database
-    ...    dbapiModuleName=${DB_MODULE}
-    ...    dbName=${DB_NAME}    
-    ...    dbHost=${DB_HOST}
-    ...    dbPort=${DB_PORT}
-    ...    dbUsername=${DB_USER}
-    ...    dbPassword=${DB_PASS}
-    ...    dbDriver=${DB_DRIVER}
+    ...    db_module=${DB_MODULE}
+    ...    db_name=${DB_NAME}    
+    ...    db_host=${DB_HOST}
+    ...    db_port=${DB_PORT}
+    ...    db_user=${DB_USER}
+    ...    db_password=${DB_PASS}
+    ...    odbc_driver=${DB_DRIVER}
     ...    blah=blah
 
 All basic params in config file
     Connect Using Config File    ${DB_MODULE}/simple_default_alias
+
+Deprecated basic params in config file
+    Connect Using Config File    ${DB_MODULE}/old_param_names
 
 Missing basic params in config file are accepted, error from Python DB module
     Run Keyword And Expect Error    
@@ -104,22 +107,22 @@ Custom params as keyword args combined with custom params from config file
 
 Keyword args override config file values - basic params
     Connect Using Config File    ${DB_MODULE}/wrong_password
-    ...    dbPassword=${DB_PASS}
+    ...    db_password=${DB_PASS}
 
 Keyword args override config file values - custom params
     Connect Using Config File    ${DB_MODULE}/valid_custom_params
     ...    user=${DB_USER}
 
-Oracle specific - basic params, no config file, driverMode
+Oracle specific - basic params, no config file, oracle_driver_mode
     Skip If    $DB_MODULE != "oracledb"
     Connect To Database
-    ...    dbapiModuleName=${DB_MODULE}
-    ...    dbName=${DB_NAME}
-    ...    dbUsername=${DB_USER}
-    ...    dbPassword=${DB_PASS}
-    ...    dbHost=${DB_HOST}
-    ...    dbPort=${DB_PORT}
-    ...    driverMode=thin
+    ...    db_module=${DB_MODULE}
+    ...    db_name=${DB_NAME}
+    ...    db_user=${DB_USER}
+    ...    db_password=${DB_PASS}
+    ...    db_host=${DB_HOST}
+    ...    db_port=${DB_PORT}
+    ...    oracle_driver_mode=thin
 
 Oracle specific - thick mode in config file - invalid
     [Documentation]    Invalid as mode switch during test execution is not supported
@@ -132,14 +135,14 @@ Oracle specific - thick mode in config file - invalid
 MSSQL / MySQL / PyODBC specific - charset as keyword argument
     Skip If    $DB_MODULE not in ["pymssql", "pymysql", "pyodbc"]
     Connect To Database
-    ...    dbapiModuleName=${DB_MODULE}
-    ...    dbName=${DB_NAME}
-    ...    dbUsername=${DB_USER}
-    ...    dbPassword=${DB_PASS}
-    ...    dbHost=${DB_HOST}
-    ...    dbPort=${DB_PORT}
-    ...    dbDriver=${DB_DRIVER}
-    ...    dbCharset=LATIN1
+    ...    db_module=${DB_MODULE}
+    ...    db_name=${DB_NAME}
+    ...    db_user=${DB_USER}
+    ...    db_password=${DB_PASS}
+    ...    db_host=${DB_HOST}
+    ...    db_port=${DB_PORT}
+    ...    odbc_driver=${DB_DRIVER}
+    ...    db_charset=LATIN1
 
 MSSQL specific - charset in config file - invalid
     Skip If    $DB_MODULE not in ["pymssql"]
@@ -161,7 +164,7 @@ SQlite specific - connection params as custom keyword args
     [Setup]    Skip If    $DB_MODULE != "sqlite3"
     Remove File    ${DBName}.db
     Connect To Database
-    ...    dbapiModuleName=${DB_MODULE}
+    ...    db_module=${DB_MODULE}
     ...    database=./${DBName}.db
     ...    isolation_level=${EMPTY}
 

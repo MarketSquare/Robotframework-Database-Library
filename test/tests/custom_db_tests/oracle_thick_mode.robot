@@ -24,11 +24,11 @@ ${ORACLE_LIB_DIR}       ${EMPTY}
 *** Test Cases ***
 Thick Mode Without Client Dir Specified
     [Documentation]    No client dir --> oracledb will search it in usual places
-    Connect And Run Simple Query    driverMode=thick
+    Connect And Run Simple Query    oracle_driver_mode=thick
 
 Thick Mode With Client Dir Specified
     [Documentation]    Client dir specified --> oracledb will search it in this place
-    Connect And Run Simple Query    driverMode=thick,lib_dir=${ORACLE_LIB_DIR}
+    Connect And Run Simple Query    oracle_driver_mode=thick,lib_dir=${ORACLE_LIB_DIR}
 
 Thin Mode - Default
     [Documentation]    No mode specified --> thin mode is used
@@ -36,12 +36,12 @@ Thin Mode - Default
 
 Thin Mode Explicitely Specified
     [Documentation]    Thin mode specified --> thin mode is used
-    Connect And Run Simple Query  driverMode=thin
+    Connect And Run Simple Query  oracle_driver_mode=thin
 
 Wrong Mode
     [Documentation]    Wrong mode --> proper error message from the library
     Run Keyword And Expect Error    ValueError: Invalid Oracle client mode provided: wrong
-    ...    Connect And Run Simple Query    driverMode=wrong
+    ...    Connect And Run Simple Query    oracle_driver_mode=wrong
 
 
 *** Keywords ***

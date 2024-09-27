@@ -8,4 +8,4 @@ Connect Using Config File
     ...    the path is build relative to the resource directory
     [Arguments]    ${File name}=${None}    &{Params}
     ${Path}=    Set Variable    ${CURDIR}/${File name}.cfg
-    Connect To Database    dbConfigFile=${Path}    &{Params}
+    Connect To Database    config_file=${Path}    &{Params}
