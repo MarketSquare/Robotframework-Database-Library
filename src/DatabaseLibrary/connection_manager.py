@@ -389,10 +389,25 @@ class ConnectionManager:
 
         elif db_module in ["ibm_db", "ibm_db_dbi"]:
             db_port = db_port or 50000
-            con_str = (
-                f"DATABASE={db_name};HOSTNAME={db_host};PORT={db_port};PROTOCOL=TCPIP;UID={db_user};PWD={db_password};"
-            )
-            con_params = _build_connection_params(userID="", userPassword="")
+            con_str = ""
+            if db_name:
+                con_str += f"DATABASE={db_name};"
+            if db_user:
+                con_str += f"UID={db_user};"
+            if db_password:
+                con_str += f"PWD={db_password};"
+            if db_host:
+                con_str += f"HOSTNAME={db_host};"
+            if db_port:
+                con_str += f"PORT={db_port};"
+
+            for param_name, param_value in custom_connection_params.items():
+                con_str += f"{param_name}={param_value};"
+
+            for param_name, param_value in other_config_file_params.items():
+                con_str += f"{param_name}={param_value};"
+
+            con_params = _build_connection_params(custom_params=False, user="", password="")
             _log_all_connection_params(connection_string=con_str, **con_params)
             db_connection = db_api_2.connect(con_str, **con_params)
 
