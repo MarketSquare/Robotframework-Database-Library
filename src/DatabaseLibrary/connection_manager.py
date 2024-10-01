@@ -205,8 +205,9 @@ class ConnectionManager:
         - _oracle_driver_mode_ - _thin_ is used as fallback for _oracledb_
 
         Other custom params from keyword arguments and config file are passed to the Python DB module as provided -
-        normally as arguments for the _connect()_ function. However, when using *pyodbc*, the connection is established
-        using a connection string - so all the custom params are added into it instead of function arguments.
+        normally as arguments for the _connect()_ function.
+        However, when using *pyodbc* or *ibm_db*, the connection is established using a *connection string* -
+        so all the custom params are added into it instead of function arguments.
 
         Set ``alias`` for `Handling multiple database connections`.
         If the same alias is given twice, then previous connection will be overridden.
