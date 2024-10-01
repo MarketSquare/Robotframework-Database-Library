@@ -320,7 +320,7 @@ class ConnectionManager:
 
         if db_api_module_name in ["ibm_db", "ibm_db_dbi"]:
             if os.name == "nt":
-                spec = importlib.util.find_spec("ibm_db")
+                spec = importlib.util.find_spec(db_api_module_name)
                 if spec is not None:
                     logger.info(
                         f"Importing DB module '{db_api_module_name}' on Windows requires configuring the DLL directory for CLI driver"
