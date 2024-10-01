@@ -91,6 +91,22 @@ Procedure Returns Multiple Result Sets
 Procedure With IF/ELSE Block
     Call Stored Procedure    check_condition
 
+MSSQL Procedure Returns OUT Param Without Result Sets
+    IF    "${DB_MODULE}" not in ["pymssql"]
+        Skip    This test is valid for pymssql only
+    END
+    @{params}=    Create List    give me 1    
+    @{out_params}=    Create List    ${9}    
+    ${param values}    ${result sets}=    Call Stored Procedure    return_out_param_without_result_sets    
+    ...    ${params}    additional_output_params=${out_params}
+    Should Be Empty    ${result sets}
+    Should Be Equal As Integers    ${param values}[1]    1
+    @{params}=    Create List    give me 0
+    ${param values}    ${result sets}=    Call Stored Procedure    return_out_param_without_result_sets    
+    ...    ${params}    additional_output_params=${out_params}
+        Should Be Empty    ${result sets}
+    Should Be Equal As Integers    ${param values}[1]    0
+
 
 *** Keywords ***
 Create And Fill Tables And Stored Procedures

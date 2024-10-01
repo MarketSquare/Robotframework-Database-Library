@@ -50,3 +50,20 @@ BEGIN
 PRINT 'Condition is false';
 END
 END;
+
+DROP PROCEDURE IF EXISTS return_out_param_without_result_sets;
+CREATE PROCEDURE 
+return_out_param_without_result_sets
+@my_input VARCHAR(20),
+@my_output INT OUTPUT
+AS
+BEGIN
+ IF @my_input = 'give me 1'
+    BEGIN
+        SELECT @my_output = 1;
+    END
+    ELSE
+    BEGIN
+        SELECT @my_output = 0;
+    END
+END;
