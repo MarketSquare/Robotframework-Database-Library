@@ -19,8 +19,6 @@ from DatabaseLibrary.connection_manager import ConnectionManager
 from DatabaseLibrary.query import Query
 from DatabaseLibrary.version import VERSION
 
-__version__ = VERSION
-
 
 class DatabaseLibrary(ConnectionManager, Query, Assertion):
     """
@@ -265,6 +263,7 @@ class DatabaseLibrary(ConnectionManager, Query, Assertion):
     """
 
     ROBOT_LIBRARY_SCOPE = "GLOBAL"
+    __version__ = VERSION
 
     def __init__(self, log_query_results=True, log_query_results_head=50):
         """
