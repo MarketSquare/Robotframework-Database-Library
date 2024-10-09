@@ -265,6 +265,7 @@ class DatabaseLibrary(ConnectionManager, Query, Assertion):
     """
 
     ROBOT_LIBRARY_SCOPE = "GLOBAL"
+    ROBOT_LIBRARY_VERSION = __version__
 
     def __init__(self, log_query_results=True, log_query_results_head=50):
         """
