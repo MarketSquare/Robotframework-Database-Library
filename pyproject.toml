@@ -31,7 +31,7 @@ dynamic = ["version"]
 "Keyword docs" = "http://marketsquare.github.io/Robotframework-Database-Library/"
 
 [tool.setuptools.dynamic]
-version = {attr = "DatabaseLibrary.__version__"}
+version = {attr = "DatabaseLibrary/version.py:VERSION"}
 
 [tool.black]
 line-length = 120
