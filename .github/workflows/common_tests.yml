@@ -115,6 +115,7 @@ jobs:
           MYSQL_DRIVER: mysql-connector-odbc-8.0.22-linux-glibc2.12-x86-64bit
 
       - name: Check ODBC setup
+        if: matrix.py_db_module == 'pyodbc'
         run: |
           echo "*** odbcinst -j"
           odbcinst -j

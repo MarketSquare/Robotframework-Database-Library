@@ -143,6 +143,7 @@ class ConnectionManager:
     def __init__(self):
         self.omit_trailing_semicolon: bool = False
         self.connection_store: ConnectionStore = ConnectionStore()
+        self.ibmdb_driver_already_added_to_path: bool = False
 
     @staticmethod
     def _hide_password_values(string_with_pass, params_separator=","):
@@ -320,18 +321,20 @@ class ConnectionManager:
 
         if db_api_module_name in ["ibm_db", "ibm_db_dbi"]:
             if os.name == "nt":
-                spec = importlib.util.find_spec(db_api_module_name)
-                if spec is not None:
-                    logger.info(
-                        f"Importing DB module '{db_api_module_name}' on Windows requires configuring the DLL directory for CLI driver"
-                    )
-                    site_packages_path = os.path.dirname(spec.origin)
-                    clidriver_bin_path = os.path.join(site_packages_path, "clidriver", "bin")
-                    if os.path.exists(clidriver_bin_path):
-                        os.add_dll_directory(clidriver_bin_path)
-                        logger.info(f"Added default CLI driver location to DLL search path: '{clidriver_bin_path}'")
-                    else:
-                        logger.info(f"Default CLI driver location folder not found: '{clidriver_bin_path}'")
+                if not self.ibmdb_driver_already_added_to_path:
+                    spec = importlib.util.find_spec(db_api_module_name)
+                    if spec is not None:
+                        logger.info(
+                            f"Importing DB module '{db_api_module_name}' on Windows requires configuring the DLL directory for CLI driver"
+                        )
+                        site_packages_path = os.path.dirname(spec.origin)
+                        clidriver_bin_path = os.path.join(site_packages_path, "clidriver", "bin")
+                        if os.path.exists(clidriver_bin_path):
+                            os.add_dll_directory(clidriver_bin_path)
+                            self.ibmdb_driver_already_added_to_path = True
+                            logger.info(f"Added default CLI driver location to DLL search path: '{clidriver_bin_path}'")
+                        else:
+                            logger.info(f"Default CLI driver location folder not found: '{clidriver_bin_path}'")
 
         db_api_2 = importlib.import_module(db_api_module_name)
 
