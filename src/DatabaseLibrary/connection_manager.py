@@ -464,7 +464,7 @@ class ConnectionManager:
             _log_all_connection_params(**con_params)
             db_connection = db_api_2.connect(**con_params)
             assert db_connection.thin == oracle_thin_mode, (
-                "Expected oracledb to run in thin mode: {oracle_thin_mode}, "
+                f"Expected oracledb to run in thin mode: {oracle_thin_mode}, "
                 f"but the connection has thin mode: {db_connection.thin}"
             )
             self.omit_trailing_semicolon = True
