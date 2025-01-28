@@ -99,7 +99,192 @@ Switching Default Alias
     Execute Sql String    drop table XYZ
 ```
 
+# Connection examples for different DB modules
+<details>
+<summary>Oracle (oracle_db)</summary>
 
+```RobotFramework
+# Thin mode is used by default
+Connect To Database
+...    oracledb
+...    db_name=db
+...    db_user=db_user
+...    db_password=pass
+...    db_host=127.0.0.1
+...    db_port=1521
+
+# Thick mode with default location of the Oracle Instant Client
+Connect To Database
+...    oracledb
+...    db_name=db
+...    db_user=db_user
+...    db_password=pass
+...    db_host=127.0.0.1
+...    db_port=1521
+...    oracle_driver_mode=thick
+    
+# Thick mode with custom location of the Oracle Instant Client
+Connect To Database
+...    oracledb
+...    db_name=db
+...    db_user=db_user
+...    db_password=pass
+...    db_host=127.0.0.1
+...    db_port=1521
+...    oracle_driver_mode=thick,lib_dir=C:/instant_client_23_5
+```
+</details>
+
+<details>
+<summary> PostgreSQL (psycopg2) </summary>
+
+```RobotFramework
+Connect To Database
+...    psycopg2
+...    db_name=db
+...    db_user=db_user
+...    db_password=pass
+...    db_host=127.0.0.1
+...    db_port=5432
+```
+</details>
+
+<details>
+<summary>Microsoft SQL Server (pymssql)</summary>
+
+```RobotFramework
+# UTF-8 charset is used by default
+Connect To Database
+...    pymssql
+...    db_name=db
+...    db_user=db_user
+...    db_password=pass
+...    db_host=127.0.0.1
+...    db_port=1433
+
+# Specifying a custom charset
+Connect To Database
+...    pymssql
+...    db_name=db
+...    db_user=db_user
+...    db_password=pass
+...    db_host=127.0.0.1
+...    db_port=1433
+...    db_charset=cp1252
+```
+</details>
+
+<details>
+<summary>MySQL (pymysql)</summary>
+
+```RobotFramework
+# UTF-8 charset is used by default
+Connect To Database
+...    pymysql
+...    db_name=db
+...    db_user=db_user
+...    db_password=pass
+...    db_host=127.0.0.1
+...    db_port=3306
+    
+# Specifying a custom charset
+Connect To Database
+...    pymysql
+...    db_name=db
+...    db_user=db_user
+...    db_password=pass
+...    db_host=127.0.0.1
+...    db_port=3306
+...    db_charset=cp1252
+```
+</details>
+
+<details>
+<summary>IBM DB2 (ibm_db)</summary>
+
+```RobotFramework
+Connect To Database
+...    ibm_db_dbi
+...    db_name=db
+...    db_user=db_user
+...    db_password=pass
+...    db_host=127.0.0.1
+...    db_port=50000
+```
+</details>
+
+<details>
+<summary>MySQL via ODBC (pyodbc)</summary>
+
+```RobotFramework
+# ODBC driver name is required
+# ODBC driver itself has to be installed
+Connect To Database
+...    pyodbc
+...    db_name=db
+...    db_user=db_user
+...    db_password=pass
+...    db_host=127.0.0.1
+...    db_port=3306
+...    odbc_driver={MySQL ODBC 8.0 ANSI Driver}
+    
+# Specifying a custom charset if needed
+Connect To Database
+...    pyodbc
+...    db_name=db
+...    db_user=db_user
+...    db_password=pass
+...    db_host=127.0.0.1
+...    db_port=3306
+...    odbc_driver={MySQL ODBC 8.0 ANSI Driver}
+...    db_charset=latin1 
+```
+</details>
+
+<details>
+<summary>Oracle via JDBC (jaydebeapi)</summary>
+
+```RobotFramework
+# Username and password must be set as a dictionary
+VAR    &{CREDENTIALS}    user=db_user    password=pass
+
+# JAR file with Oracle JDBC driver is required
+# Jaydebeapi is not "natively" supported by the Database Library,
+# so using the custom parameters
+Connect To Database
+...    jaydebeapi
+...    jclassname=oracle.jdbc.driver.OracleDriver
+...    url=jdbc:oracle:thin:@127.0.0.1:1521/db
+...    driver_args=${CREDENTIALS}
+...    jars=C:/ojdbc17.jar    
+```
+</details>
+
+<details>
+<summary>SQLite (sqlite3)</summary>
+
+```RobotFramework
+# Using custom parameters required
+Connect To Database  
+...    sqlite3
+...    database=./my_database.db
+...    isolation_level=${None}
+```
+</details>
+
+<details>
+<summary>Teradata (teradata)</summary>
+
+```RobotFramework
+Connect To Database
+...    teradata
+...    db_name=db
+...    db_user=db_user
+...    db_password=pass
+...    db_host=127.0.0.1
+...    db_port=1025
+```
+</details>
 
 # Using configuration file
 The `Connect To Database` keyword allows providing the connection parameters in two ways:
@@ -224,6 +409,8 @@ using the `Set Auto Commit` keyword.
 This has no impact on the automatic commit/rollback behavior in library keywords (described above).
 
 # Database modules compatibility
+> Looking for [Connection examples for different DB modules](#connection-examples-for-different-db-modules)?   
+
 The library is basically compatible with any [Python Database API Specification 2.0](https://peps.python.org/pep-0249/) module.
 
 However, the actual implementation in existing Python modules is sometimes quite different, which requires custom handling in the library.

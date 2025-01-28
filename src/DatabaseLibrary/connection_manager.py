@@ -230,11 +230,13 @@ class ConnectionManager:
 
         *The old parameters will be removed in future versions.*
 
-        === Examples ===
-        | Connect To Database | psycopg2 | my_db | user | pass | tiger.foobar.com | 5432 |
-        | Connect To Database | psycopg2 | my_db | user | pass | tiger.foobar.com | 5432 | my_custom_param=value |
-        | Connect To Database | psycopg2 | my_db | user | pass | tiger.foobar.com | 5432 | alias=my_alias |
+        == Basic examples ==
+        | Connect To Database | psycopg2 | my_db | user | pass | 127.0.0.1 | 5432 |
+        | Connect To Database | psycopg2 | my_db | user | pass | 127.0.0.1 | 5432 | my_custom_param=value |
+        | Connect To Database | psycopg2 | my_db | user | pass | 127.0.0.1 | 5432 | alias=my_alias |
         | Connect To Database | config_file=my_db_params.cfg |
+
+        See `Connection examples for different DB modules`.
         """
         config = ConfigReader(config_file, alias)
 
