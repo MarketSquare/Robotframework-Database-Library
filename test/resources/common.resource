@@ -34,7 +34,7 @@ Connect To DB
     IF    "${DB_MODULE_MODE}" == "custom"
         IF    "${DB_MODULE}" == "sqlite3"
             Remove File    ${DBName}.db
-            Connect To Database Using Custom Params    sqlite3    database="./${DBName}.db", isolation_level=None
+            Connect To Database    sqlite3    database=./${DBName}.db    isolation_level=${None}
             ...    &{DB_KWARGS}
         ELSE
             ${Connection String}=    Build Connection String
