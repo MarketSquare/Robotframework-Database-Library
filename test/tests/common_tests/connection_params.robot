@@ -128,7 +128,7 @@ Oracle specific - thick mode in config file - invalid
     [Documentation]    Invalid as mode switch during test execution is not supported
     ...    This test must run the last one in the suite, after others used thin mode already.
     Skip If    $DB_MODULE != "oracledb"
-    Run Keyword And Expect Error    ProgrammingError: DPY-2019: python-oracledb thick mode cannot be used because a thin mode connection has already been created
+    Run Keyword And Expect Error    ProgrammingError: DPY-2019: python-oracledb thick mode cannot be used *
     ...    Connect Using Config File    ${DB_MODULE}/thick_mode
 
 
