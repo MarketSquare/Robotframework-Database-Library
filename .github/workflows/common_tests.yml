@@ -155,6 +155,15 @@ jobs:
         run: |
           pip install ${{ matrix.pip_install }}
      
+      - name: Check ODBC setup AGAIN
+        if: matrix.py_db_module == 'pyodbc'
+        run: |
+          if [ -f /usr/lib/x86_64-linux-gnu/odbc/libmyodbc8a.so ]; then
+            echo 'File exists'
+          else
+            echo 'File does not exist'
+          fi
+      
       - name: Tests for ${{ matrix.job_name }}
         working-directory: ./test
         run: >-
