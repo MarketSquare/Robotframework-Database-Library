@@ -127,11 +127,6 @@ jobs:
           ls -l /opt/microsoft/msodbcsql17/lib64 || true
           echo '*** ls -l /usr/lib/x86_64-linux-gnu/odbc'
           ls -l /usr/lib/x86_64-linux-gnu/odbc || true
-          if [ -f /usr/lib/x86_64-linux-gnu/odbc/libmyodbc8a.so ]; then
-            echo 'File exists'
-          else
-            echo 'File does not exist'
-          fi
 
       - name: Check out repository code
         uses: actions/checkout@v3
@@ -154,15 +149,6 @@ jobs:
 
         run: |
           pip install ${{ matrix.pip_install }}
-     
-      - name: Check ODBC setup AGAIN
-        if: matrix.py_db_module == 'pyodbc'
-        run: |
-          if [ -f /usr/lib/x86_64-linux-gnu/odbc/libmyodbc8a.so ]; then
-            echo 'File exists'
-          else
-            echo 'File does not exist'
-          fi
       
       - name: Tests for ${{ matrix.job_name }}
         working-directory: ./test
