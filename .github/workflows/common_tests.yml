@@ -96,15 +96,23 @@ jobs:
       - name: Install ODBC driver for MySQL
         if: matrix.py_db_module == 'pyodbc'
         run: |
-          echo "*** apt-get install the driver"
-          sudo apt-get update
-          sudo apt-get install --yes odbc-mysql
-          echo '*** ls -l /usr/lib/x86_64-linux-gnu/odbc'
-          ls -l /usr/lib/x86_64-linux-gnu/odbc || true
-          echo '*** add full paths to MySQL .so files in /etc/odbcinst.ini'
-          sudo sed -i 's|Driver=myodbc8a.so|Driver=/usr/lib/x86_64-linux-gnu/odbc/myodbc8a.so|g' /etc/odbcinst.ini
-          sudo sed -i 's|Driver=myodbc8w.so|Driver=/usr/lib/x86_64-linux-gnu/odbc/myodbc8w.so|g' /etc/odbcinst.ini
-          sudo sed -i 's|Setup=libodbcmyS.so|Setup=/usr/lib/x86_64-linux-gnu/odbc/libodbcmyS.so|g' /etc/odbcinst.ini
+          cd "$RUNNER_TEMP"
+          echo "*** download driver zip file"
+          curl --silent --show-error --write-out "$CURL_OUTPUT_FORMAT" -O "https://www.mirrorservice.org/sites/ftp.mysql.com/Downloads/Connector-ODBC/8.0/${MYSQL_DRIVER}.tar.gz"
+          ls -l "${MYSQL_DRIVER}.tar.gz"
+          tar -xz -f "${MYSQL_DRIVER}.tar.gz"
+          echo "*** copy driver file to /usr/lib"
+          sudo cp -v "${MYSQL_DRIVER}/lib/libmyodbc8a.so" /usr/lib/x86_64-linux-gnu/odbc/
+          sudo chmod a+r /usr/lib/x86_64-linux-gnu/odbc/libmyodbc8a.so
+          echo "*** create odbcinst.ini entry"
+          echo '[MySQL ODBC 8.0 ANSI Driver]' > mysql_odbcinst.ini
+          echo 'Driver     = /usr/lib/x86_64-linux-gnu/odbc/libmyodbc8a.so' >> mysql_odbcinst.ini
+          echo 'UsageCount = 1' >> mysql_odbcinst.ini
+          echo 'Threading  = 2' >> mysql_odbcinst.ini
+          sudo odbcinst -i -d -f mysql_odbcinst.ini
+        env:
+          CURL_OUTPUT_FORMAT: '%{http_code} %{filename_effective} %{size_download} %{time_total}\n'
+          MYSQL_DRIVER: mysql-connector-odbc-8.0.22-linux-glibc2.12-x86-64bit
 
       - name: Check ODBC setup
         if: matrix.py_db_module == 'pyodbc'
