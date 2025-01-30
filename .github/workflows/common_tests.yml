@@ -101,7 +101,7 @@ jobs:
           curl --silent --show-error --write-out "$CURL_OUTPUT_FORMAT" -O "https://dev.mysql.com/get/Downloads/Connector-ODBC/9.2/${MYSQL_DRIVER}"
           ls -l "${MYSQL_DRIVER}"
           echo "*** apt-get install the driver"
-          sudo apt-get install --yes ./{MYSQL_DRIVER}
+          sudo apt-get install --yes "./{MYSQL_DRIVER}"
         env:
             CURL_OUTPUT_FORMAT: '%{http_code} %{filename_effective} %{size_download} %{time_total}\n'
             MYSQL_DRIVER: mysql-connector-odbc_9.2.0-1ubuntu24.10_amd64.deb
