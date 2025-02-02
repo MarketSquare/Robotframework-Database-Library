@@ -31,12 +31,13 @@ class Connection:
 
 
 class ConnectionStore:
-    def __init__(self):
+    def __init__(self, warn_on_overwrite=True):
         self._connections: Dict[str, Connection] = {}
         self.default_alias: str = "default"
+        self.warn_on_overwrite = warn_on_overwrite
 
     def register_connection(self, client: Any, module_name: str, alias: str):
-        if alias in self._connections:
+        if alias in self._connections and self.warn_on_overwrite:
             if alias == self.default_alias:
                 logger.warn("Overwriting not closed connection.")
             else:
@@ -140,9 +141,9 @@ class ConnectionManager:
     Connection Manager handles the connection & disconnection to the database.
     """
 
-    def __init__(self):
+    def __init__(self, warn_on_connection_overwrite):
         self.omit_trailing_semicolon: bool = False
-        self.connection_store: ConnectionStore = ConnectionStore()
+        self.connection_store: ConnectionStore = ConnectionStore(warn_on_overwrite=warn_on_connection_overwrite)
         self.ibmdb_driver_already_added_to_path: bool = False
 
     @staticmethod
@@ -219,6 +220,9 @@ class ConnectionManager:
         - _thin_ (default if omitted)
         - _thick_
         - _thick,lib_dir=<PATH_TO_ORACLE_CLIENT>_
+
+        By default, there is a warning when overwriting an existing connection (i.e. not closing it properly).
+        This can be disabled by setting the ``warn_on_connection_overwrite`` parameter to *False* in the library import.
 
         === Some parameters were renamed in version 2.0 ===
         The old parameters ``dbapiModuleName``, ``dbName``, ``dbUsername``,

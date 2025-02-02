@@ -401,14 +401,17 @@ class DatabaseLibrary(ConnectionManager, Query, Assertion):
     ROBOT_LIBRARY_SCOPE = "GLOBAL"
     ROBOT_LIBRARY_VERSION = __version__
 
-    def __init__(self, log_query_results=True, log_query_results_head=50):
+    def __init__(self, log_query_results=True, log_query_results_head=50, warn_on_connection_overwrite=True):
         """
         The library can be imported without any arguments:
         | *** Settings ***
         | Library    DatabaseLibrary
-        Use optional library import parameters to disable `Logging query results` or setup the log head.
+
+        Use optional library import parameters:
+        - ``log_query_results`` and ``log_query_results_head`` to disable `Logging query results` or setup the log head
+        - ``warn_on_connection_overwrite`` to disable the warning about overwriting an existing connection
         """
-        ConnectionManager.__init__(self)
+        ConnectionManager.__init__(self, warn_on_connection_overwrite=warn_on_connection_overwrite)
         if log_query_results_head < 0:
             raise ValueError(f"Wrong log head value provided: {log_query_results_head}. The value can't be negative!")
         Query.__init__(self, log_query_results=log_query_results, log_query_results_head=log_query_results_head)
