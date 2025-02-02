@@ -81,6 +81,11 @@ jobs:
           - 3306:3306
         
     steps:
+    
+      - name: Install unixodbc
+        if: matrix.py_db_module == 'pyodbc'
+        run: sudo apt-get update && sudo apt-get install -y unixodbc
+    
       - name: Install ODBC driver for PostgreSQL
         if: matrix.py_db_module == 'pyodbc'
         run: |
