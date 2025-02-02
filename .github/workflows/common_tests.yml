@@ -105,7 +105,7 @@ jobs:
           echo "*** download driver"
           curl --silent --show-error --write-out "$CURL_OUTPUT_FORMAT" -O -L "https://dev.mysql.com/get/Downloads/Connector-ODBC/9.2/${MYSQL_DRIVER}"
           ls -l "${MYSQL_DRIVER}"
-          echo "*** apt-get install the driver"
+          echo "*** install the driver"
           sudo dpkg -i "./${MYSQL_DRIVER}"
           sudo apt-get install -f
         env:
