@@ -11,7 +11,7 @@ env:
   
   # options for pyodbc only
   DB_CHARSET: utf8mb4
-  DB_DRIVER: "{MySQL ODBC 8.0 ANSI Driver}"
+  DB_DRIVER: "{MySQL ODBC 9.2 ANSI Driver}"
 
 jobs:
   tests:
