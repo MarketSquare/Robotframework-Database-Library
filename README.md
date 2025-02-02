@@ -226,7 +226,7 @@ Connect To Database
 ...    db_password=pass
 ...    db_host=127.0.0.1
 ...    db_port=3306
-...    odbc_driver={MySQL ODBC 8.0 ANSI Driver}
+...    odbc_driver={MySQL ODBC 9.2 ANSI Driver}
     
 # Specifying a custom charset if needed
 Connect To Database
@@ -236,7 +236,7 @@ Connect To Database
 ...    db_password=pass
 ...    db_host=127.0.0.1
 ...    db_port=3306
-...    odbc_driver={MySQL ODBC 8.0 ANSI Driver}
+...    odbc_driver={MySQL ODBC 9.2 ANSI Driver}
 ...    db_charset=latin1 
 ```
 </details>

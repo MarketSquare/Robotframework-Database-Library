@@ -156,7 +156,7 @@ MySQL specific - charset in config file - invalid
 
 PyODBC specific - charset in config file - invalid
     Skip If    $DB_MODULE not in ["pyodbc"]
-    Run Keyword And Expect Error    REGEXP: .*Can't initialize character set wrong.*
+    Run Keyword And Expect Error    REGEXP: .*Unknown character set: 'wrong'.*
     ...    Connect Using Config File    ${DB_MODULE}/charset_invalid
 
 
