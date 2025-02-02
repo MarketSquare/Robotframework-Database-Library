@@ -168,5 +168,5 @@ jobs:
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
-          name: log-files
+          name: log-files-${{ matrix.job_name }}
           path: ./test/results/
