@@ -166,7 +166,7 @@ jobs:
       
       - name: Upload Robot Logs
         if: ${{ always() }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: log-files
           path: ./test/results/
