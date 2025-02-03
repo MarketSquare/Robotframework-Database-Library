@@ -20,6 +20,7 @@ from typing import List, Optional, Tuple
 
 from robot.api import logger
 
+from .connection_manager import Connection
 from .params_decorator import renamed_args
 
 
@@ -87,9 +88,8 @@ class Query:
             if return_dict:
                 return [dict(zip(col_names, row)) for row in all_rows]
             return all_rows
-        finally:
-            if cur and not no_transaction:
-                db_connection.client.rollback()
+        except Exception as e:
+            self._rollback_and_raise(db_connection, no_transaction, e)
 
     @renamed_args(mapping={"selectStatement": "select_statement", "sansTran": "no_transaction"})
     def row_count(
@@ -140,9 +140,8 @@ class Query:
             logger.info(f"Retrieved {current_row_count} rows")
             self._log_query_results(col_names, data)
             return current_row_count
-        finally:
-            if cur and not no_transaction:
-                db_connection.client.rollback()
+        except Exception as e:
+            self._rollback_and_raise(db_connection, no_transaction, e)
 
     @renamed_args(mapping={"selectStatement": "select_statement", "sansTran": "no_transaction"})
     def description(
@@ -189,9 +188,8 @@ class Query:
                 for row in range(0, len(description)):
                     description[row] = (description[row][0].encode("utf-8"),) + description[row][1:]
             return description
-        finally:
-            if cur and not no_transaction:
-                db_connection.client.rollback()
+        except Exception as e:
+            self._rollback_and_raise(db_connection, no_transaction, e)
 
     @renamed_args(mapping={"tableName": "table_name", "sansTran": "no_transaction"})
     def delete_all_rows_from_table(
@@ -229,15 +227,11 @@ class Query:
         try:
             cur = db_connection.client.cursor()
             result = self._execute_sql(cur, query)
+            self._commit_if_needed(db_connection, no_transaction)
             if result is not None:
-                if not no_transaction:
-                    db_connection.client.commit()
                 return result
-            if not no_transaction:
-                db_connection.client.commit()
-        finally:
-            if cur and not no_transaction:
-                db_connection.client.rollback()
+        except Exception as e:
+            self._rollback_and_raise(db_connection, no_transaction, e)
 
     @renamed_args(mapping={"sqlScriptFileName": "script_path", "sansTran": "no_transaction"})
     def execute_sql_script(
@@ -348,11 +342,9 @@ class Query:
                         line_ends_with_proc_end = re.compile(r"(\s|;)" + proc_end_pattern.pattern + "$")
                         omit_semicolon = not line_ends_with_proc_end.search(statement.lower())
                         self._execute_sql(cur, statement, omit_semicolon)
-                if not no_transaction:
-                    db_connection.client.commit()
-            finally:
-                if cur and not no_transaction:
-                    db_connection.client.rollback()
+                self._commit_if_needed(db_connection, no_transaction)
+            except Exception as e:
+                self._rollback_and_raise(db_connection, no_transaction, e)
 
     @renamed_args(
         mapping={
@@ -410,11 +402,9 @@ class Query:
         try:
             cur = db_connection.client.cursor()
             self._execute_sql(cur, sql_string, omit_trailing_semicolon=omit_trailing_semicolon, parameters=parameters)
-            if not no_transaction:
-                db_connection.client.commit()
-        finally:
-            if cur and not no_transaction:
-                db_connection.client.rollback()
+            self._commit_if_needed(db_connection, no_transaction)
+        except Exception as e:
+            self._rollback_and_raise(db_connection, no_transaction, e)
 
     @renamed_args(mapping={"spName": "procedure_name", "spParams": "procedure_params", "sansTran": "no_transaction"})
     def call_stored_procedure(
@@ -717,13 +707,10 @@ class Query:
                     else:
                         result_sets_available = False
 
-            if not no_transaction:
-                db_connection.client.commit()
-
+            self._commit_if_needed(db_connection, no_transaction)
             return param_values, result_sets
-        finally:
-            if cur and not no_transaction:
-                db_connection.client.rollback()
+        except Exception as e:
+            self._rollback_and_raise(db_connection, no_transaction, e)
 
     def set_logging_query_results(self, enabled: Optional[bool] = None, log_head: Optional[int] = None):
         """
@@ -770,6 +757,22 @@ class Query:
                 html=True,
             )
             return cur.execute(sql_statement, parameters)
+
+    def _commit_if_needed(self, db_connection: Connection, no_transaction):
+        if no_transaction:
+            logger.info(f"Perform no commit, because 'no_transaction' set to {no_transaction}")
+        else:
+            logger.info("Commit the transaction")
+            db_connection.client.commit()
+
+    def _rollback_and_raise(self, db_connection: Connection, no_transaction, e):
+        logger.info(f"Error occurred: {e}")
+        if no_transaction:
+            logger.info(f"Perform no rollback, because 'no_transaction' set to {no_transaction}")
+        else:
+            logger.info("Rollback the transaction")
+            db_connection.client.rollback()
+        raise e
 
     def _log_query_results(self, col_names, result_rows, log_head: Optional[int] = None):
         """
