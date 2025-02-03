@@ -1,0 +1,41 @@
+[build-system]
+requires = [
+    "setuptools>=61.0",
+    "robotframework>=5.0.1",
+    "robotframework-assertion-engine"
+    ]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "robotframework-databaselibrary"
+authors = [{name="Franz Allan Valencia See", email="franz.see@gmail.com"},
+]
+description = "Database Library for Robot Framework"
+readme = "README.md"
+requires-python = ">=3.8.1"
+dependencies = [
+    "robotframework>=5.0.1",
+    "robotframework-excellib",
+    "robotframework-assertion-engine"
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+]
+license = {text = "Apache License 2.0"}
+dynamic = ["version"]
+
+[project.urls]
+"Homepage" = "https://github.com/MarketSquare/Robotframework-Database-Library"
+"Keyword docs" = "http://marketsquare.github.io/Robotframework-Database-Library/"
+
+[tool.setuptools.dynamic]
+version = {attr = "DatabaseLibrary.__version__"}
+
+[tool.black]
+line-length = 120
+
+[tool.isort]
+profile = "black"
+line_length = 120

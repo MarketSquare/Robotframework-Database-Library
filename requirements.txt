@@ -1,3 +1,7 @@
-#PyMySQL==0.7.4
-#psycopg2==2.6.1
-robotframework>=3.0
+robotframework
+robotframework-excellib
+robotframework-assertion-engine
+psycopg2-binary
+pre-commit
+build
+twine

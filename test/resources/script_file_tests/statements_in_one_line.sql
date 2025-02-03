@@ -1,0 +1,1 @@
+INSERT INTO person VALUES(6, 'Julian', 'Bashir'); INSERT INTO person VALUES(7, 'Jadzia', 'Dax');

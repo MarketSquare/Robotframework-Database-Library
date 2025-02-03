@@ -1,0 +1,12 @@
+{
+    "files.exclude": {
+        "**/.git": true,
+        "**/__pycache__": true
+    },
+    "robot.lint.robocop.enabled": true,
+    "robot.lint.unusedKeyword":false,
+    "robot.interactiveConsole.arguments": [
+        "--output", "${workspaceRoot}/logs/interactive_console.xml"
+    ],
+    "python.analysis.completeFunctionParens": true,
+}
