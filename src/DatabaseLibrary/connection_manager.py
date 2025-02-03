@@ -44,7 +44,7 @@ class ConnectionStore:
                 logger.warn(f"Overwriting not closed connection for alias = '{alias}'")
         self._connections[alias] = Connection(client, module_name)
 
-    def get_connection(self, alias: Optional[str]):
+    def get_connection(self, alias: Optional[str]) -> Connection:
         """
         Return connection with given alias.
 
@@ -61,7 +61,7 @@ class ConnectionStore:
             raise ValueError(f"Alias '{alias}' not found in existing connections.")
         return self._connections[alias]
 
-    def pop_connection(self, alias: Optional[str]):
+    def pop_connection(self, alias: Optional[str]) -> Connection:
         if not self._connections:
             return None
         if not alias:
@@ -639,7 +639,10 @@ class ConnectionManager:
         | Set Auto Commit | True  | alias=postgres |
         """
         db_connection = self.connection_store.get_connection(alias)
-        db_connection.client.autocommit = auto_commit
+        if db_connection.module_name == "jaydebeapi":
+            db_connection.client.jconn.setAutoCommit(auto_commit)
+        else:
+            db_connection.client.autocommit = auto_commit
 
     def switch_database(self, alias: str):
         """
