@@ -141,7 +141,7 @@ class ConnectionManager:
     Connection Manager handles the connection & disconnection to the database.
     """
 
-    def __init__(self, warn_on_connection_overwrite):
+    def __init__(self, warn_on_connection_overwrite=True):
         self.omit_trailing_semicolon: bool = False
         self.connection_store: ConnectionStore = ConnectionStore(warn_on_overwrite=warn_on_connection_overwrite)
         self.ibmdb_driver_already_added_to_path: bool = False
