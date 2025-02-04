@@ -200,7 +200,7 @@ Connect To Database
 </details>
 
 <details>
-<summary>IBM DB2 (ibm_db)</summary>
+<summary>IBM DB2 (ibm_db_dbi)</summary>
 
 ```RobotFramework
 Connect To Database
@@ -447,8 +447,8 @@ Therefore there are some modules, which are "natively" supported in the library 
 ### Teradata
 - [teradata](https://github.com/teradata/PyTd)
 ### IBM DB2
-- [ibm_db](https://github.com/ibmdb/python-ibmdb)
-- [ibm_db_dbi](https://github.com/ibmdb/python-ibmdb)
+- The Python package to be installed is [ibm_db](https://github.com/ibmdb/python-ibmdb). It includes two modules - `ibm_db` and `ibm_db_dbi`.   
+- *Using `ibm_db_dbi` is highly recommended* as only this module is Python DB API 2.0 compatible. See [official docs](https://www.ibm.com/docs/en/db2/12.1?topic=applications-python-sqlalchemy-django-framework).
 ### ODBC
 - [pyodbc](https://github.com/mkleehammer/pyodbc)
 - [pypyodbc](https://github.com/pypyodbc/pypyodbc)

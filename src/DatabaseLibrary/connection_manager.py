@@ -209,7 +209,7 @@ class ConnectionManager:
 
         Other custom params from keyword arguments and config file are passed to the Python DB module as provided -
         normally as arguments for the _connect()_ function.
-        However, when using *pyodbc* or *ibm_db*, the connection is established using a *connection string* -
+        However, when using *pyodbc* or *ibm_db_dbi*, the connection is established using a *connection string* -
         so all the custom params are added into it instead of function arguments.
 
         Set ``alias`` for `Handling multiple database connections`.

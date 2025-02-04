@@ -386,7 +386,7 @@ class DatabaseLibrary(ConnectionManager, Query, Assertion):
     === Oracle ===
     [https://oracle.github.io/python-oracledb/|oracledb]
     - Both thick and thin client modes are supported - you can select one using the `oracle_driver_mode` parameter.
-    - However, due to current limitations of the oracledb module, **it's not possible to switch between thick and thin modes during a test execution session** - even in different suites.
+    - However, due to current limitations of the oracledb module, *it's not possible to switch between thick and thin modes during a test execution session* - even in different suites.
 
     [https://oracle.github.io/python-cx_Oracle/|cx_Oracle]
 
@@ -402,8 +402,8 @@ class DatabaseLibrary(ConnectionManager, Query, Assertion):
     === Teradata ===
     - [https://github.com/teradata/PyTd|teradata]
     === IBM DB2 ===
-    - [https://github.com/ibmdb/python-ibmdb|ibm_db]
-    - [https://github.com/ibmdb/python-ibmdb|ibm_db_dbi]
+    - The Python package to be installed is [https://github.com/ibmdb/python-ibmdb|ibm_db]. It includes two modules - `ibm_db` and `ibm_db_dbi`.
+    - Using *`ibm_db_dbi` is highly recommended* as only this module is Python DB API 2.0 compatible. See [https://www.ibm.com/docs/en/db2/12.1?topic=applications-python-sqlalchemy-django-framework|official docs].
     === ODBC ===
     - [https://github.com/mkleehammer/pyodbc|pyodbc]
     - [https://github.com/pypyodbc/pypyodbc|pypyodbc]
