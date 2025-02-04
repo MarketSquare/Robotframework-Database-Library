@@ -46,6 +46,7 @@ Connect To DB
             Connect To Database    ${DB_MODULE}    jclassname=${DRIVER_CLASSNAME}    url=${JDBC_URL}
             ...    driver_args=${DRIVER_ARGS}    jars=${DRIVER_PATH}    &{DB_KWARGS}
             Set Auto Commit    False    alias=${alias}
+            Set Omit Trailing Semicolon    True    alias=${alias}
         ELSE
             ${Connection String}=    Build Connection String
             Connect To Database Using Custom Connection String    ${DB_MODULE}    ${Connection String}    &{DB_KWARGS}
