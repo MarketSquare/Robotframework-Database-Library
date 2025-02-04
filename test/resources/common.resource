@@ -21,6 +21,12 @@ ${DB_USER}              db_user
 # used for MySQL via PyODBC only
 ${DB_DRIVER}            ODBC Driver 18 for SQL Server
 
+# Oracle via Jaydebeapi
+${DRIVER_PATH}          ${CURDIR}/ojdbc17.jar
+${DRIVER_CLASSNAME}     oracle.jdbc.driver.OracleDriver
+&{DRIVER_ARGS}          user=${DB_USER}    password=${DB_PASS}
+${JDBC_URL}             jdbc:oracle:thin:@${DB_HOST}:${DB_PORT}/${DB_NAME}
+
 
 *** Keywords ***
 Connect To DB
@@ -34,8 +40,13 @@ Connect To DB
     IF    "${DB_MODULE_MODE}" == "custom"
         IF    "${DB_MODULE}" == "sqlite3"
             Remove File    ${DBName}.db
-            Connect To Database Using Custom Params    sqlite3    database="./${DBName}.db", isolation_level=None
+            Connect To Database    sqlite3    database=./${DBName}.db    isolation_level=${None}
             ...    &{DB_KWARGS}
+        ELSE IF    "${DB_MODULE}" == "jaydebeapi"
+            Connect To Database    ${DB_MODULE}    jclassname=${DRIVER_CLASSNAME}    url=${JDBC_URL}
+            ...    driver_args=${DRIVER_ARGS}    jars=${DRIVER_PATH}    &{DB_KWARGS}
+            Set Auto Commit    False    alias=${alias}
+            Set Omit Trailing Semicolon    True    alias=${alias}
         ELSE
             ${Connection String}=    Build Connection String
             Connect To Database Using Custom Connection String    ${DB_MODULE}    ${Connection String}    &{DB_KWARGS}

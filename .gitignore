@@ -13,3 +13,4 @@ report.html
 venv
 .runNumber
 .DS_Store
+test/resources/ojdbc17.jar

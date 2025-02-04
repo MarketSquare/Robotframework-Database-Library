@@ -99,7 +99,198 @@ Switching Default Alias
     Execute Sql String    drop table XYZ
 ```
 
+# Connection examples for different DB modules
+<details>
+<summary>Oracle (oracle_db)</summary>
 
+```RobotFramework
+# Thin mode is used by default
+Connect To Database
+...    oracledb
+...    db_name=db
+...    db_user=db_user
+...    db_password=pass
+...    db_host=127.0.0.1
+...    db_port=1521
+
+# Thick mode with default location of the Oracle Instant Client
+Connect To Database
+...    oracledb
+...    db_name=db
+...    db_user=db_user
+...    db_password=pass
+...    db_host=127.0.0.1
+...    db_port=1521
+...    oracle_driver_mode=thick
+    
+# Thick mode with custom location of the Oracle Instant Client
+Connect To Database
+...    oracledb
+...    db_name=db
+...    db_user=db_user
+...    db_password=pass
+...    db_host=127.0.0.1
+...    db_port=1521
+...    oracle_driver_mode=thick,lib_dir=C:/instant_client_23_5
+```
+</details>
+
+<details>
+<summary> PostgreSQL (psycopg2) </summary>
+
+```RobotFramework
+Connect To Database
+...    psycopg2
+...    db_name=db
+...    db_user=db_user
+...    db_password=pass
+...    db_host=127.0.0.1
+...    db_port=5432
+```
+</details>
+
+<details>
+<summary>Microsoft SQL Server (pymssql)</summary>
+
+```RobotFramework
+# UTF-8 charset is used by default
+Connect To Database
+...    pymssql
+...    db_name=db
+...    db_user=db_user
+...    db_password=pass
+...    db_host=127.0.0.1
+...    db_port=1433
+
+# Specifying a custom charset
+Connect To Database
+...    pymssql
+...    db_name=db
+...    db_user=db_user
+...    db_password=pass
+...    db_host=127.0.0.1
+...    db_port=1433
+...    db_charset=cp1252
+```
+</details>
+
+<details>
+<summary>MySQL (pymysql)</summary>
+
+```RobotFramework
+# UTF-8 charset is used by default
+Connect To Database
+...    pymysql
+...    db_name=db
+...    db_user=db_user
+...    db_password=pass
+...    db_host=127.0.0.1
+...    db_port=3306
+    
+# Specifying a custom charset
+Connect To Database
+...    pymysql
+...    db_name=db
+...    db_user=db_user
+...    db_password=pass
+...    db_host=127.0.0.1
+...    db_port=3306
+...    db_charset=cp1252
+```
+</details>
+
+<details>
+<summary>IBM DB2 (ibm_db_dbi)</summary>
+
+```RobotFramework
+Connect To Database
+...    ibm_db_dbi
+...    db_name=db
+...    db_user=db_user
+...    db_password=pass
+...    db_host=127.0.0.1
+...    db_port=50000
+```
+</details>
+
+<details>
+<summary>MySQL via ODBC (pyodbc)</summary>
+
+```RobotFramework
+# ODBC driver name is required
+# ODBC driver itself has to be installed
+Connect To Database
+...    pyodbc
+...    db_name=db
+...    db_user=db_user
+...    db_password=pass
+...    db_host=127.0.0.1
+...    db_port=3306
+...    odbc_driver={MySQL ODBC 9.2 ANSI Driver}
+    
+# Specifying a custom charset if needed
+Connect To Database
+...    pyodbc
+...    db_name=db
+...    db_user=db_user
+...    db_password=pass
+...    db_host=127.0.0.1
+...    db_port=3306
+...    odbc_driver={MySQL ODBC 9.2 ANSI Driver}
+...    db_charset=latin1 
+```
+</details>
+
+<details>
+<summary>Oracle via JDBC (jaydebeapi)</summary>
+
+```RobotFramework
+# Username and password must be set as a dictionary
+VAR    &{CREDENTIALS}    user=db_user    password=pass
+
+# JAR file with Oracle JDBC driver is required
+# Jaydebeapi is not "natively" supported by the Database Library,
+# so using the custom parameters
+Connect To Database
+...    jaydebeapi
+...    jclassname=oracle.jdbc.driver.OracleDriver
+...    url=jdbc:oracle:thin:@127.0.0.1:1521/db
+...    driver_args=${CREDENTIALS}
+...    jars=C:/ojdbc17.jar    
+
+# Set if getting error 'Could not commit/rollback with auto-commit enabled'
+Set Auto Commit    False    
+
+# Set for automatically removing trailing ';' (might be helpful for Oracle)
+Set Omit Trailing Semicolon    True    
+```
+</details>
+
+<details>
+<summary>SQLite (sqlite3)</summary>
+
+```RobotFramework
+# Using custom parameters required
+Connect To Database  
+...    sqlite3
+...    database=./my_database.db
+...    isolation_level=${None}
+```
+</details>
+
+<details>
+<summary>Teradata (teradata)</summary>
+
+```RobotFramework
+Connect To Database
+...    teradata
+...    db_name=db
+...    db_user=db_user
+...    db_password=pass
+...    db_host=127.0.0.1
+...    db_port=1025
+```
+</details>
 
 # Using configuration file
 The `Connect To Database` keyword allows providing the connection parameters in two ways:
@@ -182,7 +373,7 @@ The retry mechanism is disabled by default - ``retry_timeout`` is set to ``0``.
 ${sql}=   Catenate    SELECT first_name FROM person
 Check Row Count     ${sql}  ==        2      retry_timeout=10 seconds
 Check Query Result  ${sql}  contains  Allan  retry_timeout=5s  retry_pause=1s
-````
+```
 
 # Logging query results
 Keywords, that fetch results of a SQL query, print the result rows as a table in RF log.
@@ -204,7 +395,7 @@ Library    DatabaseLibrary    log_query_results_head=10
 
 # Logging of query results is enabled (default), log head limit is disabled (log all rows).
 Library    DatabaseLibrary    log_query_results_head=0
-````
+```
 
 # Commit behavior
 While creating a database connection, the library doesn't explicitly set the _autocommit_ behavior -
@@ -223,7 +414,22 @@ It's also possible to explicitly set the _autocommit_ behavior on the Python DB 
 using the `Set Auto Commit` keyword.
 This has no impact on the automatic commit/rollback behavior in library keywords (described above).
 
+# Omitting trailing semicolon behavior
+Some databases (e.g. Oracle) throw an exception, if you leave a semicolon (;) at the SQL string end.     
+However, there are exceptional cases, when you need it even for Oracle - e.g. at the end of a PL/SQL block.
+
+The library can handle it for you and remove the semicolon at the end of the SQL string.
+By default, it's decided based on the current database module in use:
+- For `oracle_db` and `cx_Oracle`, the trailing semicolon is removed
+- For other modules, the trailing semicolon is left as it is
+
+You can also set this behavior explicitly:
+- Using the `Set Omit Trailing Semicolon` keyword
+- Using the `omit_trailing_semicolon` parameter in the `Execute SQL String` keyword.
+
 # Database modules compatibility
+> Looking for [Connection examples for different DB modules](#connection-examples-for-different-db-modules)?   
+
 The library is basically compatible with any [Python Database API Specification 2.0](https://peps.python.org/pep-0249/) module.
 
 However, the actual implementation in existing Python modules is sometimes quite different, which requires custom handling in the library.
@@ -247,8 +453,8 @@ Therefore there are some modules, which are "natively" supported in the library 
 ### Teradata
 - [teradata](https://github.com/teradata/PyTd)
 ### IBM DB2
-- [ibm_db](https://github.com/ibmdb/python-ibmdb)
-- [ibm_db_dbi](https://github.com/ibmdb/python-ibmdb)
+- The Python package to be installed is [ibm_db](https://github.com/ibmdb/python-ibmdb). It includes two modules - `ibm_db` and `ibm_db_dbi`.   
+- *Using `ibm_db_dbi` is highly recommended* as only this module is Python DB API 2.0 compatible. See [official docs](https://www.ibm.com/docs/en/db2/12.1?topic=applications-python-sqlalchemy-django-framework).
 ### ODBC
 - [pyodbc](https://github.com/mkleehammer/pyodbc)
 - [pypyodbc](https://github.com/pypyodbc/pypyodbc)

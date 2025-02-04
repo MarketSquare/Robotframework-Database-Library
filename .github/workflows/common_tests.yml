@@ -11,7 +11,7 @@ env:
   
   # options for pyodbc only
   DB_CHARSET: utf8mb4
-  DB_DRIVER: "{MySQL ODBC 8.0 ANSI Driver}"
+  DB_DRIVER: "{MySQL ODBC 9.2 ANSI Driver}"
 
 jobs:
   tests:
@@ -81,6 +81,11 @@ jobs:
           - 3306:3306
         
     steps:
+    
+      - name: Install unixodbc
+        if: matrix.py_db_module == 'pyodbc'
+        run: sudo apt-get update && sudo apt-get install -y unixodbc
+    
       - name: Install ODBC driver for PostgreSQL
         if: matrix.py_db_module == 'pyodbc'
         run: |
@@ -97,22 +102,15 @@ jobs:
         if: matrix.py_db_module == 'pyodbc'
         run: |
           cd "$RUNNER_TEMP"
-          echo "*** download driver zip file"
-          curl --silent --show-error --write-out "$CURL_OUTPUT_FORMAT" -O "https://www.mirrorservice.org/sites/ftp.mysql.com/Downloads/Connector-ODBC/8.0/${MYSQL_DRIVER}.tar.gz"
-          ls -l "${MYSQL_DRIVER}.tar.gz"
-          tar -xz -f "${MYSQL_DRIVER}.tar.gz"
-          echo "*** copy driver file to /usr/lib"
-          sudo cp -v "${MYSQL_DRIVER}/lib/libmyodbc8a.so" /usr/lib/x86_64-linux-gnu/odbc/
-          sudo chmod a+r /usr/lib/x86_64-linux-gnu/odbc/libmyodbc8a.so
-          echo "*** create odbcinst.ini entry"
-          echo '[MySQL ODBC 8.0 ANSI Driver]' > mysql_odbcinst.ini
-          echo 'Driver     = /usr/lib/x86_64-linux-gnu/odbc/libmyodbc8a.so' >> mysql_odbcinst.ini
-          echo 'UsageCount = 1' >> mysql_odbcinst.ini
-          echo 'Threading  = 2' >> mysql_odbcinst.ini
-          sudo odbcinst -i -d -f mysql_odbcinst.ini
+          echo "*** download driver"
+          curl --silent --show-error --write-out "$CURL_OUTPUT_FORMAT" -O -L "https://dev.mysql.com/get/Downloads/Connector-ODBC/9.2/${MYSQL_DRIVER}"
+          ls -l "${MYSQL_DRIVER}"
+          echo "*** install the driver"
+          sudo dpkg -i "./${MYSQL_DRIVER}"
+          sudo apt-get install -f
         env:
-          CURL_OUTPUT_FORMAT: '%{http_code} %{filename_effective} %{size_download} %{time_total}\n'
-          MYSQL_DRIVER: mysql-connector-odbc-8.0.22-linux-glibc2.12-x86-64bit
+            CURL_OUTPUT_FORMAT: '%{http_code} %{filename_effective} %{size_download} %{time_total}\n'
+            MYSQL_DRIVER: mysql-connector-odbc_9.2.0-1ubuntu24.04_amd64.deb
 
       - name: Check ODBC setup
         if: matrix.py_db_module == 'pyodbc'
@@ -149,7 +147,7 @@ jobs:
 
         run: |
           pip install ${{ matrix.pip_install }}
-     
+      
       - name: Tests for ${{ matrix.job_name }}
         working-directory: ./test
         run: >-
@@ -173,7 +171,7 @@ jobs:
       
       - name: Upload Robot Logs
         if: ${{ always() }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: log-files
+          name: log-files-${{ matrix.job_name }}
           path: ./test/results/

@@ -120,8 +120,13 @@ Check Row Count With Assertion Engine Fails With Message
 
 Check Query Result With Assertion Engine Fails
     ${expected value}=    Set Variable    ${5}
+    IF    "${DB_MODULE}" == "jaydebeapi"
+        VAR    ${Num Type}=    jlong
+    ELSE
+        VAR    ${Num Type}=    int
+    END
     ${expected error}=    Catenate
-    ...    Wrong query result: '1' (int) should be '${expected value}' (int)
+    ...    Wrong query result: '1' (${Num Type}) should be '${expected value}' (int)
     Run Keyword And Expect Error
     ...    ${expected error}
     ...    Check Query Result    ${Existing Select}    equals    ${expected value}

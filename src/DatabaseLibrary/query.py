@@ -20,6 +20,7 @@ from typing import List, Optional, Tuple
 
 from robot.api import logger
 
+from .connection_manager import Connection
 from .params_decorator import renamed_args
 
 
@@ -80,16 +81,20 @@ class Query:
         cur = None
         try:
             cur = db_connection.client.cursor()
-            self._execute_sql(cur, select_statement, parameters=parameters)
+            self._execute_sql(
+                cur,
+                select_statement,
+                parameters=parameters,
+                omit_trailing_semicolon=db_connection.omit_trailing_semicolon,
+            )
             all_rows = cur.fetchall()
             col_names = [c[0] for c in cur.description]
             self._log_query_results(col_names, all_rows)
             if return_dict:
                 return [dict(zip(col_names, row)) for row in all_rows]
             return all_rows
-        finally:
-            if cur and not no_transaction:
-                db_connection.client.rollback()
+        except Exception as e:
+            self._rollback_and_raise(db_connection, no_transaction, e)
 
     @renamed_args(mapping={"selectStatement": "select_statement", "sansTran": "no_transaction"})
     def row_count(
@@ -130,19 +135,23 @@ class Query:
         cur = None
         try:
             cur = db_connection.client.cursor()
-            self._execute_sql(cur, select_statement, parameters=parameters)
+            self._execute_sql(
+                cur,
+                select_statement,
+                parameters=parameters,
+                omit_trailing_semicolon=db_connection.omit_trailing_semicolon,
+            )
             data = cur.fetchall()
             col_names = [c[0] for c in cur.description]
-            if db_connection.module_name in ["sqlite3", "ibm_db", "ibm_db_dbi", "pyodbc"]:
+            if db_connection.module_name in ["sqlite3", "ibm_db", "ibm_db_dbi", "pyodbc", "jaydebeapi"]:
                 current_row_count = len(data)
             else:
                 current_row_count = cur.rowcount
             logger.info(f"Retrieved {current_row_count} rows")
             self._log_query_results(col_names, data)
             return current_row_count
-        finally:
-            if cur and not no_transaction:
-                db_connection.client.rollback()
+        except Exception as e:
+            self._rollback_and_raise(db_connection, no_transaction, e)
 
     @renamed_args(mapping={"selectStatement": "select_statement", "sansTran": "no_transaction"})
     def description(
@@ -183,15 +192,19 @@ class Query:
         cur = None
         try:
             cur = db_connection.client.cursor()
-            self._execute_sql(cur, select_statement, parameters=parameters)
+            self._execute_sql(
+                cur,
+                select_statement,
+                parameters=parameters,
+                omit_trailing_semicolon=db_connection.omit_trailing_semicolon,
+            )
             description = list(cur.description)
             if sys.version_info[0] < 3:
                 for row in range(0, len(description)):
                     description[row] = (description[row][0].encode("utf-8"),) + description[row][1:]
             return description
-        finally:
-            if cur and not no_transaction:
-                db_connection.client.rollback()
+        except Exception as e:
+            self._rollback_and_raise(db_connection, no_transaction, e)
 
     @renamed_args(mapping={"tableName": "table_name", "sansTran": "no_transaction"})
     def delete_all_rows_from_table(
@@ -229,15 +242,11 @@ class Query:
         try:
             cur = db_connection.client.cursor()
             result = self._execute_sql(cur, query)
+            self._commit_if_needed(db_connection, no_transaction)
             if result is not None:
-                if not no_transaction:
-                    db_connection.client.commit()
                 return result
-            if not no_transaction:
-                db_connection.client.commit()
-        finally:
-            if cur and not no_transaction:
-                db_connection.client.rollback()
+        except Exception as e:
+            self._rollback_and_raise(db_connection, no_transaction, e)
 
     @renamed_args(mapping={"sqlScriptFileName": "script_path", "sansTran": "no_transaction"})
     def execute_sql_script(
@@ -282,7 +291,11 @@ class Query:
                 cur = db_connection.client.cursor()
                 if not split:
                     logger.info("Statements splitting disabled - pass entire script content to the database module")
-                    self._execute_sql(cur, sql_file.read())
+                    self._execute_sql(
+                        cur,
+                        sql_file.read(),
+                        omit_trailing_semicolon=db_connection.omit_trailing_semicolon,
+                    )
                 else:
                     logger.info("Splitting script file into statements...")
                     statements_to_execute = []
@@ -348,11 +361,9 @@ class Query:
                         line_ends_with_proc_end = re.compile(r"(\s|;)" + proc_end_pattern.pattern + "$")
                         omit_semicolon = not line_ends_with_proc_end.search(statement.lower())
                         self._execute_sql(cur, statement, omit_semicolon)
-                if not no_transaction:
-                    db_connection.client.commit()
-            finally:
-                if cur and not no_transaction:
-                    db_connection.client.rollback()
+                self._commit_if_needed(db_connection, no_transaction)
+            except Exception as e:
+                self._rollback_and_raise(db_connection, no_transaction, e)
 
     @renamed_args(
         mapping={
@@ -385,11 +396,7 @@ class Query:
         Use ``parameters`` for query variable substitution (variable substitution syntax may be different
         depending on the database client).
 
-        Use ``omit_trailing_semicolon`` for explicit instruction,
-        if the trailing semicolon (;) at the SQL string end should be removed or not:
-        - Some database modules (e.g. Oracle) throw an exception, if you leave a semicolon at the string end
-        - However, there are exceptional cases, when you need it even for Oracle - e.g. at the end of a PL/SQL block
-        - If not explicitly specified, it's decided based on the current database module in use. For Oracle, the semicolon is removed by default.
+        Set the ``omit_trailing_semicolon`` to explicitly control the `Omitting trailing semicolon behavior` for the command.
 
         === Some parameters were renamed in version 2.0 ===
         The old parameters ``sqlString``, ``sansTran`` and ``omitTrailingSemicolon`` are *deprecated*,
@@ -409,12 +416,12 @@ class Query:
         cur = None
         try:
             cur = db_connection.client.cursor()
+            if omit_trailing_semicolon is None:
+                omit_trailing_semicolon = db_connection.omit_trailing_semicolon
             self._execute_sql(cur, sql_string, omit_trailing_semicolon=omit_trailing_semicolon, parameters=parameters)
-            if not no_transaction:
-                db_connection.client.commit()
-        finally:
-            if cur and not no_transaction:
-                db_connection.client.rollback()
+            self._commit_if_needed(db_connection, no_transaction)
+        except Exception as e:
+            self._rollback_and_raise(db_connection, no_transaction, e)
 
     @renamed_args(mapping={"spName": "procedure_name", "spParams": "procedure_params", "sansTran": "no_transaction"})
     def call_stored_procedure(
@@ -717,13 +724,10 @@ class Query:
                     else:
                         result_sets_available = False
 
-            if not no_transaction:
-                db_connection.client.commit()
-
+            self._commit_if_needed(db_connection, no_transaction)
             return param_values, result_sets
-        finally:
-            if cur and not no_transaction:
-                db_connection.client.rollback()
+        except Exception as e:
+            self._rollback_and_raise(db_connection, no_transaction, e)
 
     def set_logging_query_results(self, enabled: Optional[bool] = None, log_head: Optional[int] = None):
         """
@@ -747,7 +751,7 @@ class Query:
         self,
         cur,
         sql_statement: str,
-        omit_trailing_semicolon: Optional[bool] = None,
+        omit_trailing_semicolon: Optional[bool] = False,
         parameters: Optional[Tuple] = None,
     ):
         """
@@ -757,8 +761,6 @@ class Query:
         won't be executed by some databases (e.g. Oracle).
         Otherwise, it's decided based on the current database module in use.
         """
-        if omit_trailing_semicolon is None:
-            omit_trailing_semicolon = self.omit_trailing_semicolon
         if omit_trailing_semicolon:
             sql_statement = sql_statement.rstrip(";")
         if parameters is None:
@@ -770,6 +772,22 @@ class Query:
                 html=True,
             )
             return cur.execute(sql_statement, parameters)
+
+    def _commit_if_needed(self, db_connection: Connection, no_transaction):
+        if no_transaction:
+            logger.info(f"Perform no commit, because 'no_transaction' set to {no_transaction}")
+        else:
+            logger.info("Commit the transaction")
+            db_connection.client.commit()
+
+    def _rollback_and_raise(self, db_connection: Connection, no_transaction, e):
+        logger.info(f"Error occurred: {e}")
+        if no_transaction:
+            logger.info(f"Perform no rollback, because 'no_transaction' set to {no_transaction}")
+        else:
+            logger.info("Rollback the transaction")
+            db_connection.client.rollback()
+        raise e
 
     def _log_query_results(self, col_names, result_rows, log_head: Optional[int] = None):
         """

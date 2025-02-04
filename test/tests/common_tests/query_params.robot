@@ -21,7 +21,7 @@ Connect To DB And Build Query
 
 Build Query Strings With Params
     ${placeholder}=    Set Variable    %s
-    IF  "${DB_MODULE}" in ["oracledb", "cx_Oracle"]
+    IF  "${DB_MODULE}" in ["oracledb", "cx_Oracle", "jaydebeapi"]
         ${placeholder}=    Set Variable    :id
     ELSE IF  "${DB_MODULE}" in ["sqlite3", "pyodbc"]
         ${placeholder}=    Set Variable    ?

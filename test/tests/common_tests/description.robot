@@ -16,12 +16,12 @@ Verify Person Description
     Length Should Be    ${queryResults}    3
     IF    "${DB_MODULE}" == "oracledb"
         Should Be Equal As Strings    ${queryResults}[0]    ('ID', <DbType DB_TYPE_NUMBER>, 39, None, 38, 0, False)
-        Should Be Equal As Strings
-        ...    ${queryResults}[1]
-        ...    ('FIRST_NAME', <DbType DB_TYPE_VARCHAR>, 20, 20, None, None, True)
-        Should Be Equal As Strings
-        ...    ${queryResults}[2]
-        ...    ('LAST_NAME', <DbType DB_TYPE_VARCHAR>, 20, 20, None, None, True)
+        Should Be Equal As Strings    ${queryResults}[1]    ('FIRST_NAME', <DbType DB_TYPE_VARCHAR>, 20, 20, None, None, True)
+        Should Be Equal As Strings    ${queryResults}[2]    ('LAST_NAME', <DbType DB_TYPE_VARCHAR>, 20, 20, None, None, True)
+    ELSE IF    "${DB_MODULE}" == "jaydebeapi"
+        Should Be Equal As Strings    ${queryResults}[0]    ('ID', DBAPITypeObject('DECIMAL', 'NUMERIC'), 39, 39, 38, 0, 0)
+        Should Be Equal As Strings    ${queryResults}[1]    ('FIRST_NAME', DBAPITypeObject('CHAR', 'NCHAR', 'NVARCHAR', 'VARCHAR', 'OTHER'), 20, 20, 20, 0, 1)
+        Should Be Equal As Strings    ${queryResults}[2]    ('LAST_NAME', DBAPITypeObject('CHAR', 'NCHAR', 'NVARCHAR', 'VARCHAR', 'OTHER'), 20, 20, 20, 0, 1)
     ELSE IF    "${DB_MODULE}" == "sqlite3"
         Should Be Equal As Strings    ${queryResults}[0]    ('id', None, None, None, None, None, None)
         Should Be Equal As Strings    ${queryResults}[1]    ('FIRST_NAME', None, None, None, None, None, None)
@@ -68,9 +68,10 @@ Verify Foobar Description
     Length Should Be    ${queryResults}    2
     IF    "${DB_MODULE}" == "oracledb"
         Should Be Equal As Strings    ${queryResults}[0]    ('ID', <DbType DB_TYPE_NUMBER>, 39, None, 38, 0, False)
-        Should Be Equal As Strings
-        ...    ${queryResults}[1]
-        ...    ('FIRST_NAME', <DbType DB_TYPE_VARCHAR>, 30, 30, None, None, False)
+        Should Be Equal As Strings    ${queryResults}[1]    ('FIRST_NAME', <DbType DB_TYPE_VARCHAR>, 30, 30, None, None, False)
+    ELSE IF    "${DB_MODULE}" == "jaydebeapi"
+        Should Be Equal As Strings    ${queryResults}[0]    ('ID', DBAPITypeObject('DECIMAL', 'NUMERIC'), 39, 39, 38, 0, 0)
+        Should Be Equal As Strings    ${queryResults}[1]    ('FIRST_NAME', DBAPITypeObject('CHAR', 'NCHAR', 'NVARCHAR', 'VARCHAR', 'OTHER'), 30, 30, 30, 0, 0)
     ELSE IF    "${DB_MODULE}" == "sqlite3"
         Should Be Equal As Strings    ${queryResults}[0]    ('id', None, None, None, None, None, None)
         Should Be Equal As Strings    ${queryResults}[1]    ('FIRST_NAME', None, None, None, None, None, None)

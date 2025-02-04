@@ -117,6 +117,146 @@ class DatabaseLibrary(ConnectionManager, Query, Assertion):
     |     Execute Sql String    drop table XYZ
     |
 
+    = Connection examples for different DB modules =
+    == Oracle (oracle_db) ==
+    | # Thin mode is used by default
+    | Connect To Database
+    | ...    oracledb
+    | ...    db_name=db
+    | ...    db_user=db_user
+    | ...    db_password=pass
+    | ...    db_host=127.0.0.1
+    | ...    db_port=1521
+    |
+    | # Thick mode with default location of the Oracle Instant Client
+    | Connect To Database
+    | ...    oracledb
+    | ...    db_name=db
+    | ...    db_user=db_user
+    | ...    db_password=pass
+    | ...    db_host=127.0.0.1
+    | ...    db_port=1521
+    | ...    oracle_driver_mode=thick
+    |
+    | # Thick mode with custom location of the Oracle Instant Client
+    | Connect To Database
+    | ...    oracledb
+    | ...    db_name=db
+    | ...    db_user=db_user
+    | ...    db_password=pass
+    | ...    db_host=127.0.0.1
+    | ...    db_port=1521
+    | ...    oracle_driver_mode=thick,lib_dir=C:/instant_client_23_5
+    == PostgreSQL (psycopg2) ==
+    | Connect To Database
+    | ...    psycopg2
+    | ...    db_name=db
+    | ...    db_user=db_user
+    | ...    db_password=pass
+    | ...    db_host=127.0.0.1
+    | ...    db_port=5432
+    == Microsoft SQL Server (pymssql) ==
+    | # UTF-8 charset is used by default
+    | Connect To Database
+    | ...    pymssql
+    | ...    db_name=db
+    | ...    db_user=db_user
+    | ...    db_password=pass
+    | ...    db_host=127.0.0.1
+    | ...    db_port=1433
+    |
+    | # Specifying a custom charset
+    | Connect To Database
+    | ...    pymssql
+    | ...    db_name=db
+    | ...    db_user=db_user
+    | ...    db_password=pass
+    | ...    db_host=127.0.0.1
+    | ...    db_port=1433
+    | ...    db_charset=cp1252
+    == MySQL (pymysql) ==
+    | # UTF-8 charset is used by default
+    | Connect To Database
+    | ...    pymysql
+    | ...    db_name=db
+    | ...    db_user=db_user
+    | ...    db_password=pass
+    | ...    db_host=127.0.0.1
+    | ...    db_port=3306
+    |
+    | # Specifying a custom charset
+    | Connect To Database
+    | ...    pymysql
+    | ...    db_name=db
+    | ...    db_user=db_user
+    | ...    db_password=pass
+    | ...    db_host=127.0.0.1
+    | ...    db_port=3306
+    | ...    db_charset=cp1252
+    == IBM DB2 (ibm_db) ==
+    | Connect To Database
+    | ...    ibm_db_dbi
+    | ...    db_name=db
+    | ...    db_user=db_user
+    | ...    db_password=pass
+    | ...    db_host=127.0.0.1
+    | ...    db_port=50000
+    == MySQL via ODBC (pyodbc) ==
+    | # ODBC driver name is required
+    | # ODBC driver itself has to be installed
+    | Connect To Database
+    | ...    pyodbc
+    | ...    db_name=db
+    | ...    db_user=db_user
+    | ...    db_password=pass
+    | ...    db_host=127.0.0.1
+    | ...    db_port=3306
+    | ...    odbc_driver={MySQL ODBC 9.2 ANSI Driver}
+    |
+    | # Specifying a custom charset if needed
+    | Connect To Database
+    | ...    pyodbc
+    | ...    db_name=db
+    | ...    db_user=db_user
+    | ...    db_password=pass
+    | ...    db_host=127.0.0.1
+    | ...    db_port=3306
+    | ...    odbc_driver={MySQL ODBC 9.2 ANSI Driver}
+    | ...    db_charset=latin1
+    == Oracle via JDBC (jaydebeapi) ==
+    | # Username and password must be set as a dictionary
+    | VAR  &{CREDENTIALS}  user=db_user  password=pass
+    |
+    | # JAR file with Oracle JDBC driver is required
+    | # Jaydebeapi is not "natively" supported by the Database Library,
+    | # so using the custom parameters
+    | Connect To Database
+    | ...    jaydebeapi
+    | ...    jclassname=oracle.jdbc.driver.OracleDriver
+    | ...    url=jdbc:oracle:thin:@127.0.0.1:1521/db
+    | ...    driver_args=${CREDENTIALS}
+    | ...    jars=C:/ojdbc17.jar
+    |
+    | # Set if getting error 'Could not commit/rollback with auto-commit enabled'
+    | Set Auto Commit    False
+    |
+    | # Set for automatically removing trailing ';' (might be helpful for Oracle)
+    | Set Omit Trailing Semicolon    True
+    ==  SQLite (sqlite3) ==
+    | # Using custom parameters required
+    | Connect To Database
+    | ...    sqlite3
+    | ...    database=./my_database.db
+    | ...    isolation_level=${None}
+    == Teradata (teradata) ==
+    | Connect To Database
+    | ...    teradata
+    | ...    db_name=db
+    | ...    db_user=db_user
+    | ...    db_password=pass
+    | ...    db_host=127.0.0.1
+    | ...    db_port=1025
+
     = Using configuration file =
     The `Connect To Database` keyword allows providing the connection parameters in two ways:
     - As keyword arguments
@@ -229,6 +369,19 @@ class DatabaseLibrary(ConnectionManager, Query, Assertion):
     using the `Set Auto Commit` keyword.
     This has no impact on the automatic commit/rollback behavior in library keywords (described above).
 
+    = Omitting trailing semicolon behavior =
+    Some databases (e.g. Oracle) throw an exception, if you leave a semicolon (;) at the SQL string end.
+    However, there are exceptional cases, when you need it even for Oracle - e.g. at the end of a PL/SQL block.
+
+    The library can handle it for you and remove the semicolon at the end of the SQL string.
+    By default, it's decided based on the current database module in use:
+    - For `oracle_db` and `cx_Oracle`, the trailing semicolon is removed
+    - For other modules, the trailing semicolon is left as it is
+
+    You can also set this behavior explicitly:
+    - Using the `Set Omit Trailing Semicolon` keyword
+    - Using the `omit_trailing_semicolon` parameter in the `Execute SQL String` keyword.
+
     = Database modules compatibility =
     The library is basically compatible with any [https://peps.python.org/pep-0249|Python Database API Specification 2.0] module.
 
@@ -239,7 +392,7 @@ class DatabaseLibrary(ConnectionManager, Query, Assertion):
     === Oracle ===
     [https://oracle.github.io/python-oracledb/|oracledb]
     - Both thick and thin client modes are supported - you can select one using the `oracle_driver_mode` parameter.
-    - However, due to current limitations of the oracledb module, **it's not possible to switch between thick and thin modes during a test execution session** - even in different suites.
+    - However, due to current limitations of the oracledb module, *it's not possible to switch between thick and thin modes during a test execution session* - even in different suites.
 
     [https://oracle.github.io/python-cx_Oracle/|cx_Oracle]
 
@@ -255,8 +408,8 @@ class DatabaseLibrary(ConnectionManager, Query, Assertion):
     === Teradata ===
     - [https://github.com/teradata/PyTd|teradata]
     === IBM DB2 ===
-    - [https://github.com/ibmdb/python-ibmdb|ibm_db]
-    - [https://github.com/ibmdb/python-ibmdb|ibm_db_dbi]
+    - The Python package to be installed is [https://github.com/ibmdb/python-ibmdb|ibm_db]. It includes two modules - `ibm_db` and `ibm_db_dbi`.
+    - Using *`ibm_db_dbi` is highly recommended* as only this module is Python DB API 2.0 compatible. See [https://www.ibm.com/docs/en/db2/12.1?topic=applications-python-sqlalchemy-django-framework|official docs].
     === ODBC ===
     - [https://github.com/mkleehammer/pyodbc|pyodbc]
     - [https://github.com/pypyodbc/pypyodbc|pypyodbc]
@@ -267,14 +420,17 @@ class DatabaseLibrary(ConnectionManager, Query, Assertion):
     ROBOT_LIBRARY_SCOPE = "GLOBAL"
     ROBOT_LIBRARY_VERSION = __version__
 
-    def __init__(self, log_query_results=True, log_query_results_head=50):
+    def __init__(self, log_query_results=True, log_query_results_head=50, warn_on_connection_overwrite=True):
         """
         The library can be imported without any arguments:
         | *** Settings ***
         | Library    DatabaseLibrary
-        Use optional library import parameters to disable `Logging query results` or setup the log head.
+
+        Use optional library import parameters:
+        - ``log_query_results`` and ``log_query_results_head`` to disable `Logging query results` or setup the log head
+        - ``warn_on_connection_overwrite`` to disable the warning about overwriting an existing connection
         """
-        ConnectionManager.__init__(self)
+        ConnectionManager.__init__(self, warn_on_connection_overwrite=warn_on_connection_overwrite)
         if log_query_results_head < 0:
             raise ValueError(f"Wrong log head value provided: {log_query_results_head}. The value can't be negative!")
         Query.__init__(self, log_query_results=log_query_results, log_query_results_head=log_query_results_head)

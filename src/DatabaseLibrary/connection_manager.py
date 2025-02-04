@@ -28,22 +28,24 @@ from .params_decorator import renamed_args
 class Connection:
     client: Any
     module_name: str
+    omit_trailing_semicolon: bool
 
 
 class ConnectionStore:
-    def __init__(self):
+    def __init__(self, warn_on_overwrite=True):
         self._connections: Dict[str, Connection] = {}
         self.default_alias: str = "default"
+        self.warn_on_overwrite = warn_on_overwrite
 
-    def register_connection(self, client: Any, module_name: str, alias: str):
-        if alias in self._connections:
+    def register_connection(self, client: Any, module_name: str, alias: str, omit_trailing_semicolon=False):
+        if alias in self._connections and self.warn_on_overwrite:
             if alias == self.default_alias:
                 logger.warn("Overwriting not closed connection.")
             else:
                 logger.warn(f"Overwriting not closed connection for alias = '{alias}'")
-        self._connections[alias] = Connection(client, module_name)
+        self._connections[alias] = Connection(client, module_name, omit_trailing_semicolon)
 
-    def get_connection(self, alias: Optional[str]):
+    def get_connection(self, alias: Optional[str]) -> Connection:
         """
         Return connection with given alias.
 
@@ -60,7 +62,7 @@ class ConnectionStore:
             raise ValueError(f"Alias '{alias}' not found in existing connections.")
         return self._connections[alias]
 
-    def pop_connection(self, alias: Optional[str]):
+    def pop_connection(self, alias: Optional[str]) -> Connection:
         if not self._connections:
             return None
         if not alias:
@@ -140,9 +142,8 @@ class ConnectionManager:
     Connection Manager handles the connection & disconnection to the database.
     """
 
-    def __init__(self):
-        self.omit_trailing_semicolon: bool = False
-        self.connection_store: ConnectionStore = ConnectionStore()
+    def __init__(self, warn_on_connection_overwrite=True):
+        self.connection_store: ConnectionStore = ConnectionStore(warn_on_overwrite=warn_on_connection_overwrite)
         self.ibmdb_driver_already_added_to_path: bool = False
 
     @staticmethod
@@ -208,7 +209,7 @@ class ConnectionManager:
 
         Other custom params from keyword arguments and config file are passed to the Python DB module as provided -
         normally as arguments for the _connect()_ function.
-        However, when using *pyodbc* or *ibm_db*, the connection is established using a *connection string* -
+        However, when using *pyodbc* or *ibm_db_dbi*, the connection is established using a *connection string* -
         so all the custom params are added into it instead of function arguments.
 
         Set ``alias`` for `Handling multiple database connections`.
@@ -220,6 +221,9 @@ class ConnectionManager:
         - _thick_
         - _thick,lib_dir=<PATH_TO_ORACLE_CLIENT>_
 
+        By default, there is a warning when overwriting an existing connection (i.e. not closing it properly).
+        This can be disabled by setting the ``warn_on_connection_overwrite`` parameter to *False* in the library import.
+
         === Some parameters were renamed in version 2.0 ===
         The old parameters ``dbapiModuleName``, ``dbName``, ``dbUsername``,
         ``dbPassword``, ``dbHost``, ``dbPort``, ``dbCharset``, ``dbDriver``,
@@ -230,11 +234,13 @@ class ConnectionManager:
 
         *The old parameters will be removed in future versions.*
 
-        === Examples ===
-        | Connect To Database | psycopg2 | my_db | user | pass | tiger.foobar.com | 5432 |
-        | Connect To Database | psycopg2 | my_db | user | pass | tiger.foobar.com | 5432 | my_custom_param=value |
-        | Connect To Database | psycopg2 | my_db | user | pass | tiger.foobar.com | 5432 | alias=my_alias |
+        == Basic examples ==
+        | Connect To Database | psycopg2 | my_db | user | pass | 127.0.0.1 | 5432 |
+        | Connect To Database | psycopg2 | my_db | user | pass | 127.0.0.1 | 5432 | my_custom_param=value |
+        | Connect To Database | psycopg2 | my_db | user | pass | 127.0.0.1 | 5432 | alias=my_alias |
         | Connect To Database | config_file=my_db_params.cfg |
+
+        See `Connection examples for different DB modules`.
         """
         config = ConfigReader(config_file, alias)
 
@@ -313,6 +319,8 @@ class ConnectionManager:
         other_config_file_params = config.get_all_available_params()
         if other_config_file_params:
             logger.info(f"Other params from configuration file: {list(other_config_file_params.keys())}")
+
+        omit_trailing_semicolon = False
 
         if db_module == "excel" or db_module == "excelrw":
             db_api_module_name = "pyodbc"
@@ -438,7 +446,7 @@ class ConnectionManager:
             con_params = _build_connection_params(user=db_user, password=db_password, dsn=oracle_dsn)
             _log_all_connection_params(**con_params)
             db_connection = db_api_2.connect(**con_params)
-            self.omit_trailing_semicolon = True
+            omit_trailing_semicolon = True
 
         elif db_module in ["oracledb"]:
             db_port = db_port or 1521
@@ -464,10 +472,10 @@ class ConnectionManager:
             _log_all_connection_params(**con_params)
             db_connection = db_api_2.connect(**con_params)
             assert db_connection.thin == oracle_thin_mode, (
-                "Expected oracledb to run in thin mode: {oracle_thin_mode}, "
+                f"Expected oracledb to run in thin mode: {oracle_thin_mode}, "
                 f"but the connection has thin mode: {db_connection.thin}"
             )
-            self.omit_trailing_semicolon = True
+            omit_trailing_semicolon = True
 
         elif db_module in ["teradata"]:
             db_port = db_port or 1025
@@ -499,7 +507,7 @@ class ConnectionManager:
             _log_all_connection_params(**con_params)
             db_connection = db_api_2.connect(**con_params)
 
-        self.connection_store.register_connection(db_connection, db_api_module_name, alias)
+        self.connection_store.register_connection(db_connection, db_api_module_name, alias, omit_trailing_semicolon)
 
     @renamed_args(mapping={"dbapiModuleName": "db_module"})
     def connect_to_database_using_custom_params(
@@ -633,7 +641,12 @@ class ConnectionManager:
         | Set Auto Commit | True  | alias=postgres |
         """
         db_connection = self.connection_store.get_connection(alias)
-        db_connection.client.autocommit = auto_commit
+        if db_connection.module_name == "jaydebeapi":
+            db_connection.client.jconn.setAutoCommit(auto_commit)
+        elif db_connection.module_name in ["ibm_db", "ibm_db_dbi"]:
+            raise ValueError(f"Setting autocommit for {db_connection.module_name} is not supported")
+        else:
+            db_connection.client.autocommit = auto_commit
 
     def switch_database(self, alias: str):
         """
@@ -644,3 +657,16 @@ class ConnectionManager:
         | Switch Database | alias=my_alias |
         """
         self.connection_store.switch(alias)
+
+    def set_omit_trailing_semicolon(self, omit_trailing_semicolon=True, alias: Optional[str] = None):
+        """
+        Set the ``omit_trailing_semicolon`` to control the `Omitting trailing semicolon behavior` for the connection.
+
+        Use ``alias`` to specify what connection should be used if `Handling multiple database connections`.
+
+        Examples:
+        | Set Omit Trailing Semicolon | True |
+        | Set Omit Trailing Semicolon | False | alias=my_alias |
+        """
+        db_connection = self.connection_store.get_connection(alias)
+        db_connection.omit_trailing_semicolon = omit_trailing_semicolon

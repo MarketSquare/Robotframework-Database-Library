@@ -4,7 +4,7 @@ Documentation       Tests for the basic _Connect To Database_ keyword - with and
 
 Resource            ../../resources/common.resource
 
-Test Setup          Skip If    $DB_MODULE == "sqlite3"
+Test Setup          Skip If    $DB_MODULE == "sqlite3" or $DB_MODULE == "jaydebeapi"
 Test Teardown       Disconnect From Database
 
 *** Variables ***
@@ -128,7 +128,7 @@ Oracle specific - thick mode in config file - invalid
     [Documentation]    Invalid as mode switch during test execution is not supported
     ...    This test must run the last one in the suite, after others used thin mode already.
     Skip If    $DB_MODULE != "oracledb"
-    Run Keyword And Expect Error    ProgrammingError: DPY-2019: python-oracledb thick mode cannot be used because a thin mode connection has already been created
+    Run Keyword And Expect Error    ProgrammingError: DPY-2019: python-oracledb thick mode cannot be used *
     ...    Connect Using Config File    ${DB_MODULE}/thick_mode
 
 
@@ -156,7 +156,7 @@ MySQL specific - charset in config file - invalid
 
 PyODBC specific - charset in config file - invalid
     Skip If    $DB_MODULE not in ["pyodbc"]
-    Run Keyword And Expect Error    REGEXP: .*Can't initialize character set wrong.*
+    Run Keyword And Expect Error    REGEXP: .*Unknown character set: 'wrong'.*
     ...    Connect Using Config File    ${DB_MODULE}/charset_invalid
 
 
