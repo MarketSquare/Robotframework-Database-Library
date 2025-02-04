@@ -93,6 +93,7 @@
                 "Teradata",
                 "MySQL_pymysql",
                 "MySQL_pyodbc",
+                "Oracle_JDBC",
                 "MSSQL",
                 "Excel",
                 "Excel_RW",

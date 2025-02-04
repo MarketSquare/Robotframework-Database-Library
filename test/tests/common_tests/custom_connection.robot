@@ -36,6 +36,8 @@ Connect Using Custom Params
         ${Params}=    Catenate
         ...    database="./${DBName}.db",
         ...    isolation_level=None
+    ELSE IF    "${DB_MODULE}" == "jaydebeapi"
+        Skip    Connecting with custom params for Jaydebeapi is already done in all other tests
     ELSE
         ${Params}=    Catenate
         ...    database='${DB_NAME}',

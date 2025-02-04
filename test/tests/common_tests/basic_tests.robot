@@ -10,10 +10,10 @@ Test Teardown       Drop Tables Person And Foobar
 
 
 *** Test Cases ***
-SQL Statement Ending With Semicolon Works
+SQL Statement Ending Without Semicolon Works
     Query    SELECT * FROM person
 
-SQL Statement Ending Without Semicolon Works
+SQL Statement Ending With Semicolon Works
     Query    SELECT * FROM person;
 
 Create Person Table

@@ -4,7 +4,7 @@ Documentation       Tests for the basic _Connect To Database_ keyword - with and
 
 Resource            ../../resources/common.resource
 
-Test Setup          Skip If    $DB_MODULE == "sqlite3"
+Test Setup          Skip If    $DB_MODULE == "sqlite3" or $DB_MODULE == "jaydebeapi"
 Test Teardown       Disconnect From Database
 
 *** Variables ***
