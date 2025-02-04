@@ -643,6 +643,8 @@ class ConnectionManager:
         db_connection = self.connection_store.get_connection(alias)
         if db_connection.module_name == "jaydebeapi":
             db_connection.client.jconn.setAutoCommit(auto_commit)
+        elif db_connection.module_name in ["ibm_db", "ibm_db_dbi"]:
+            raise ValueError(f"Setting autocommit for {db_connection.module_name} is not supported")
         else:
             db_connection.client.autocommit = auto_commit
 
