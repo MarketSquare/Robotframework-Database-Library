@@ -367,7 +367,7 @@ The retry mechanism is disabled by default - ``retry_timeout`` is set to ``0``.
 ${sql}=   Catenate    SELECT first_name FROM person
 Check Row Count     ${sql}  ==        2      retry_timeout=10 seconds
 Check Query Result  ${sql}  contains  Allan  retry_timeout=5s  retry_pause=1s
-````
+```
 
 # Logging query results
 Keywords, that fetch results of a SQL query, print the result rows as a table in RF log.
@@ -389,7 +389,7 @@ Library    DatabaseLibrary    log_query_results_head=10
 
 # Logging of query results is enabled (default), log head limit is disabled (log all rows).
 Library    DatabaseLibrary    log_query_results_head=0
-````
+```
 
 # Commit behavior
 While creating a database connection, the library doesn't explicitly set the _autocommit_ behavior -
@@ -407,6 +407,19 @@ See docs of a particular keyword.
 It's also possible to explicitly set the _autocommit_ behavior on the Python DB module level -
 using the `Set Auto Commit` keyword.
 This has no impact on the automatic commit/rollback behavior in library keywords (described above).
+
+# Omitting trailing semicolon behavior
+Some databases (e.g. Oracle) throw an exception, if you leave a semicolon (;) at the SQL string end.     
+However, there are exceptional cases, when you need it even for Oracle - e.g. at the end of a PL/SQL block.
+
+The library can handle it for you and remove the semicolon at the end of the SQL string.
+By default, it's decided based on the current database module in use:
+- For `oracle_db` and `cx_Oracle`, the trailing semicolon is removed
+- For other modules, the trailing semicolon is left as it is
+
+You can also set this behavior explicitly:
+- Using the `Set Omit Trailing Semicolon` keyword
+- Using the `omit_trailing_semicolon` parameter in the `Execute SQL String` keyword.
 
 # Database modules compatibility
 > Looking for [Connection examples for different DB modules](#connection-examples-for-different-db-modules)?   

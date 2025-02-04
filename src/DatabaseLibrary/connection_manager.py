@@ -655,3 +655,16 @@ class ConnectionManager:
         | Switch Database | alias=my_alias |
         """
         self.connection_store.switch(alias)
+
+    def set_omit_trailing_semicolon(self, omit=True, alias: Optional[str] = None):
+        """
+        Set the ``omit_trailing_semicolon`` to control the `Omitting trailing semicolon behavior` for the connection.
+
+        Use ``alias`` to specify what connection should be used if `Handling multiple database connections`.
+
+        Examples:
+        | Set Omit Trailing Semicolon | True |
+        | Set Omit Trailing Semicolon | False | alias=my_alias |
+        """
+        db_connection = self.connection_store.get_connection(alias)
+        db_connection.omit_trailing_semicolon = omit

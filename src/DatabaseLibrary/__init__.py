@@ -363,6 +363,19 @@ class DatabaseLibrary(ConnectionManager, Query, Assertion):
     using the `Set Auto Commit` keyword.
     This has no impact on the automatic commit/rollback behavior in library keywords (described above).
 
+    = Omitting trailing semicolon behavior =
+    Some databases (e.g. Oracle) throw an exception, if you leave a semicolon (;) at the SQL string end.
+    However, there are exceptional cases, when you need it even for Oracle - e.g. at the end of a PL/SQL block.
+
+    The library can handle it for you and remove the semicolon at the end of the SQL string.
+    By default, it's decided based on the current database module in use:
+    - For `oracle_db` and `cx_Oracle`, the trailing semicolon is removed
+    - For other modules, the trailing semicolon is left as it is
+
+    You can also set this behavior explicitly:
+    - Using the `Set Omit Trailing Semicolon` keyword
+    - Using the `omit_trailing_semicolon` parameter in the `Execute SQL String` keyword.
+
     = Database modules compatibility =
     The library is basically compatible with any [https://peps.python.org/pep-0249|Python Database API Specification 2.0] module.
 
