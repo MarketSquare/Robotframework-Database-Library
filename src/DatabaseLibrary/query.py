@@ -81,7 +81,12 @@ class Query:
         cur = None
         try:
             cur = db_connection.client.cursor()
-            self._execute_sql(cur, select_statement, parameters=parameters)
+            self._execute_sql(
+                cur,
+                select_statement,
+                parameters=parameters,
+                omit_trailing_semicolon=db_connection.omit_trailing_semicolon,
+            )
             all_rows = cur.fetchall()
             col_names = [c[0] for c in cur.description]
             self._log_query_results(col_names, all_rows)
@@ -130,7 +135,12 @@ class Query:
         cur = None
         try:
             cur = db_connection.client.cursor()
-            self._execute_sql(cur, select_statement, parameters=parameters)
+            self._execute_sql(
+                cur,
+                select_statement,
+                parameters=parameters,
+                omit_trailing_semicolon=db_connection.omit_trailing_semicolon,
+            )
             data = cur.fetchall()
             col_names = [c[0] for c in cur.description]
             if db_connection.module_name in ["sqlite3", "ibm_db", "ibm_db_dbi", "pyodbc", "jaydebeapi"]:
@@ -182,7 +192,12 @@ class Query:
         cur = None
         try:
             cur = db_connection.client.cursor()
-            self._execute_sql(cur, select_statement, parameters=parameters)
+            self._execute_sql(
+                cur,
+                select_statement,
+                parameters=parameters,
+                omit_trailing_semicolon=db_connection.omit_trailing_semicolon,
+            )
             description = list(cur.description)
             if sys.version_info[0] < 3:
                 for row in range(0, len(description)):
@@ -276,7 +291,11 @@ class Query:
                 cur = db_connection.client.cursor()
                 if not split:
                     logger.info("Statements splitting disabled - pass entire script content to the database module")
-                    self._execute_sql(cur, sql_file.read())
+                    self._execute_sql(
+                        cur,
+                        sql_file.read(),
+                        omit_trailing_semicolon=db_connection.omit_trailing_semicolon,
+                    )
                 else:
                     logger.info("Splitting script file into statements...")
                     statements_to_execute = []
@@ -377,11 +396,7 @@ class Query:
         Use ``parameters`` for query variable substitution (variable substitution syntax may be different
         depending on the database client).
 
-        Use ``omit_trailing_semicolon`` for explicit instruction,
-        if the trailing semicolon (;) at the SQL string end should be removed or not:
-        - Some database modules (e.g. Oracle) throw an exception, if you leave a semicolon at the string end
-        - However, there are exceptional cases, when you need it even for Oracle - e.g. at the end of a PL/SQL block
-        - If not explicitly specified, it's decided based on the current database module in use. For Oracle, the semicolon is removed by default.
+        Set the ``omit_trailing_semicolon`` to explicitly control the `Omitting trailing semicolon behavior` for the command.
 
         === Some parameters were renamed in version 2.0 ===
         The old parameters ``sqlString``, ``sansTran`` and ``omitTrailingSemicolon`` are *deprecated*,
@@ -401,6 +416,8 @@ class Query:
         cur = None
         try:
             cur = db_connection.client.cursor()
+            if omit_trailing_semicolon is None:
+                omit_trailing_semicolon = db_connection.omit_trailing_semicolon
             self._execute_sql(cur, sql_string, omit_trailing_semicolon=omit_trailing_semicolon, parameters=parameters)
             self._commit_if_needed(db_connection, no_transaction)
         except Exception as e:
@@ -734,7 +751,7 @@ class Query:
         self,
         cur,
         sql_statement: str,
-        omit_trailing_semicolon: Optional[bool] = None,
+        omit_trailing_semicolon: Optional[bool] = False,
         parameters: Optional[Tuple] = None,
     ):
         """
@@ -744,8 +761,6 @@ class Query:
         won't be executed by some databases (e.g. Oracle).
         Otherwise, it's decided based on the current database module in use.
         """
-        if omit_trailing_semicolon is None:
-            omit_trailing_semicolon = self.omit_trailing_semicolon
         if omit_trailing_semicolon:
             sql_statement = sql_statement.rstrip(";")
         if parameters is None:

@@ -28,6 +28,7 @@ from .params_decorator import renamed_args
 class Connection:
     client: Any
     module_name: str
+    omit_trailing_semicolon: bool
 
 
 class ConnectionStore:
@@ -36,13 +37,13 @@ class ConnectionStore:
         self.default_alias: str = "default"
         self.warn_on_overwrite = warn_on_overwrite
 
-    def register_connection(self, client: Any, module_name: str, alias: str):
+    def register_connection(self, client: Any, module_name: str, alias: str, omit_trailing_semicolon=False):
         if alias in self._connections and self.warn_on_overwrite:
             if alias == self.default_alias:
                 logger.warn("Overwriting not closed connection.")
             else:
                 logger.warn(f"Overwriting not closed connection for alias = '{alias}'")
-        self._connections[alias] = Connection(client, module_name)
+        self._connections[alias] = Connection(client, module_name, omit_trailing_semicolon)
 
     def get_connection(self, alias: Optional[str]) -> Connection:
         """
@@ -142,7 +143,6 @@ class ConnectionManager:
     """
 
     def __init__(self, warn_on_connection_overwrite=True):
-        self.omit_trailing_semicolon: bool = False
         self.connection_store: ConnectionStore = ConnectionStore(warn_on_overwrite=warn_on_connection_overwrite)
         self.ibmdb_driver_already_added_to_path: bool = False
 
@@ -320,6 +320,8 @@ class ConnectionManager:
         if other_config_file_params:
             logger.info(f"Other params from configuration file: {list(other_config_file_params.keys())}")
 
+        omit_trailing_semicolon = False
+
         if db_module == "excel" or db_module == "excelrw":
             db_api_module_name = "pyodbc"
         else:
@@ -444,7 +446,7 @@ class ConnectionManager:
             con_params = _build_connection_params(user=db_user, password=db_password, dsn=oracle_dsn)
             _log_all_connection_params(**con_params)
             db_connection = db_api_2.connect(**con_params)
-            self.omit_trailing_semicolon = True
+            omit_trailing_semicolon = True
 
         elif db_module in ["oracledb"]:
             db_port = db_port or 1521
@@ -473,7 +475,7 @@ class ConnectionManager:
                 f"Expected oracledb to run in thin mode: {oracle_thin_mode}, "
                 f"but the connection has thin mode: {db_connection.thin}"
             )
-            self.omit_trailing_semicolon = True
+            omit_trailing_semicolon = True
 
         elif db_module in ["teradata"]:
             db_port = db_port or 1025
@@ -505,7 +507,7 @@ class ConnectionManager:
             _log_all_connection_params(**con_params)
             db_connection = db_api_2.connect(**con_params)
 
-        self.connection_store.register_connection(db_connection, db_api_module_name, alias)
+        self.connection_store.register_connection(db_connection, db_api_module_name, alias, omit_trailing_semicolon)
 
     @renamed_args(mapping={"dbapiModuleName": "db_module"})
     def connect_to_database_using_custom_params(
