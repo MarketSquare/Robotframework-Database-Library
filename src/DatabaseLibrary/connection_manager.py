@@ -656,7 +656,7 @@ class ConnectionManager:
         """
         self.connection_store.switch(alias)
 
-    def set_omit_trailing_semicolon(self, omit=True, alias: Optional[str] = None):
+    def set_omit_trailing_semicolon(self, omit_trailing_semicolon=True, alias: Optional[str] = None):
         """
         Set the ``omit_trailing_semicolon`` to control the `Omitting trailing semicolon behavior` for the connection.
 
@@ -667,4 +667,4 @@ class ConnectionManager:
         | Set Omit Trailing Semicolon | False | alias=my_alias |
         """
         db_connection = self.connection_store.get_connection(alias)
-        db_connection.omit_trailing_semicolon = omit
+        db_connection.omit_trailing_semicolon = omit_trailing_semicolon
