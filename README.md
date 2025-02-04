@@ -257,6 +257,12 @@ Connect To Database
 ...    url=jdbc:oracle:thin:@127.0.0.1:1521/db
 ...    driver_args=${CREDENTIALS}
 ...    jars=C:/ojdbc17.jar    
+
+# Set if getting error 'Could not commit/rollback with auto-commit enabled'
+Set Auto Commit    False    
+
+# Set for automatically removing trailing ';' (might be helpful for Oracle)
+Set Omit Trailing Semicolon    True    
 ```
 </details>
 
