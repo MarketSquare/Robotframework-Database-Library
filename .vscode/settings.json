@@ -9,4 +9,10 @@
         "--output", "${workspaceRoot}/logs/interactive_console.xml"
     ],
     "python.analysis.completeFunctionParens": true,
+    "cSpell.words": [
+        "hana",
+        "hdbodbc",
+        "saphana",
+        "SERVERNODE"
+    ],
 }

@@ -391,12 +391,14 @@ class ConnectionManager:
             if db_charset:
                 con_str += f"charset={db_charset};"
             if db_host and db_port:
-                if odbc_driver and "mysql" in odbc_driver.lower():
-                    con_str += f"SERVER={db_host}:{db_port};"
-                elif odbc_driver and "saphana" in dbDriver.lower():
-                    con_str += f"SERVERNODE={dbHost}:{dbPort}"    
-                else:
-                    con_str += f"SERVER={db_host},{db_port};"
+                con_str_server = f"SERVER={db_host},{db_port};"  # default for most databases
+                if odbc_driver:
+                    driver_lower = odbc_driver.lower()
+                    if "mysql" in driver_lower:
+                        con_str_server = f"SERVER={db_host}:{db_port};"
+                    elif "saphana" in driver_lower or "hdbodbc" in driver_lower or "sap hana" in driver_lower:
+                        con_str_server = f"SERVERNODE={db_host}:{db_port};"
+                con_str += con_str_server
 
             for param_name, param_value in custom_connection_params.items():
                 con_str += f"{param_name}={param_value};"
