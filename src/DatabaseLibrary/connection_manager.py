@@ -393,6 +393,8 @@ class ConnectionManager:
             if db_host and db_port:
                 if odbc_driver and "mysql" in odbc_driver.lower():
                     con_str += f"SERVER={db_host}:{db_port};"
+                elif odbc_driver and "saphana" in dbDriver.lower():
+                    con_str += f"SERVERNODE={dbHost}:{dbPort}"    
                 else:
                     con_str += f"SERVER={db_host},{db_port};"
 
