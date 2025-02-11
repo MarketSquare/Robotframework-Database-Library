@@ -15,7 +15,6 @@ readme = "README.md"
 requires-python = ">=3.8.1"
 dependencies = [
     "robotframework>=5.0.1",
-    "robotframework-excellib",
     "robotframework-assertion-engine"
 ]
 classifiers = [
