@@ -802,12 +802,13 @@ class Query:
             log_head = self.LOG_QUERY_RESULTS_HEAD
         cell_border_and_align = "border: 1px solid rgb(160 160 160);padding: 8px 10px;text-align: center;"
         table_border = "2px solid rgb(140 140 140)"
-        row_index_color = "#d6ecd4"
-        msg = f'<div style="max-width: 100%; overflow-x: auto;">'
+        row_index_background_color = "#d6ecd4"
+        row_index_text_color = "black"
+        msg = '<div style="max-width: 100%; overflow-x: auto;">'
         msg += f'<table style="width: auto; border-collapse: collapse; border: {table_border}">'
         msg += f'<caption style="text-align: left; font-weight: bold; padding: 5px;">Query returned {len(result_rows)} rows</caption>'
         msg += "<tr>"
-        msg += f'<th scope="col" style="background-color: {row_index_color}; {cell_border_and_align}">Row</th>'
+        msg += f'<th scope="col" style="color:{row_index_text_color}; background-color: {row_index_background_color}; {cell_border_and_align}">Row</th>'
         for col in col_names:
             msg += f'<th scope="col" style="background-color: #505050; color: #fff;{cell_border_and_align}">{col}</th>'
         msg += "</tr>"
@@ -818,9 +819,9 @@ class Query:
                 break
             row_style = ""
             if i % 2 == 0:
-                row_style = ' style="background-color: #eee;"'
+                row_style = ' style="background-color: var(--secondary-color, #eee)"'
             msg += f"<tr{row_style}>"
-            msg += f'<th scope="row" style="background-color: {row_index_color};{cell_border_and_align}">{i}</th>'
+            msg += f'<th scope="row" style="color:{row_index_text_color}; background-color: {row_index_background_color};{cell_border_and_align}">{i}</th>'
             for cell in row:
                 msg += f'<td style="{cell_border_and_align}">{cell}</td>'
             msg += "</tr>"
