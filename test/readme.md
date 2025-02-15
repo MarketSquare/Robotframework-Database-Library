@@ -1,5 +1,17 @@
-# Some tests are run automatically in the pipeline after pushing in the repository
-See the folder `.github/workflows` 
+# Which tests run automatically in the pipeline?
+- Tests from the folder `common_tests` run automatically in the pipeline after pushing in the repository
+- The tests in the folder `custom_db_tests` are designed to run locally - they have to be triggered manually. I don't run them at all changes.
+- There are some unit tests with pytest, but mostly there are acceptance tests with RF
+- See the folder `.github/workflows` 
+
+# Which databases / modules are covered?
+- The acceptance tests in the pipeline don't cover all possible DB's - here is a lot of room for improvement
+- Running tests locally require DB containers running - see below
+
+# Running tests locally from VS Code / terminal
+- Selecting a DB module works via a global variable `GLOBAL_DB_SELECTOR` - set it from VSC or CLI
+- Current debug/launch configs are implemented for old LSP plugin - still need to update to Robotcode from Daniel
+
 # Here are some advices for local testing of the library with different Python DB modules
 ## Oracle:
 - https://github.com/gvenzl/oci-oracle-free
