@@ -19,6 +19,7 @@ import sys
 from typing import List, Optional, Tuple
 
 from robot.api import logger
+from robot.utils.dotdict import DotDict
 
 from .connection_manager import Connection
 from .params_decorator import renamed_args
@@ -91,7 +92,7 @@ class Query:
             col_names = [c[0] for c in cur.description]
             self._log_query_results(col_names, all_rows)
             if return_dict:
-                return [dict(zip(col_names, row)) for row in all_rows]
+                return [DotDict(zip(col_names, row)) for row in all_rows]
             return all_rows
         except Exception as e:
             self._rollback_and_raise(db_connection, no_transaction, e)

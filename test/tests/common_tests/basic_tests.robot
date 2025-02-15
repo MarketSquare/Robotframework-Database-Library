@@ -113,6 +113,19 @@ Verify Query - Get results as a list of dictionaries
     Should Be Equal As Strings    ${value 1}    Franz Allan
     Should Be Equal As Strings    ${value 2}    Jerry
 
+Return As Dictionary - Dotted Syntax
+    ${output}=    Query    SELECT * FROM person    return_dict=True
+    ${field_names}=    Get Dictionary Keys    ${output}[0]
+    IF    "FIRST_NAME" in $field_names
+        VAR    ${field_name}=    FIRST_NAME
+    ELSE IF    "first_name" in $field_names
+        VAR    ${field_name}=    first_name
+    ELSE
+        FAIL    Unexpected field name in dictionary
+    END
+    Should Be Equal As Strings    ${output[0].${field_name}}    Franz Allan
+    Should Be Equal As Strings    ${output[1].${field_name}}    Jerry
+
 Verify Execute SQL String - Row Count person table
     ${output}=    Execute SQL String    SELECT COUNT(*) FROM person
     Log    ${output}
