@@ -54,7 +54,7 @@ class Query:
         The type of row values depends on the database module -
         usually they are tuples or tuple-like objects.
 
-        Set ``no_transaction`` to _True_ to run command without explicit transaction rollback in case of error.
+        Set ``no_transaction`` to _True_ to run command without explicit transaction commit or rollback in case of error.
         See `Commit behavior` for details.
 
         Set ``return_dict`` to _True_ to explicitly convert the return values into list of dictionaries.
@@ -89,6 +89,7 @@ class Query:
                 omit_trailing_semicolon=db_connection.omit_trailing_semicolon,
             )
             all_rows = cur.fetchall()
+            self._commit_if_needed(db_connection, no_transaction)
             col_names = [c[0] for c in cur.description]
             self._log_query_results(col_names, all_rows)
             if return_dict:
@@ -111,7 +112,7 @@ class Query:
         """
         Runs a query with the ``select_statement`` and returns the number of rows in the result.
 
-        Set ``no_transaction`` to _True_ to run command without explicit transaction rollback in case of error.
+        Set ``no_transaction`` to _True_ to run command without explicit transaction commit or rollback in case of error.
         See `Commit behavior` for details.
 
         Use ``alias`` to specify what connection should be used if `Handling multiple database connections`.
@@ -143,6 +144,7 @@ class Query:
                 omit_trailing_semicolon=db_connection.omit_trailing_semicolon,
             )
             data = cur.fetchall()
+            self._commit_if_needed(db_connection, no_transaction)
             col_names = [c[0] for c in cur.description]
             if db_connection.module_name in ["sqlite3", "ibm_db", "ibm_db_dbi", "pyodbc", "jaydebeapi"]:
                 current_row_count = len(data)
@@ -168,7 +170,7 @@ class Query:
         """
         Runs a query with the ``select_statement`` to determine the table description.
 
-        Set ``no_transaction`` to _True_ to run command without explicit transaction rollback in case of error.
+        Set ``no_transaction`` to _True_ to run command without explicit transaction commit or rollback in case of error.
         See `Commit behavior` for details.
 
         Use ``alias`` to specify what connection should be used if `Handling multiple database connections`.
@@ -199,6 +201,7 @@ class Query:
                 parameters=parameters,
                 omit_trailing_semicolon=db_connection.omit_trailing_semicolon,
             )
+            self._commit_if_needed(db_connection, no_transaction)
             description = list(cur.description)
             if sys.version_info[0] < 3:
                 for row in range(0, len(description)):

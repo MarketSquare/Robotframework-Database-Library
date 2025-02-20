@@ -356,11 +356,10 @@ class DatabaseLibrary(ConnectionManager, Query, Assertion):
     While creating a database connection, the library doesn't explicitly set the _autocommit_ behavior -
     so the default value of the Python DB module is used.
     According to Python DB API specification it should be disabled by default -
-    which means each SQL transaction must contain a dedicated commit statement, if necessary.
+    which means each SQL transaction (even a simple _SELECT_) must contain a dedicated commit statement, if necessary.
 
-    The library manages it for you:
-    - Keywords like `Execute SQL String` perform automatically a commit after running the query - or a rollback in case of error
-    - Keywords like `Query` don't perform a commit, but also do a rollback in case of error
+    The library manages it for you - keywords like `Query` or `Execute SQL String`
+    perform automatically a commit after running the query (or a rollback in case of error).
 
     You can turn off this automatic commit/rollback behavior using the ``no_transaction`` parameter.
     See docs of a particular keyword.

@@ -157,11 +157,3 @@ Verify Query - Row Count foobar table 0 row
     [Setup]    Create Foobar Table And Insert Data
     Delete All Rows From Table    foobar
     Row Count Is 0    SELECT * FROM foobar
-
-For Loop
-    FOR    ${i}    IN RANGE    10
-        ${results}=    Query    SELECT LAST_NAME FROM person ORDER BY id
-        Sleep    3s
-        IF    '${results}[0][0]' == 'Musk'    BREAK
-    END
-    Should Be Equal As Strings    ${results}[0][0]    Musk
