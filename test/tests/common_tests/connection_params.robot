@@ -19,7 +19,7 @@ Test Teardown       Disconnect From Database
 ...    invalid custom param=TypeError: connect() got an unexpected keyword argument 'blah'
 &{Errors pymysql}
 ...    missing basic params=OperationalError: (1045, "Access denied*
-...    invalid custom param=TypeError: Connection.__init__() got an unexpected keyword argument 'blah'
+...    invalid custom param=REGEXP: TypeError.*__init__.*got an unexpected keyword argument 'blah'
 &{Errors pyodbc}
 ...    missing basic params=REGEXP: InterfaceError.*Data source name not found and no default driver specified.*
 
