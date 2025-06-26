@@ -827,7 +827,11 @@ class Query:
             msg += f"<tr{row_style}>"
             msg += f'<th scope="row" style="color:{row_index_text_color}; background-color: {row_index_background_color};{cell_border_and_align}">{i}</th>'
             for cell in row:
-                msg += f'<td style="{cell_border_and_align}">{cell}</td>'
+                try:
+                    cell_string = str(cell)
+                except TypeError as e:
+                    cell_string = f"Unable printing the value: {e}"
+                msg += f'<td style="{cell_border_and_align}">{cell_string}</td>'
             msg += "</tr>"
         msg += "</table>"
         if table_truncated:
