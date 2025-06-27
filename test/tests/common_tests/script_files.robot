@@ -29,10 +29,11 @@ Semicolons In Values
 Semicolons And Quotes In Values
     Run SQL Script File    semicolons_and_quotes_in_values
     ${sql}=    Catenate    select * from person
-    ...    where id=5
+    ...    where LAST_NAME='O''Brian'
     ${results}=    Query    ${sql}
-    Length Should Be    ${results}    1
+    Length Should Be    ${results}    2
     Should Be Equal As Strings    ${results}[0]    (5, 'Miles', "O'Brian")
+    Should Be Equal As Strings    ${results}[1]    (6, 'Keiko', "O'Brian")
 
 
 *** Keywords ***
