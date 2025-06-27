@@ -346,7 +346,6 @@ class Query:
                             # check if the semicolon is a part of the value (quoted string)
                             quotes += sqlFragment.count("'")
                             quotes -= sqlFragment.count("\\'")
-                            quotes -= sqlFragment.count("''")
                             inside_quoted_string = quotes % 2 != 0
                             if inside_quoted_string:
                                 sqlFragment += ";"  # restore the semicolon
