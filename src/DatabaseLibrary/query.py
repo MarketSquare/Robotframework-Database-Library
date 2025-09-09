@@ -89,6 +89,8 @@ class Query:
                 omit_trailing_semicolon=db_connection.omit_trailing_semicolon,
             )
             all_rows = cur.fetchall()
+            if all_rows is None:
+                all_rows = []
             self._commit_if_needed(db_connection, no_transaction)
             col_names = [c[0] for c in cur.description]
             self._log_query_results(col_names, all_rows)
@@ -144,6 +146,8 @@ class Query:
                 omit_trailing_semicolon=db_connection.omit_trailing_semicolon,
             )
             data = cur.fetchall()
+            if data is None:
+                data = []
             self._commit_if_needed(db_connection, no_transaction)
             col_names = [c[0] for c in cur.description]
             if db_connection.module_name in ["sqlite3", "ibm_db", "ibm_db_dbi", "pyodbc", "jaydebeapi"]:
@@ -803,6 +807,10 @@ class Query:
 
         if log_head is None:
             log_head = self.LOG_QUERY_RESULTS_HEAD
+
+        if result_rows is None:
+            result_rows = []
+
         cell_border_and_align = "border: 1px solid rgb(160 160 160);padding: 8px 10px;text-align: center;"
         table_border = "2px solid rgb(140 140 140)"
         row_index_background_color = "#d6ecd4"
@@ -816,25 +824,26 @@ class Query:
             msg += f'<th scope="col" style="background-color: #505050; color: #fff;{cell_border_and_align}">{col}</th>'
         msg += "</tr>"
         table_truncated = False
-        if result_rows is not None:
-            for i, row in enumerate(result_rows):
-                if log_head and i >= log_head:
-                    table_truncated = True
-                    break
-                row_style = ""
-                if i % 2 == 0:
-                    row_style = ' style="background-color: var(--secondary-color, #eee)"'
-                msg += f"<tr{row_style}>"
-                msg += f'<th scope="row" style="color:{row_index_text_color}; background-color: {row_index_background_color};{cell_border_and_align}">{i}</th>'
-                for cell in row:
-                    try:
-                        cell_string = str(cell)
-                    except TypeError as e:
-                        cell_string = f"Unable printing the value: {e}"
-                    msg += f'<td style="{cell_border_and_align}">{cell_string}</td>'
-                msg += "</tr>"
-            msg += "</table>"
-            if table_truncated:
-                msg += f'<p style="font-weight: bold;">Log limit of {log_head} rows was reached, the table was truncated</p>'
-            msg += "</div>"
-            logger.info(msg, html=True)
+        for i, row in enumerate(result_rows):
+            if log_head and i >= log_head:
+                table_truncated = True
+                break
+            row_style = ""
+            if i % 2 == 0:
+                row_style = ' style="background-color: var(--secondary-color, #eee)"'
+            msg += f"<tr{row_style}>"
+            msg += f'<th scope="row" style="color:{row_index_text_color}; background-color: {row_index_background_color};{cell_border_and_align}">{i}</th>'
+            for cell in row:
+                try:
+                    cell_string = str(cell)
+                except TypeError as e:
+                    cell_string = f"Unable printing the value: {e}"
+                msg += f'<td style="{cell_border_and_align}">{cell_string}</td>'
+            msg += "</tr>"
+        msg += "</table>"
+        if table_truncated:
+            msg += (
+                f'<p style="font-weight: bold;">Log limit of {log_head} rows was reached, the table was truncated</p>'
+            )
+        msg += "</div>"
+        logger.info(msg, html=True)

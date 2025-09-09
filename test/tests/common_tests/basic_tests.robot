@@ -157,3 +157,8 @@ Verify Query - Row Count foobar table 0 row
     [Setup]    Create Foobar Table And Insert Data
     Delete All Rows From Table    foobar
     Row Count Is 0    SELECT * FROM foobar
+
+Query Returns Zero Results
+    [Documentation]    Tests that nothing crashes when there are zero results
+    ${results}=    Query    SELECT * FROM Person WHERE id < 0
+    Should Be Empty    ${results}
