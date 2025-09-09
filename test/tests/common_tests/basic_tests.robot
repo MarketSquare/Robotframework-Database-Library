@@ -160,5 +160,5 @@ Verify Query - Row Count foobar table 0 row
 
 Query Returns Zero Results
     [Documentation]    Tests that nothing crashes when there are zero results
-    ${results}=    Query    SELECT * FROM Person WHERE id < 0
+    ${results}=    Query    SELECT * FROM person WHERE id < 0
     Should Be Empty    ${results}
