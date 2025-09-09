@@ -816,26 +816,25 @@ class Query:
             msg += f'<th scope="col" style="background-color: #505050; color: #fff;{cell_border_and_align}">{col}</th>'
         msg += "</tr>"
         table_truncated = False
-        for i, row in enumerate(result_rows):
-            if log_head and i >= log_head:
-                table_truncated = True
-                break
-            row_style = ""
-            if i % 2 == 0:
-                row_style = ' style="background-color: var(--secondary-color, #eee)"'
-            msg += f"<tr{row_style}>"
-            msg += f'<th scope="row" style="color:{row_index_text_color}; background-color: {row_index_background_color};{cell_border_and_align}">{i}</th>'
-            for cell in row:
-                try:
-                    cell_string = str(cell)
-                except TypeError as e:
-                    cell_string = f"Unable printing the value: {e}"
-                msg += f'<td style="{cell_border_and_align}">{cell_string}</td>'
-            msg += "</tr>"
-        msg += "</table>"
-        if table_truncated:
-            msg += (
-                f'<p style="font-weight: bold;">Log limit of {log_head} rows was reached, the table was truncated</p>'
-            )
-        msg += "</div>"
-        logger.info(msg, html=True)
+        if result_rows is not None:
+            for i, row in enumerate(result_rows):
+                if log_head and i >= log_head:
+                    table_truncated = True
+                    break
+                row_style = ""
+                if i % 2 == 0:
+                    row_style = ' style="background-color: var(--secondary-color, #eee)"'
+                msg += f"<tr{row_style}>"
+                msg += f'<th scope="row" style="color:{row_index_text_color}; background-color: {row_index_background_color};{cell_border_and_align}">{i}</th>'
+                for cell in row:
+                    try:
+                        cell_string = str(cell)
+                    except TypeError as e:
+                        cell_string = f"Unable printing the value: {e}"
+                    msg += f'<td style="{cell_border_and_align}">{cell_string}</td>'
+                msg += "</tr>"
+            msg += "</table>"
+            if table_truncated:
+                msg += f'<p style="font-weight: bold;">Log limit of {log_head} rows was reached, the table was truncated</p>'
+            msg += "</div>"
+            logger.info(msg, html=True)
