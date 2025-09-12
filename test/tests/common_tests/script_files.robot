@@ -38,7 +38,7 @@ Semicolons And Quotes In Values
     Should Be Equal As Strings    ${results}[0]    (5, 'Miles', "O'Brian")
     Should Be Equal As Strings    ${results}[1]    (6, 'Keiko', "O'Brian")
 
-Split Script Into Statements
+Split Script Into Statements - Internal Parser
     Insert Data In Person Table Using SQL Script
     @{Expected commands}=    Create List
     ...    SELECT * FROM person
@@ -49,6 +49,16 @@ Split Script Into Statements
         ${results}=    Query    ${command}
     END
 
+Split Script Into Statements - External Parser
+    Insert Data In Person Table Using SQL Script
+    @{Expected commands}=    Create List
+    ...    SELECT * FROM person;
+    ...    SELECT * FROM person WHERE id=1;
+    ${extracted commands}=    Split Sql Script    ${Script files dir}/split_commands.sql    external_parser=True
+    Lists Should Be Equal    ${Expected commands}    ${extracted commands}
+    FOR    ${command}    IN    @{extracted commands}
+        ${results}=    Query    ${command}
+    END
 
 
 *** Keywords ***
