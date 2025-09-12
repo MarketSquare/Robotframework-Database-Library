@@ -2,7 +2,8 @@
 requires = [
     "setuptools>=61.0",
     "robotframework>=5.0.1",
-    "robotframework-assertion-engine"
+    "robotframework-assertion-engine",
+    "sqlparse"
     ]
 build-backend = "setuptools.build_meta"
 
@@ -15,7 +16,8 @@ readme = "README.md"
 requires-python = ">=3.8.1"
 dependencies = [
     "robotframework>=5.0.1",
-    "robotframework-assertion-engine"
+    "robotframework-assertion-engine",
+    "sqlparse"
 ]
 classifiers = [
     "Programming Language :: Python :: 3",

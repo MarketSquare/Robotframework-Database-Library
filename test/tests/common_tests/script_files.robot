@@ -6,6 +6,9 @@ Suite Teardown      Disconnect From Database
 Test Setup          Create Person Table
 Test Teardown       Drop Tables Person And Foobar
 
+*** Variables ***
+${Script files dir}    ${CURDIR}/../../resources/script_file_tests
+
 
 *** Test Cases ***
 Semicolons As Statement Separators In One Line
@@ -35,9 +38,30 @@ Semicolons And Quotes In Values
     Should Be Equal As Strings    ${results}[0]    (5, 'Miles', "O'Brian")
     Should Be Equal As Strings    ${results}[1]    (6, 'Keiko', "O'Brian")
 
+Split Script Into Statements - Internal Parser
+    Insert Data In Person Table Using SQL Script
+    @{Expected commands}=    Create List
+    ...    SELECT * FROM person
+    ...    SELECT * FROM person WHERE id=1
+    ${extracted commands}=    Split Sql Script    ${Script files dir}/split_commands.sql
+    Lists Should Be Equal    ${Expected commands}    ${extracted commands}
+    FOR    ${command}    IN    @{extracted commands}
+        ${results}=    Query    ${command}
+    END
+
+Split Script Into Statements - External Parser
+    Insert Data In Person Table Using SQL Script
+    @{Expected commands}=    Create List
+    ...    SELECT * FROM person;
+    ...    SELECT * FROM person WHERE id=1;
+    ${extracted commands}=    Split Sql Script    ${Script files dir}/split_commands.sql    external_parser=True
+    Lists Should Be Equal    ${Expected commands}    ${extracted commands}
+    FOR    ${command}    IN    @{extracted commands}
+        ${results}=    Query    ${command}
+    END
+
 
 *** Keywords ***
 Run SQL Script File
     [Arguments]    ${File Name}
-    ${Script files dir}=    Set Variable    ${CURDIR}/../../resources/script_file_tests
     Execute Sql Script    ${Script files dir}/${File Name}.sql
