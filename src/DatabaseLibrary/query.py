@@ -276,7 +276,7 @@ class Query:
         Set ``split`` to _False_ to disable this behavior  - in this case the entire script content
         will be passed to the database module for execution as a single command.
 
-        Set `external_parser` to _True_ to use the external `sqlparse` library for splitting the script.
+        Set ``external_parser`` to _True_ to use the external library [https://pypi.org/project/sqlparse/|sqlparse] for splitting the script.
 
         Set ``no_transaction`` to _True_ to run command without explicit transaction commit
         or rollback in case of error.
@@ -325,11 +325,11 @@ class Query:
         external_parser=False,
     ):
         """
-        Splits the content of the SQL script file loaded from `script_path` into individual SQL commands
+        Splits the content of the SQL script file loaded from ``script_path`` into individual SQL commands
         and returns them as a list of strings.
         SQL commands are expected to be delimited by a semicolon (';').
 
-        Set `external_parser` to _True_ to use the external `sqlparse` library.
+        Set ``external_parser`` to _True_ to use the external library [https://pypi.org/project/sqlparse/|sqlparse].
         """
         with open(script_path, encoding="UTF-8") as sql_file:
             logger.info("Splitting script file into statements...")
