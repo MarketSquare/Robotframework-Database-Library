@@ -2,7 +2,8 @@
 requires = [
     "setuptools>=61.0",
     "robotframework>=5.0.1",
-    "robotframework-assertion-engine"
+    "robotframework-assertion-engine",
+    "sqlparse"
     ]
 build-backend = "setuptools.build_meta"
 
