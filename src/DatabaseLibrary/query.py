@@ -293,84 +293,98 @@ class Query:
         | Execute SQL Script | insert_data_in_person_table.sql | split=False |
         """
         db_connection = self.connection_store.get_connection(alias)
-        with open(script_path, encoding="UTF-8") as sql_file:
-            cur = None
-            try:
-                cur = db_connection.client.cursor()
-                if not split:
+        cur = None
+        try:
+            cur = db_connection.client.cursor()
+            if not split:
+                with open(script_path, encoding="UTF-8") as sql_file:
                     logger.info("Statements splitting disabled - pass entire script content to the database module")
                     self._execute_sql(
                         cur,
                         sql_file.read(),
                         omit_trailing_semicolon=db_connection.omit_trailing_semicolon,
                     )
-                else:
-                    logger.info("Splitting script file into statements...")
-                    statements_to_execute = []
-                    current_statement = ""
-                    inside_statements_group = False
-                    proc_start_pattern = re.compile("create( or replace)? (procedure|function){1}( )?")
+            else:
+                statements_to_execute = self.split_sql_script(script_path)
+                for statement in statements_to_execute:
                     proc_end_pattern = re.compile("end(?!( if;| loop;| case;| while;| repeat;)).*;()?")
-                    for line in sql_file:
-                        line = line.strip()
-                        if line.startswith("#") or line.startswith("--") or line == "/":
-                            continue
+                    line_ends_with_proc_end = re.compile(r"(\s|;)" + proc_end_pattern.pattern + "$")
+                    omit_semicolon = not line_ends_with_proc_end.search(statement.lower())
+                    self._execute_sql(cur, statement, omit_semicolon)
+            self._commit_if_needed(db_connection, no_transaction)
+        except Exception as e:
+            self._rollback_and_raise(db_connection, no_transaction, e)
 
-                        # check if the line matches the creating procedure regexp pattern
-                        if proc_start_pattern.match(line.lower()):
-                            inside_statements_group = True
-                        elif line.lower().startswith("begin"):
-                            inside_statements_group = True
+    def split_sql_script(
+        self,
+        script_path: str,
+    ):
+        """
+        Splits the content of the SQL script file loaded from `script_path` into individual SQL commands
+        and returns them as a list of strings.
+        SQL commands are expected to be delimited by a semicolon (';').
+        """
+        with open(script_path, encoding="UTF-8") as sql_file:
+            logger.info("Splitting script file into statements...")
+            statements_to_execute = []
+            current_statement = ""
+            inside_statements_group = False
+            proc_start_pattern = re.compile("create( or replace)? (procedure|function){1}( )?")
+            proc_end_pattern = re.compile("end(?!( if;| loop;| case;| while;| repeat;)).*;()?")
+            for line in sql_file:
+                line = line.strip()
+                if line.startswith("#") or line.startswith("--") or line == "/":
+                    continue
 
-                        # semicolons inside the line? use them to separate statements
-                        # ... but not if they are inside a begin/end block (aka. statements group)
-                        sqlFragments = line.split(";")
-                        # no semicolons
-                        if len(sqlFragments) == 1:
-                            current_statement += line + " "
-                            continue
+                # check if the line matches the creating procedure regexp pattern
+                if proc_start_pattern.match(line.lower()):
+                    inside_statements_group = True
+                elif line.lower().startswith("begin"):
+                    inside_statements_group = True
+
+                # semicolons inside the line? use them to separate statements
+                # ... but not if they are inside a begin/end block (aka. statements group)
+                sqlFragments = line.split(";")
+                # no semicolons
+                if len(sqlFragments) == 1:
+                    current_statement += line + " "
+                    continue
+                quotes = 0
+                # "select * from person;" -> ["select..", ""]
+                for sqlFragment in sqlFragments:
+                    if len(sqlFragment.strip()) == 0:
+                        continue
+
+                    if inside_statements_group:
+                        # if statements inside a begin/end block have semicolns,
+                        # they must persist - even with oracle
+                        sqlFragment += "; "
+
+                    if proc_end_pattern.match(sqlFragment.lower()):
+                        inside_statements_group = False
+                    elif proc_start_pattern.match(sqlFragment.lower()):
+                        inside_statements_group = True
+                    elif sqlFragment.lower().startswith("begin"):
+                        inside_statements_group = True
+
+                    # check if the semicolon is a part of the value (quoted string)
+                    quotes += sqlFragment.count("'")
+                    quotes -= sqlFragment.count("\\'")
+                    inside_quoted_string = quotes % 2 != 0
+                    if inside_quoted_string:
+                        sqlFragment += ";"  # restore the semicolon
+
+                    current_statement += sqlFragment
+                    if not inside_statements_group and not inside_quoted_string:
+                        statements_to_execute.append(current_statement.strip())
+                        current_statement = ""
                         quotes = 0
-                        # "select * from person;" -> ["select..", ""]
-                        for sqlFragment in sqlFragments:
-                            if len(sqlFragment.strip()) == 0:
-                                continue
 
-                            if inside_statements_group:
-                                # if statements inside a begin/end block have semicolns,
-                                # they must persist - even with oracle
-                                sqlFragment += "; "
+            current_statement = current_statement.strip()
+            if len(current_statement) != 0:
+                statements_to_execute.append(current_statement)
 
-                            if proc_end_pattern.match(sqlFragment.lower()):
-                                inside_statements_group = False
-                            elif proc_start_pattern.match(sqlFragment.lower()):
-                                inside_statements_group = True
-                            elif sqlFragment.lower().startswith("begin"):
-                                inside_statements_group = True
-
-                            # check if the semicolon is a part of the value (quoted string)
-                            quotes += sqlFragment.count("'")
-                            quotes -= sqlFragment.count("\\'")
-                            inside_quoted_string = quotes % 2 != 0
-                            if inside_quoted_string:
-                                sqlFragment += ";"  # restore the semicolon
-
-                            current_statement += sqlFragment
-                            if not inside_statements_group and not inside_quoted_string:
-                                statements_to_execute.append(current_statement.strip())
-                                current_statement = ""
-                                quotes = 0
-
-                    current_statement = current_statement.strip()
-                    if len(current_statement) != 0:
-                        statements_to_execute.append(current_statement)
-
-                    for statement in statements_to_execute:
-                        line_ends_with_proc_end = re.compile(r"(\s|;)" + proc_end_pattern.pattern + "$")
-                        omit_semicolon = not line_ends_with_proc_end.search(statement.lower())
-                        self._execute_sql(cur, statement, omit_semicolon)
-                self._commit_if_needed(db_connection, no_transaction)
-            except Exception as e:
-                self._rollback_and_raise(db_connection, no_transaction, e)
+            return statements_to_execute
 
     @renamed_args(
         mapping={
