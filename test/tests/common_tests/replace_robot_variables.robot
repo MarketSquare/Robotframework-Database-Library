@@ -17,9 +17,10 @@ ${Script with vars}     ${Script files dir}/select_with_robot_variables.sql
 ...    psycopg2=*syntax error*$*
 ...    oracledb=*$*invalid character*
 ...    pymssql=*Incorrect syntax*$*
-...    pymysql=xfg
-...    pyodbc=xfgf
+...    pymysql=*error*syntax*
+...    pyodbc=*error*syntax*
 ...    ibm_db_dbi=*Invalid SQL syntax*
+...    sqlite3=*unrecognized token*$*
 
 
 *** Test Cases ***
