@@ -17,6 +17,7 @@ ${DB_NAME}              db
 ${DB_PASS}              pass
 ${DB_PORT}              5432
 ${DB_USER}              db_user
+${Script files dir}    ${CURDIR}/script_file_tests
 
 # used for MySQL via PyODBC only
 ${DB_DRIVER}            ODBC Driver 18 for SQL Server

@@ -6,9 +6,6 @@ Suite Teardown      Disconnect From Database
 Test Setup          Create Person Table
 Test Teardown       Drop Tables Person And Foobar
 
-*** Variables ***
-${Script files dir}    ${CURDIR}/../../resources/script_file_tests
-
 
 *** Test Cases ***
 Semicolons As Statement Separators In One Line

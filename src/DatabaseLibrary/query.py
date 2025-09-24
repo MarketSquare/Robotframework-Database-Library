@@ -20,6 +20,7 @@ from typing import List, Optional, Tuple
 
 import sqlparse
 from robot.api import logger
+from robot.libraries.BuiltIn import BuiltIn
 from robot.utils.dotdict import DotDict
 
 from .connection_manager import Connection
@@ -46,6 +47,7 @@ class Query:
         alias: Optional[str] = None,
         parameters: Optional[Tuple] = None,
         *,
+        replace_robot_variables=False,
         selectStatement: Optional[str] = None,
         sansTran: Optional[bool] = None,
         returnAsDict: Optional[bool] = None,
@@ -64,6 +66,8 @@ class Query:
 
         Use ``parameters`` for query variable substitution (variable substitution syntax may be different
         depending on the database client).
+
+        Set ``replace_robot_variables`` to resolve RF variables (like ${MY_VAR}) before executing the SQL.
 
         === Some parameters were renamed in version 2.0 ===
         The old parameters ``selectStatement``, ``sansTran`` and ``returnAsDict`` are *deprecated*,
@@ -88,6 +92,7 @@ class Query:
                 select_statement,
                 parameters=parameters,
                 omit_trailing_semicolon=db_connection.omit_trailing_semicolon,
+                replace_robot_variables=replace_robot_variables,
             )
             all_rows = cur.fetchall()
             if all_rows is None:
@@ -109,6 +114,7 @@ class Query:
         alias: Optional[str] = None,
         parameters: Optional[Tuple] = None,
         *,
+        replace_robot_variables=False,
         selectStatement: Optional[str] = None,
         sansTran: Optional[bool] = None,
     ):
@@ -122,6 +128,8 @@ class Query:
 
         Use ``parameters`` for query variable substitution (variable substitution syntax may be different
         depending on the database client).
+
+        Set ``replace_robot_variables`` to resolve RF variables (like ${MY_VAR}) before executing the SQL.
 
         === Some parameters were renamed in version 2.0 ===
         The old parameters ``selectStatement`` and ``sansTran`` are *deprecated*,
@@ -145,6 +153,7 @@ class Query:
                 select_statement,
                 parameters=parameters,
                 omit_trailing_semicolon=db_connection.omit_trailing_semicolon,
+                replace_robot_variables=replace_robot_variables,
             )
             data = cur.fetchall()
             if data is None:
@@ -169,6 +178,7 @@ class Query:
         alias: Optional[str] = None,
         parameters: Optional[Tuple] = None,
         *,
+        replace_robot_variables=False,
         selectStatement: Optional[str] = None,
         sansTran: Optional[bool] = None,
     ):
@@ -182,6 +192,8 @@ class Query:
 
         Use ``parameters`` for query variable substitution (variable substitution syntax may be different
         depending on the database client).
+
+        Set ``replace_robot_variables`` to resolve RF variables (like ${MY_VAR}) before executing the SQL.
 
         === Some parameters were renamed in version 2.0 ===
         The old parameters ``selectStatement`` and ``sansTran`` are *deprecated*,
@@ -205,6 +217,7 @@ class Query:
                 select_statement,
                 parameters=parameters,
                 omit_trailing_semicolon=db_connection.omit_trailing_semicolon,
+                replace_robot_variables=replace_robot_variables,
             )
             self._commit_if_needed(db_connection, no_transaction)
             description = list(cur.description)
@@ -264,8 +277,9 @@ class Query:
         no_transaction: bool = False,
         alias: Optional[str] = None,
         split: bool = True,
-        external_parser=False,
         *,
+        external_parser=False,
+        replace_robot_variables=False,
         sqlScriptFileName: Optional[str] = None,
         sansTran: Optional[bool] = None,
     ):
@@ -283,6 +297,8 @@ class Query:
         See `Commit behavior` for details.
 
         Use ``alias`` to specify what connection should be used if `Handling multiple database connections`.
+
+        Set ``replace_robot_variables`` to resolve RF variables (like ${MY_VAR}) before executing the SQL.
 
         === Some parameters were renamed in version 2.0 ===
         The old parameters ``sqlScriptFileName`` and ``sansTran`` are *deprecated*,
@@ -307,6 +323,7 @@ class Query:
                         cur,
                         sql_file.read(),
                         omit_trailing_semicolon=db_connection.omit_trailing_semicolon,
+                        replace_robot_variables=replace_robot_variables,
                     )
             else:
                 statements_to_execute = self.split_sql_script(script_path, external_parser=external_parser)
@@ -314,7 +331,7 @@ class Query:
                     proc_end_pattern = re.compile("end(?!( if;| loop;| case;| while;| repeat;)).*;()?")
                     line_ends_with_proc_end = re.compile(r"(\s|;)" + proc_end_pattern.pattern + "$")
                     omit_semicolon = not line_ends_with_proc_end.search(statement.lower())
-                    self._execute_sql(cur, statement, omit_semicolon)
+                    self._execute_sql(cur, statement, omit_semicolon, replace_robot_variables=replace_robot_variables)
             self._commit_if_needed(db_connection, no_transaction)
         except Exception as e:
             self._rollback_and_raise(db_connection, no_transaction, e)
@@ -411,6 +428,7 @@ class Query:
         parameters: Optional[Tuple] = None,
         omit_trailing_semicolon: Optional[bool] = None,
         *,
+        replace_robot_variables=False,
         sqlString: Optional[str] = None,
         sansTran: Optional[bool] = None,
         omitTrailingSemicolon: Optional[bool] = None,
@@ -427,7 +445,9 @@ class Query:
         Use ``parameters`` for query variable substitution (variable substitution syntax may be different
         depending on the database client).
 
-        Set the ``omit_trailing_semicolon`` to explicitly control the `Omitting trailing semicolon behavior` for the command.
+        Set ``omit_trailing_semicolon`` to explicitly control the `Omitting trailing semicolon behavior` for the command.
+
+        Set ``replace_robot_variables`` to resolve RF variables (like ${MY_VAR}) before executing the SQL.
 
         === Some parameters were renamed in version 2.0 ===
         The old parameters ``sqlString``, ``sansTran`` and ``omitTrailingSemicolon`` are *deprecated*,
@@ -449,7 +469,13 @@ class Query:
             cur = db_connection.client.cursor()
             if omit_trailing_semicolon is None:
                 omit_trailing_semicolon = db_connection.omit_trailing_semicolon
-            self._execute_sql(cur, sql_string, omit_trailing_semicolon=omit_trailing_semicolon, parameters=parameters)
+            self._execute_sql(
+                cur,
+                sql_string,
+                omit_trailing_semicolon=omit_trailing_semicolon,
+                parameters=parameters,
+                replace_robot_variables=replace_robot_variables,
+            )
             self._commit_if_needed(db_connection, no_transaction)
         except Exception as e:
             self._rollback_and_raise(db_connection, no_transaction, e)
@@ -784,9 +810,11 @@ class Query:
         sql_statement: str,
         omit_trailing_semicolon: Optional[bool] = False,
         parameters: Optional[Tuple] = None,
+        replace_robot_variables=False,
     ):
         """
         Runs the `sql_statement` using `cur` as Cursor object.
+
         Use `omit_trailing_semicolon` parameter (bool) for explicit instruction,
         if the trailing semicolon (;) should be removed - otherwise the statement
         won't be executed by some databases (e.g. Oracle).
@@ -794,6 +822,8 @@ class Query:
         """
         if omit_trailing_semicolon:
             sql_statement = sql_statement.rstrip(";")
+        if replace_robot_variables:
+            sql_statement = BuiltIn().replace_variables(sql_statement)
         if parameters is None:
             logger.info(f'Executing sql:<br><code style="font-weight: bold;">{sql_statement}</code>', html=True)
             return cur.execute(sql_statement)
