@@ -278,6 +278,7 @@ class Assertion:
         retry_timeout="0 seconds",
         retry_pause="0.5 seconds",
         *,
+        replace_robot_variables=False,
         selectStatement: Optional[str] = None,
         sansTran: Optional[bool] = None,
     ):
@@ -298,6 +299,8 @@ class Assertion:
         Use ``retry_timeout`` and ``retry_pause`` parameters to enable waiting for assertion to pass.
         See `Retry mechanism` for more details.
 
+        Set ``replace_robot_variables`` to resolve RF variables (like ${MY_VAR}) before executing the SQL.
+
         === Some parameters were renamed in version 2.0 ===
         The old parameters ``selectStatement`` and ``sansTran`` are *deprecated*,
         please use new parameters ``select_statement`` and ``no_transaction`` instead.
@@ -317,7 +320,11 @@ class Assertion:
         while not check_ok:
             try:
                 num_rows = self.row_count(
-                    select_statement, no_transaction=no_transaction, alias=alias, parameters=parameters
+                    select_statement,
+                    no_transaction=no_transaction,
+                    alias=alias,
+                    parameters=parameters,
+                    replace_robot_variables=replace_robot_variables,
                 )
                 verify_assertion(num_rows, assertion_operator, expected_value, "Wrong row count:", assertion_message)
                 check_ok = True
@@ -343,6 +350,7 @@ class Assertion:
         retry_timeout="0 seconds",
         retry_pause="0.5 seconds",
         *,
+        replace_robot_variables=False,
         selectStatement: Optional[str] = None,
         sansTran: Optional[bool] = None,
     ):
@@ -368,6 +376,8 @@ class Assertion:
         Use ``retry_timeout`` and ``retry_pause`` parameters to enable waiting for assertion to pass.
         See `Retry mechanism` for more details.
 
+        Set ``replace_robot_variables`` to resolve RF variables (like ${MY_VAR}) before executing the SQL.
+
         === Some parameters were renamed in version 2.0 ===
         The old parameters ``selectStatement`` and ``sansTran`` are *deprecated*,
         please use new parameters ``select_statement`` and ``no_transaction`` instead.
@@ -390,7 +400,11 @@ class Assertion:
         while not check_ok:
             try:
                 query_results = self.query(
-                    select_statement, no_transaction=no_transaction, alias=alias, parameters=parameters
+                    select_statement,
+                    no_transaction=no_transaction,
+                    alias=alias,
+                    parameters=parameters,
+                    replace_robot_variables=replace_robot_variables,
                 )
                 row_count = len(query_results)
                 assert (
