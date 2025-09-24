@@ -67,7 +67,7 @@ class Query:
         Use ``parameters`` for query variable substitution (variable substitution syntax may be different
         depending on the database client).
 
-        Set ``replace_robot_variables`` to resolve RF variables (like ${MY_VAR}) before executing the SQL.
+        Set ``replace_robot_variables`` to resolve RF variables like _${MY_VAR}_ before executing the SQL.
 
         === Some parameters were renamed in version 2.0 ===
         The old parameters ``selectStatement``, ``sansTran`` and ``returnAsDict`` are *deprecated*,
@@ -129,7 +129,7 @@ class Query:
         Use ``parameters`` for query variable substitution (variable substitution syntax may be different
         depending on the database client).
 
-        Set ``replace_robot_variables`` to resolve RF variables (like ${MY_VAR}) before executing the SQL.
+        Set ``replace_robot_variables`` to resolve RF variables like _${MY_VAR}_ before executing the SQL.
 
         === Some parameters were renamed in version 2.0 ===
         The old parameters ``selectStatement`` and ``sansTran`` are *deprecated*,
@@ -193,7 +193,7 @@ class Query:
         Use ``parameters`` for query variable substitution (variable substitution syntax may be different
         depending on the database client).
 
-        Set ``replace_robot_variables`` to resolve RF variables (like ${MY_VAR}) before executing the SQL.
+        Set ``replace_robot_variables`` to resolve RF variables like _${MY_VAR}_ before executing the SQL.
 
         === Some parameters were renamed in version 2.0 ===
         The old parameters ``selectStatement`` and ``sansTran`` are *deprecated*,
@@ -298,7 +298,7 @@ class Query:
 
         Use ``alias`` to specify what connection should be used if `Handling multiple database connections`.
 
-        Set ``replace_robot_variables`` to resolve RF variables (like ${MY_VAR}) before executing the SQL.
+        Set ``replace_robot_variables`` to resolve RF variables like _${MY_VAR}_ before executing the SQL.
 
         === Some parameters were renamed in version 2.0 ===
         The old parameters ``sqlScriptFileName`` and ``sansTran`` are *deprecated*,
@@ -447,7 +447,7 @@ class Query:
 
         Set ``omit_trailing_semicolon`` to explicitly control the `Omitting trailing semicolon behavior` for the command.
 
-        Set ``replace_robot_variables`` to resolve RF variables (like ${MY_VAR}) before executing the SQL.
+        Set ``replace_robot_variables`` to resolve RF variables like _${MY_VAR}_ before executing the SQL.
 
         === Some parameters were renamed in version 2.0 ===
         The old parameters ``sqlString``, ``sansTran`` and ``omitTrailingSemicolon`` are *deprecated*,

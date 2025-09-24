@@ -299,7 +299,7 @@ class Assertion:
         Use ``retry_timeout`` and ``retry_pause`` parameters to enable waiting for assertion to pass.
         See `Retry mechanism` for more details.
 
-        Set ``replace_robot_variables`` to resolve RF variables (like ${MY_VAR}) before executing the SQL.
+        Set ``replace_robot_variables`` to resolve RF variables like _${MY_VAR}_ before executing the SQL.
 
         === Some parameters were renamed in version 2.0 ===
         The old parameters ``selectStatement`` and ``sansTran`` are *deprecated*,
@@ -376,7 +376,7 @@ class Assertion:
         Use ``retry_timeout`` and ``retry_pause`` parameters to enable waiting for assertion to pass.
         See `Retry mechanism` for more details.
 
-        Set ``replace_robot_variables`` to resolve RF variables (like ${MY_VAR}) before executing the SQL.
+        Set ``replace_robot_variables`` to resolve RF variables like _${MY_VAR}_ before executing the SQL.
 
         === Some parameters were renamed in version 2.0 ===
         The old parameters ``selectStatement`` and ``sansTran`` are *deprecated*,
