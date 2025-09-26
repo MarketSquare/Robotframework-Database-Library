@@ -869,13 +869,13 @@ class Query:
         table_border = "2px solid rgb(140 140 140)"
         row_index_background_color = "#d6ecd4"
         row_index_text_color = "black"
-        msg = '<div style="max-width: 100%; overflow-x: auto;">'
+        msg = '<div style="max-width: 100%; overflow-x: auto; max-height: 500px; overflow-y: auto;">'
         msg += f'<table style="width: auto; border-collapse: collapse; border: {table_border}">'
         msg += f'<caption style="text-align: left; font-weight: bold; padding: 5px;">Query returned {len(result_rows)} rows</caption>'
         msg += "<tr>"
-        msg += f'<th scope="col" style="color:{row_index_text_color}; background-color: {row_index_background_color}; {cell_border_and_align}">Row</th>'
+        msg += f'<th scope="col" style="position: sticky; top: 0; color:{row_index_text_color}; background-color: {row_index_background_color}; {cell_border_and_align}">Row</th>'
         for col in col_names:
-            msg += f'<th scope="col" style="background-color: #505050; color: #fff;{cell_border_and_align}">{col}</th>'
+            msg += f'<th scope="col" style="position: sticky; top: 0; background-color: #505050; color: #fff;{cell_border_and_align}">{col}</th>'
         msg += "</tr>"
         table_truncated = False
         for i, row in enumerate(result_rows):
