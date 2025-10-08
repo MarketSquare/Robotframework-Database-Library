@@ -395,8 +395,8 @@ class Assertion:
         | Check Query Result | SELECT first_name FROM person | *equal* | Franz Allan | assertion_message=my error message |
         | Check Query Result | SELECT first_name FROM person | *inequal* | John | alias=my_alias |
         | Check Query Result | SELECT first_name FROM person | *contains* | Allan | no_transaction=True |
-        | @{parameters} | Create List |  John |
-        | Check Query Result | SELECT first_name FROM person | *contains* | Allan | parameters=${parameters} |
+        | @{parameters} | Create List |  Smith |
+        | Check Query Result | SELECT first_name FROM person last_name = %s | *contains* | Allan | parameters=${parameters} |
         """
         check_ok = False
         time_counter = 0
