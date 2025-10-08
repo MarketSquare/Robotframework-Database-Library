@@ -350,6 +350,7 @@ class Assertion:
         retry_timeout="0 seconds",
         retry_pause="0.5 seconds",
         *,
+        assert_as_string=False,
         replace_robot_variables=False,
         selectStatement: Optional[str] = None,
         sansTran: Optional[bool] = None,
@@ -359,9 +360,11 @@ class Assertion:
         The value position in results can be adjusted using ``row`` and ``col`` parameters (0-based).
         See `Inline assertions` for more details.
 
-        *The assertion in this keyword is type sensitive!*
-        The ``expected_value`` is taken as a string, no argument conversion is performed.
-        Use RF syntax like ``${1}`` for numeric values.
+        === Assertions are type sensitive! ===
+        Normally, the type of ``expected_value`` is taken as provided (string as RF default or e.g. ``${1}`` for numeric values)
+        and the type of *actual value* is taken as returned by the ``select_statement``
+        (depends on the DB table and the Python module).
+        Set ``assert_as_string`` to _True_ to convert both *actual value* and ``expected_value`` to string before running the assertion.
 
         Use optional ``assertion_message`` to override the default error message.
 
@@ -397,8 +400,24 @@ class Assertion:
         """
         check_ok = False
         time_counter = 0
+
+        use_string_assertion_hint = "Consider using the 'assert_as_string' parameter."
+
+        def _log_possible_type_mismatch(expected, actual, suggest_string_assertion=True):
+            if actual is not None:
+                msg = (
+                    f"Possible type mismatch between expected value '{expected}' ({type(expected).__name__}) "
+                    f"and actual value returned by the sql statement '{actual}' ({type(actual).__name__})."
+                )
+                if suggest_string_assertion:
+                    msg += f"\n{use_string_assertion_hint}"
+                if type(expected) != type(actual):
+                    logger.info(msg)
+
         while not check_ok:
             try:
+                actual_value = None
+
                 query_results = self.query(
                     select_statement,
                     no_transaction=no_transaction,
@@ -406,6 +425,7 @@ class Assertion:
                     parameters=parameters,
                     replace_robot_variables=replace_robot_variables,
                 )
+
                 row_count = len(query_results)
                 assert (
                     row < row_count
@@ -415,13 +435,33 @@ class Assertion:
                     col < col_count
                 ), f"Checking column '{col}' is not possible, as query results contain {col_count} columns only!"
                 actual_value = query_results[row][col]
+                if assert_as_string:
+                    actual_value = str(actual_value)
+                    expected_value = str(expected_value)
+
+                assert_log_msg = (
+                    f"'{actual_value}' ({type(actual_value).__name__}) "
+                    f"{assertion_operator.name} '{expected_value}' ({type(expected_value).__name__})"
+                )
+                logger.info(f"Run assertion: {assert_log_msg}")
+
                 verify_assertion(
-                    actual_value, assertion_operator, expected_value, "Wrong query result:", assertion_message
+                    actual_value,
+                    assertion_operator,
+                    expected_value,
+                    "Wrong query result:",
+                    assertion_message,
                 )
                 check_ok = True
+            except TypeError as e:
+                _log_possible_type_mismatch(expected_value, actual_value, suggest_string_assertion=False)
+                msg = f"Invalid assertion: {assert_log_msg}.\n{use_string_assertion_hint}\n"
+                raise TypeError(f"{msg}Original error: {e}") from e
+
             except AssertionError as e:
                 if time_counter >= timestr_to_secs(retry_timeout):
                     logger.info(f"Timeout '{retry_timeout}' reached")
+                    _log_possible_type_mismatch(expected_value, actual_value)
                     raise e
                 BuiltIn().sleep(retry_pause)
                 time_counter += timestr_to_secs(retry_pause)
