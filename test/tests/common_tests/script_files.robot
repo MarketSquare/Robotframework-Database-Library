@@ -57,6 +57,17 @@ Split Script Into Statements - External Parser
         ${results}=    Query    ${command}
     END
 
+Split Script Into Statements - External Parser - Comments Are Removed
+    Insert Data In Person Table Using SQL Script
+    @{Expected commands}=    Create List
+    ...    SELECT * FROM person;
+    ...    SELECT * FROM person WHERE id=1;
+    ${extracted commands}=    Split Sql Script    ${Script files dir}/split_commands_comments.sql    external_parser=True
+    Lists Should Be Equal    ${Expected commands}    ${extracted commands}
+    FOR    ${command}    IN    @{extracted commands}
+        ${results}=    Query    ${command}
+    END
+
 
 *** Keywords ***
 Run SQL Script File

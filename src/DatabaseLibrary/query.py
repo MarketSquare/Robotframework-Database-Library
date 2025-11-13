@@ -352,7 +352,11 @@ class Query:
             logger.info("Splitting script file into statements...")
             statements_to_execute = []
             if external_parser:
-                statements_to_execute = sqlparse.split(sql_file.read())
+                split_statements = sqlparse.split(sql_file.read())
+                for statement in split_statements:
+                    statement_without_comments = sqlparse.format(statement, strip_comments=True)
+                    if statement_without_comments:
+                        statements_to_execute.append(statement_without_comments)
             else:
                 current_statement = ""
                 inside_statements_group = False
