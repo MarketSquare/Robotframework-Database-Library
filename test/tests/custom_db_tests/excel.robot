@@ -24,7 +24,7 @@ Create person table
 
 Execute SQL Script - Insert Data person table
     log to console    ${DBName}
-    ${output} =    Execute SQL Script    ${CURDIR}/../../resources/excel_db_test_insertData.sql
+    ${output} =    Execute SQL Script    ${Script files dir}/excel_db_test_insertData.sql
     Log    ${output}
     Should Be Equal As Strings    ${output}    None
 
