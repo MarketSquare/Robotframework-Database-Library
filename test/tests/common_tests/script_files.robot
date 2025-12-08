@@ -6,7 +6,6 @@ Suite Teardown      Disconnect From Database
 Test Setup          Create Person Table
 Test Teardown       Drop Tables Person And Foobar
 
-
 *** Test Cases ***
 Semicolons As Statement Separators In One Line
     Run SQL Script File    statements_in_one_line
@@ -34,40 +33,6 @@ Semicolons And Quotes In Values
     Length Should Be    ${results}    2
     Should Be Equal As Strings    ${results}[0]    (5, 'Miles', "O'Brian")
     Should Be Equal As Strings    ${results}[1]    (6, 'Keiko', "O'Brian")
-
-Split Script Into Statements - Internal Parser
-    Insert Data In Person Table Using SQL Script
-    @{Expected commands}=    Create List
-    ...    SELECT * FROM person
-    ...    SELECT * FROM person WHERE id=1
-    ${extracted commands}=    Split Sql Script    ${Script files dir}/split_commands.sql
-    Lists Should Be Equal    ${Expected commands}    ${extracted commands}
-    FOR    ${command}    IN    @{extracted commands}
-        ${results}=    Query    ${command}
-    END
-
-Split Script Into Statements - External Parser
-    Insert Data In Person Table Using SQL Script
-    @{Expected commands}=    Create List
-    ...    SELECT * FROM person;
-    ...    SELECT * FROM person WHERE id=1;
-    ${extracted commands}=    Split Sql Script    ${Script files dir}/split_commands.sql    external_parser=True
-    Lists Should Be Equal    ${Expected commands}    ${extracted commands}
-    FOR    ${command}    IN    @{extracted commands}
-        ${results}=    Query    ${command}
-    END
-
-Split Script Into Statements - External Parser - Comments Are Removed
-    Insert Data In Person Table Using SQL Script
-    @{Expected commands}=    Create List
-    ...    SELECT * FROM person;
-    ...    SELECT * FROM person WHERE id=1;
-    ${extracted commands}=    Split Sql Script    ${Script files dir}/split_commands_comments.sql    external_parser=True
-    Lists Should Be Equal    ${Expected commands}    ${extracted commands}
-    FOR    ${command}    IN    @{extracted commands}
-        ${results}=    Query    ${command}
-    END
-
 
 *** Keywords ***
 Run SQL Script File

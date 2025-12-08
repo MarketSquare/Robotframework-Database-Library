@@ -17,7 +17,7 @@ ${DB_NAME}              db
 ${DB_PASS}              pass
 ${DB_PORT}              5432
 ${DB_USER}              db_user
-${Script files dir}    ${CURDIR}/script_file_tests
+${Script files dir}    ${CURDIR}/script_files
 
 # used for MySQL via PyODBC only
 ${DB_DRIVER}            ODBC Driver 18 for SQL Server
@@ -96,9 +96,9 @@ Create Person Table And Insert Data
 Insert Data In Person Table Using SQL Script
     [Arguments]    ${alias}=${None}
     IF    $alias is None
-        ${output}=    Execute SQL Script    ${CURDIR}/insert_data_in_person_table.sql
+        ${output}=    Execute SQL Script    ${Script files dir}/insert_data_in_person_table.sql
     ELSE
-        ${output}=    Execute SQL Script    ${CURDIR}/insert_data_in_person_table.sql    alias=${alias}
+        ${output}=    Execute SQL Script    ${Script files dir}/insert_data_in_person_table.sql    alias=${alias}
     END
     RETURN    ${output}
 
