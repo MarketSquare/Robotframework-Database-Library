@@ -16,7 +16,7 @@ import importlib
 import inspect
 import re
 import sys
-from typing import List, Optional, Tuple, Union
+from typing import List, Optional, Tuple
 
 import sqlparse
 from robot.api import logger
@@ -347,82 +347,82 @@ class Query:
         Set ``external_parser`` to _True_ to use the external library [https://pypi.org/project/sqlparse/|sqlparse].
         """
         with open(script_path, encoding="UTF-8") as sql_file:
-            logger.info("Splitting script file into statements...")
             return self.split_sql_string(sql_file.read(), external_parser=external_parser)
 
-    def split_sql_string(self, sql_string: str, external_parser: bool = False):
-        if external_parser:
-            return self._split_statements_using_external_parser(sql_string)
-        else:
-            return self._parse_sql_internally(sql_string.splitlines())
+    def split_sql_string(self, sql_string: str, external_parser=False):
+        """
+        Splits the content of the ``sql_string`` into individual SQL commands
+        and returns them as a list of strings.
+        SQL commands are expected to be delimited by a semicolon (';').
 
-    def _parse_sql_internally(self, sql_file: List[str]) -> list[str]:
+        Set ``external_parser`` to _True_ to use the external library [https://pypi.org/project/sqlparse/|sqlparse].
+        """
+        logger.info(f"Splitting SQL into statements. Using external parser: {external_parser}")
         statements_to_execute = []
-        current_statement = ""
-        inside_statements_group = False
-        proc_start_pattern = re.compile("create( or replace)? (procedure|function){1}( )?")
-        proc_end_pattern = re.compile("end(?!( if;| loop;| case;| while;| repeat;)).*;()?")
-        for line in sql_file:
-            line = line.strip()
-            if line.startswith("#") or line.startswith("--") or line == "/":
-                continue
-
-            # check if the line matches the creating procedure regexp pattern
-            if proc_start_pattern.match(line.lower()):
-                inside_statements_group = True
-            elif line.lower().startswith("begin"):
-                inside_statements_group = True
-
-            # semicolons inside the line? use them to separate statements
-            # ... but not if they are inside a begin/end block (aka. statements group)
-            sqlFragments = line.split(";")
-            # no semicolons
-            if len(sqlFragments) == 1:
-                current_statement += line + " "
-                continue
-            quotes = 0
-            # "select * from person;" -> ["select..", ""]
-            for sqlFragment in sqlFragments:
-                if len(sqlFragment.strip()) == 0:
+        if external_parser:
+            split_statements = sqlparse.split(sql_string)
+            for statement in split_statements:
+                statement_without_comments = sqlparse.format(statement, strip_comments=True)
+                if statement_without_comments:
+                    statements_to_execute.append(statement_without_comments)
+        else:
+            current_statement = ""
+            inside_statements_group = False
+            proc_start_pattern = re.compile("create( or replace)? (procedure|function){1}( )?")
+            proc_end_pattern = re.compile("end(?!( if;| loop;| case;| while;| repeat;)).*;()?")
+            for line in sql_string.splitlines():
+                line = line.strip()
+                if line.startswith("#") or line.startswith("--") or line == "/":
                     continue
 
-                if inside_statements_group:
-                    # if statements inside a begin/end block have semicolns,
-                    # they must persist - even with oracle
-                    sqlFragment += "; "
-
-                if proc_end_pattern.match(sqlFragment.lower()):
-                    inside_statements_group = False
-                elif proc_start_pattern.match(sqlFragment.lower()):
+                # check if the line matches the creating procedure regexp pattern
+                if proc_start_pattern.match(line.lower()):
                     inside_statements_group = True
-                elif sqlFragment.lower().startswith("begin"):
+                elif line.lower().startswith("begin"):
                     inside_statements_group = True
 
-                # check if the semicolon is a part of the value (quoted string)
-                quotes += sqlFragment.count("'")
-                quotes -= sqlFragment.count("\\'")
-                inside_quoted_string = quotes % 2 != 0
-                if inside_quoted_string:
-                    sqlFragment += ";"  # restore the semicolon
+                # semicolons inside the line? use them to separate statements
+                # ... but not if they are inside a begin/end block (aka. statements group)
+                sqlFragments = line.split(";")
+                # no semicolons
+                if len(sqlFragments) == 1:
+                    current_statement += line + " "
+                    continue
+                quotes = 0
+                # "select * from person;" -> ["select..", ""]
+                for sqlFragment in sqlFragments:
+                    if len(sqlFragment.strip()) == 0:
+                        continue
 
-                current_statement += sqlFragment
-                if not inside_statements_group and not inside_quoted_string:
-                    statements_to_execute.append(current_statement.strip())
-                    current_statement = ""
-                    quotes = 0
+                    if inside_statements_group:
+                        # if statements inside a begin/end block have semicolns,
+                        # they must persist - even with oracle
+                        sqlFragment += "; "
 
-        current_statement = current_statement.strip()
-        if len(current_statement) != 0:
-            statements_to_execute.append(current_statement)
-        return statements_to_execute
+                    if proc_end_pattern.match(sqlFragment.lower()):
+                        inside_statements_group = False
+                    elif proc_start_pattern.match(sqlFragment.lower()):
+                        inside_statements_group = True
+                    elif sqlFragment.lower().startswith("begin"):
+                        inside_statements_group = True
 
-    def _split_statements_using_external_parser(self, sql_file_content: str):
-        statements_to_execute = []
-        split_statements = sqlparse.split(sql_file_content)
-        for statement in split_statements:
-            statement_without_comments = sqlparse.format(statement, strip_comments=True)
-            if statement_without_comments:
-                statements_to_execute.append(statement_without_comments)
+                    # check if the semicolon is a part of the value (quoted string)
+                    quotes += sqlFragment.count("'")
+                    quotes -= sqlFragment.count("\\'")
+                    inside_quoted_string = quotes % 2 != 0
+                    if inside_quoted_string:
+                        sqlFragment += ";"  # restore the semicolon
+
+                    current_statement += sqlFragment
+                    if not inside_statements_group and not inside_quoted_string:
+                        statements_to_execute.append(current_statement.strip())
+                        current_statement = ""
+                        quotes = 0
+
+            current_statement = current_statement.strip()
+            if len(current_statement) != 0:
+                statements_to_execute.append(current_statement)
+
         return statements_to_execute
 
     @renamed_args(
@@ -441,14 +441,20 @@ class Query:
         omit_trailing_semicolon: Optional[bool] = None,
         *,
         replace_robot_variables=False,
+        split: bool = False,
+        external_parser: bool = False,
         sqlString: Optional[str] = None,
         sansTran: Optional[bool] = None,
         omitTrailingSemicolon: Optional[bool] = None,
-        split: bool = False,
-        external_parser: bool = False,
     ):
         """
-        Executes the ``sql_string`` as a single SQL command.
+        Executes the ``sql_string`` - as a single SQL command (default) or as separate statements.
+
+        Set ``split`` to _True_ to enable dividing the string into SQL commands similar to the `Execute SQL Script`
+        keyword. The commands are expected to be delimited by a semicolon (';') in this case -
+        they will be split and executed separately.
+
+        Set ``external_parser`` to _True_ to use the external library [https://pypi.org/project/sqlparse/|sqlparse] for splitting the script.
 
         Set ``no_transaction`` to _True_ to run command without explicit transaction commit
         or rollback in case of error.
@@ -500,12 +506,6 @@ class Query:
             self._commit_if_needed(db_connection, no_transaction)
         except Exception as e:
             self._rollback_and_raise(db_connection, no_transaction, e)
-
-    def _omit_semicolon_needed(self, statement: str) -> bool:
-        proc_end_pattern = re.compile("end(?!( if;| loop;| case;| while;| repeat;)).*;()?")
-        line_ends_with_proc_end = re.compile(r"(\s|;)" + proc_end_pattern.pattern + "$")
-        omit_semicolon = not line_ends_with_proc_end.search(statement.lower())
-        return omit_semicolon
 
     @renamed_args(mapping={"spName": "procedure_name", "spParams": "procedure_params", "sansTran": "no_transaction"})
     def call_stored_procedure(
@@ -830,6 +830,17 @@ class Query:
             if log_head < 0:
                 raise ValueError(f"Wrong log head value provided: {log_head}. The value can't be negative!")
             self.LOG_QUERY_RESULTS_HEAD = log_head
+
+    def _omit_semicolon_needed(self, statement: str) -> bool:
+        """
+        Checks if the `statement` ends with a procedure ending keyword - so that semicolon should be omitted -
+        and returns the result.
+        The function is used when running multiple SQL statements from a script or an SQL string.
+        """
+        proc_end_pattern = re.compile("end(?!( if;| loop;| case;| while;| repeat;)).*;()?")
+        line_ends_with_proc_end = re.compile(r"(\s|;)" + proc_end_pattern.pattern + "$")
+        omit_semicolon = not line_ends_with_proc_end.search(statement.lower())
+        return omit_semicolon
 
     def _execute_sql(
         self,
