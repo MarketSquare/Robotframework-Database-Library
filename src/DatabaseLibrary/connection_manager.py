@@ -315,7 +315,7 @@ class ConnectionManager:
         oracle_driver_mode = _arg_or_config(oracle_driver_mode, "oracle_driver_mode", old_param_name="driverMode")
 
         for param_name, param_value in custom_connection_params.items():
-            _arg_or_config(param_value, param_name)
+            custom_connection_params[param_name] = _arg_or_config(param_value, param_name)
         other_config_file_params = config.get_all_available_params()
         if other_config_file_params:
             logger.info(f"Other params from configuration file: {list(other_config_file_params.keys())}")
