@@ -1,0 +1,103 @@
+name: Common tests run with PostgreSQL on different Python and RF versions
+
+on: [push, pull_request]
+
+env:
+  DB_NAME: db
+  DB_USER: db_user
+  DB_PASS: pass
+  DB_HOST: 127.0.0.1
+  DB_PORT: 5432
+  MODULE_MODE: standard
+  PY_DB_MODULE: psycopg2
+  PIP_INSTALL_DB_MODULE: psycopg2
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - python-version: '3.8'
+            rf-version: '5.0.1'
+          - python-version: '3.9'
+            rf-version: '5.0.1'
+          - python-version: '3.10'
+            rf-version: '6.1.1'
+          - python-version: '3.11'
+            rf-version: '6.1.1'
+          - python-version: '3.12'
+            rf-version: '7.0.1'
+          - python-version: '3.13'
+            rf-version: '7.2.2'
+          - python-version: '3.14'
+            rf-version: '7.4.2'
+          - python-version: '3.15'
+            rf-version: '7.5.0'
+
+    services:
+      postgres:
+        image: postgres:11
+        env:
+          POSTGRES_DB: ${{ env.DB_NAME }}
+          POSTGRES_USER: ${{ env.DB_USER }}
+          POSTGRES_PASSWORD: ${{ env.DB_PASS }}
+        ports:
+          - 5432:5432
+        # needed because the postgres container does not provide a healthcheck
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+
+        
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Setup Python and dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Install special RF version
+        if: matrix.rf_version != 'default'
+
+        run: |
+          pip install -U robotframework==${{matrix.rf-version}}
+      
+      - name: Install Development/Checked out version of DatabaseLibrary
+        run: |
+          pip install -e ${{ github.workspace }}
+
+      - name: Setup Python DB module
+        run: |
+          pip install ${{ env.PIP_INSTALL_DB_MODULE }}
+      
+      - name: Tests for RF ${{ matrix.rf-version }} on Python ${{ matrix.python-version }}
+        working-directory: ./test
+        run: >-
+            robot
+            -d results
+            --xunit result.xml
+            --loglevel DEBUG:INFO
+            --output output_rf_${{ matrix.rf-version }}_python_${{ matrix.python-version }}.xml
+            --log log_rf_${{ matrix.rf-version }}_python_${{ matrix.python-version }}.html
+            --report report_rf_${{ matrix.rf-version }}_python_${{ matrix.python-version }}.html
+            -v DB_MODULE_MODE:${{ env.MODULE_MODE }}
+            -v DB_MODULE:${{ env.PY_DB_MODULE }}
+            -v DB_NAME:${{ env.DB_NAME }}
+            -v DB_USER:${{ env.DB_USER }}
+            -v DB_PASS:${{ env.DB_PASS }}
+            -v DB_HOST:${{ env.DB_HOST }}
+            -v DB_PORT:${{ env.DB_PORT }}
+            tests/common_tests            
+      
+      - name: Upload Robot Logs
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: log-files-rf_${{ matrix.rf-version }}_python_${{ matrix.python-version }}
+          path: ./test/results/
