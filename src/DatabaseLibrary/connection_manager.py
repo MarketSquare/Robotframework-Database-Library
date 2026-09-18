@@ -17,7 +17,7 @@ import os
 from configparser import ConfigParser, NoOptionError, NoSectionError
 from dataclasses import dataclass
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, Optional
+from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 
 from robot.api import logger
 
@@ -188,7 +188,7 @@ class ConnectionManager:
         db_module: Optional[str] = None,
         db_name: Optional[str] = None,
         db_user: Optional[str] = None,
-        db_password: Optional[Secret | str] = None,
+        db_password: Optional[Union[Secret, str]] = None,
         db_host: Optional[str] = None,
         db_port: Optional[int] = None,
         db_charset: Optional[str] = None,
