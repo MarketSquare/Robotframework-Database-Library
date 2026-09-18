@@ -1,5 +1,13 @@
 *** Settings ***
 Documentation    Tests for parameters used when importing the library
+Suite Setup    Get RF version
+
+*** Variables ***
+${OLD_RF_VERSION}    unknown
+*** Keywords ***
+Get RF version
+    ${old_version}=    Evaluate    str(int(robot.__version__[:1])<6).lower()
+    Set Global Variable    ${OLD_RF_VERSION}    ${old_version}
 
 *** Test Cases ***
 Import Without Parameters Is Valid
@@ -15,7 +23,11 @@ Log Query Results Head - Negative Value Not Allowed
 
 Warn On Connection Overwrite Enabled
     Skip If    '${DB_MODULE}' != 'psycopg2'
-    Import Library    DatabaseLibrary    warn_on_connection_overwrite=True        AS    MyDBLib
+    IF    "${OLD_RF_VERSION}" == "true"
+        Import Library    DatabaseLibrary    warn_on_connection_overwrite=True        WITH NAME    MyDBLib
+    ELSE
+        Import Library    DatabaseLibrary    warn_on_connection_overwrite=True        AS    MyDBLib
+    END
     FOR    ${counter}    IN RANGE    0    2
         MyDBLib.Connect To Database
         ...    db_module=${DB_MODULE}
@@ -29,7 +41,11 @@ Warn On Connection Overwrite Enabled
 
 Warn On Connection Overwrite Disabled
     Skip If    '${DB_MODULE}' != 'psycopg2'
-    Import Library    DatabaseLibrary    warn_on_connection_overwrite=False    AS    MyDBLib2
+    IF    "${OLD_RF_VERSION}" == "true"
+        Import Library    DatabaseLibrary    warn_on_connection_overwrite=False    WITH NAME    MyDBLib2
+    ELSE
+        Import Library    DatabaseLibrary    warn_on_connection_overwrite=False    AS    MyDBLib2
+    END
     FOR    ${counter}    IN RANGE    0    2
         MyDBLib2.Connect To Database
         ...    db_module=${DB_MODULE}

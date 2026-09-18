@@ -117,9 +117,9 @@ Return As Dictionary - Dotted Syntax
     ${output}=    Query    SELECT * FROM person    return_dict=True
     ${field_names}=    Get Dictionary Keys    ${output}[0]
     IF    "FIRST_NAME" in $field_names
-        VAR    ${field_name}=    FIRST_NAME
+        ${field_name}=    Set Variable    FIRST_NAME
     ELSE IF    "first_name" in $field_names
-        VAR    ${field_name}=    first_name
+        ${field_name}=    Set Variable   first_name
     ELSE
         FAIL    Unexpected field name in dictionary
     END

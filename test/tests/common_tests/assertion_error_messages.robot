@@ -121,9 +121,9 @@ Check Row Count With Assertion Engine Fails With Message
 Check Query Result With Assertion Engine Fails
     ${expected value}=    Set Variable    ${5}
     IF    "${DB_MODULE}" == "jaydebeapi"
-        VAR    ${Num Type}=    jlong
+        ${Num Type}=    Set Variable    jlong
     ELSE
-        VAR    ${Num Type}=    int
+        ${Num Type}=    Set Variable   int
     END
     ${expected error}=    Catenate
     ...    Wrong query result: '1' (${Num Type}) should be '${expected value}' (int)
