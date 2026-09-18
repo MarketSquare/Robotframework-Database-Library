@@ -73,9 +73,9 @@ jobs:
             -d results
             --xunit result.xml
             --loglevel DEBUG:INFO
-            --output output_rf_${{ matrix.rf-version }}_python_${{ matrix.python-version }}.xml
-            --log log_rf_${{ matrix.rf-version }}_python_${{ matrix.python-version }}.html
-            --report report_rf_${{ matrix.rf-version }}_python_${{ matrix.python-version }}.html
+            --output output_${{ matrix.python-version }}__${{ matrix.rf-version }}.xml
+            --log log_${{ matrix.python-version }}__${{ matrix.rf-version }}.html
+            --report report_${{ matrix.python-version }}__${{ matrix.rf-version }}.html
             -v DB_MODULE_MODE:${{ env.MODULE_MODE }}
             -v DB_MODULE:${{ env.PY_DB_MODULE }}
             -v DB_NAME:${{ env.DB_NAME }}
@@ -89,5 +89,5 @@ jobs:
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
-          name: log-files-rf_${{ matrix.rf-version }}_python_${{ matrix.python-version }}
+          name: log-files-${{ matrix.python-version }}__${{ matrix.rf-version }}
           path: ./test/results/
