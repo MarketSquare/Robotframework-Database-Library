@@ -17,11 +17,19 @@ import os
 from configparser import ConfigParser, NoOptionError, NoSectionError
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import TYPE_CHECKING, Any, Dict, Optional
 
 from robot.api import logger
 
 from .params_decorator import renamed_args
+
+if TYPE_CHECKING:
+    from robot.api.types import Secret
+else:
+    try:
+        from robot.api.types import Secret
+    except ImportError:
+        Secret = None
 
 
 @dataclass
@@ -180,7 +188,7 @@ class ConnectionManager:
         db_module: Optional[str] = None,
         db_name: Optional[str] = None,
         db_user: Optional[str] = None,
-        db_password: Optional[str] = None,
+        db_password: Optional[Secret | str] = None,
         db_host: Optional[str] = None,
         db_port: Optional[int] = None,
         db_charset: Optional[str] = None,
@@ -224,6 +232,9 @@ class ConnectionManager:
         By default, there is a warning when overwriting an existing connection (i.e. not closing it properly).
         This can be disabled by setting the ``warn_on_connection_overwrite`` parameter to *False* in the library import.
 
+        The ``db_password`` can be passed as a plain string or as a Robot Framework
+        [https://robotframework.org/robotframework/latest/RobotFrameworkUserGuide.html#secret-variables|Secret variable].
+
         === Some parameters were renamed in version 2.0 ===
         The old parameters ``dbapiModuleName``, ``dbName``, ``dbUsername``,
         ``dbPassword``, ``dbHost``, ``dbPort``, ``dbCharset``, ``dbDriver``,
@@ -239,10 +250,20 @@ class ConnectionManager:
         | Connect To Database | psycopg2 | my_db | user | pass | 127.0.0.1 | 5432 | my_custom_param=value |
         | Connect To Database | psycopg2 | my_db | user | pass | 127.0.0.1 | 5432 | alias=my_alias |
         | Connect To Database | config_file=my_db_params.cfg |
+        | Connect To Database | psycopg2 | my_db | user | ${SECRET_PASS} | 127.0.0.1 | 5432 |
 
         See `Connection examples for different DB modules`.
         """
         config = ConfigReader(config_file, alias)
+
+        def _unwrap_secret(value):
+            """
+            Returns the value encapsulated in a Robot Framework `Secret` object,
+            other values are returned as they are.
+            """
+            if Secret is None or not isinstance(value, Secret):
+                return value
+            return value.value
 
         def _build_connection_params(custom_params=True, **basic_params):
             con_params = basic_params.copy()
@@ -305,7 +326,7 @@ class ConnectionManager:
         # optional named params - named because of custom module specific handling
         db_name = _arg_or_config(db_name, "db_name", old_param_name="dbName")
         db_user = _arg_or_config(db_user, "db_user", old_param_name="dbUsername")
-        db_password = _arg_or_config(db_password, "db_password", old_param_name="dbPassword")
+        db_password = _unwrap_secret(_arg_or_config(db_password, "db_password", old_param_name="dbPassword"))
         db_host = _arg_or_config(db_host, "db_host", old_param_name="dbHost")
         db_port = _arg_or_config(db_port, "db_port", old_param_name="dbPort")
         if db_port is not None:

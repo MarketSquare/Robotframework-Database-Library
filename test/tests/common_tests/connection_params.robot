@@ -78,6 +78,19 @@ Custom params as keyword args - invalid, error from Python DB module
     ...    odbc_driver=${DB_DRIVER}
     ...    blah=blah
 
+Password as secret value
+    [Documentation]    The password can be a Robot Framework secret value - requires RF 7.4
+    Skip If Secret Values Not Supported
+    ${Secret pass}=    Create Secret    ${DB_PASS}
+    Connect To Database
+    ...    db_module=${DB_MODULE}
+    ...    db_name=${DB_NAME}
+    ...    db_user=${DB_USER}
+    ...    db_password=${Secret pass}
+    ...    db_host=${DB_HOST}
+    ...    db_port=${DB_PORT}
+    ...    odbc_driver=${DB_DRIVER}
+
 All basic params in config file
     Connect Using Config File    ${DB_MODULE}/simple_default_alias
 
@@ -172,3 +185,9 @@ SQlite specific - custom connection params in config file
     [Setup]    Skip If    $DB_MODULE != "sqlite3"
     Remove File    ${DBName}.db
     Connect Using Config File    ${DB_MODULE}/simple_default_alias
+
+
+*** Keywords ***
+Skip If Secret Values Not Supported
+    ${Supported}=    Secret Values Supported
+    Skip If    not ${Supported}    Secret values require Robot Framework 7.4 or newer

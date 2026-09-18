@@ -7,6 +7,7 @@ Library             OperatingSystem
 Library             DatabaseLibrary
 Library             DateTime
 Resource            config_files/connect_config_file.resource
+Library             secret_helper.py
 
 
 *** Variables ***
