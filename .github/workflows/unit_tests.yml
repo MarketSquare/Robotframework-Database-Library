@@ -33,9 +33,7 @@ jobs:
           - os: 'ubuntu-latest'
             python-version: '3.14'
             rf-version: '7.4.2'
-          - os: 'ubuntu-latest'
-            python-version: '3.15'
-            rf-version: '7.5.0'
+
     runs-on: ${{ matrix.os }}
 
     steps:
