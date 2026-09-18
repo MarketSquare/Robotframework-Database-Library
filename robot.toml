@@ -1,0 +1,42 @@
+output-dir = "logs"
+default-profiles = ["postgresql", "common_tests"]
+log-level = "DEBUG:INFO"
+
+[profiles.common_tests]
+suites=["common tests"]
+
+[profiles.postgresql.variables]
+GLOBAL_DB_SELECTOR = "PostgreSQL"
+
+[profiles.oracledb.variables]
+GLOBAL_DB_SELECTOR = "oracledb"
+
+[profiles.cxoracle.variables]
+GLOBAL_DB_SELECTOR = "cx_Oracle"
+
+[profiles.sqlite.variables]
+GLOBAL_DB_SELECTOR = "SQLite"
+
+[profiles.db2.variables]
+GLOBAL_DB_SELECTOR = "IBM_DB2"
+
+[profiles.teradata.variables]
+GLOBAL_DB_SELECTOR = "Teradata"
+
+[profiles.pymysql.variables]
+GLOBAL_DB_SELECTOR = "MySQL_pymysql"
+
+[profiles.pyodbc.variables]
+GLOBAL_DB_SELECTOR = "MySQL_pyodbc"
+
+[profiles.oraclejdbc.variables]
+GLOBAL_DB_SELECTOR = "Oracle_JDBC"
+
+[profiles.mssql.variables]
+GLOBAL_DB_SELECTOR = "MSSQL"
+
+[profiles.excel.variables]
+GLOBAL_DB_SELECTOR = "Excel"
+
+[profiles.excelrw.variables]
+GLOBAL_DB_SELECTOR = "Excel_RW"
