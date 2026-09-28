@@ -1,6 +1,6 @@
-output-dir = "logs"
+args = ["--argumentfile", "argumentfile.txt"]
+
 default-profiles = ["postgresql", "common_tests"]
-log-level = "DEBUG:INFO"
 
 [profiles.common_tests]
 suites=["common tests"]

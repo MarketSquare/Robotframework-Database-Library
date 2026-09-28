@@ -1,0 +1,3 @@
+--output-dir logs
+--log-level DEBUG:INFO
+--suite common_tests
