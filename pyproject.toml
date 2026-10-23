@@ -9,7 +9,7 @@ authors = [
     {name="Andre Mochinin"}
 ]
 
-requires-python = ">=3.8.1"
+requires-python = ">=3.9"
 dependencies = [
     "robotframework>=5.0.1",
     "robotframework-assertion-engine>=3.0.3",
