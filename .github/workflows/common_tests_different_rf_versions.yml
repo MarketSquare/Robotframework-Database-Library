@@ -55,7 +55,6 @@ jobs:
 
       - name: Install special RF version
         if: matrix.rf-version != 'default'
-
         run: |
           uv pip install -U robotframework==${{matrix.rf-version}}
       

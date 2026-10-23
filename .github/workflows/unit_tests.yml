@@ -7,7 +7,7 @@ name: Unit tests
 on: [push, pull_request]
 
 jobs:
-  build:
+  tests:
     strategy:
       fail-fast: false
       matrix:
