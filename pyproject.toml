@@ -1,38 +1,45 @@
-[build-system]
-requires = [
-    "setuptools>=61.0",
-    "robotframework>=5.0.1",
-    "robotframework-assertion-engine",
-    "sqlparse"
-    ]
-build-backend = "setuptools.build_meta"
-
 [project]
+dynamic = ["version"]
+
 name = "robotframework-databaselibrary"
-authors = [{name="Franz Allan Valencia See", email="franz.see@gmail.com"},
-]
 description = "Database Library for Robot Framework"
 readme = "README.md"
-requires-python = ">=3.8.1"
+authors = [
+    {name="Franz Allan Valencia See", email="franz.see@gmail.com"},
+    {name="Andre Mochinin"}
+]
+
+requires-python = ">=3.9"
 dependencies = [
     "robotframework>=5.0.1",
-    "robotframework-assertion-engine",
-    "sqlparse"
+    "robotframework-assertion-engine>=3.0.3",
+    "sqlparse>=0.5.5",
 ]
+license = "Apache-2.0"
 classifiers = [
     "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: Apache Software License",
     "Operating System :: OS Independent",
 ]
-license = {text = "Apache License 2.0"}
-dynamic = ["version"]
+keywords = ["Robot Framework", "Libraries"]
 
 [project.urls]
 "Homepage" = "https://github.com/MarketSquare/Robotframework-Database-Library"
 "Keyword docs" = "http://marketsquare.github.io/Robotframework-Database-Library/"
 
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
 [tool.setuptools.dynamic]
-version = {attr = "DatabaseLibrary.__version__"}
+version = {attr = "DatabaseLibrary.version.VERSION"}
+
+[dependency-groups]
+dev = [
+    "pre-commit>=3.5.0",
+    "psycopg2-binary>=2.9.10",
+    "robotcode[runner]>=1.9.0",
+    "robotframework-excellib>=2.0.1",
+]
 
 [tool.black]
 line-length = 120
