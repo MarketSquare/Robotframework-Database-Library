@@ -129,28 +129,24 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v3
 
-      - uses: actions/setup-python@v4
+      - name: Install Python and uv
+        uses: astral-sh/setup-uv@v6
         with:
+          enable-cache: true
           python-version: '3.14'
-
-      - name: Setup Python dependencies
+      - name: Install DatabaseLibrary and dependecies
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-
-      - name: Install Development/Checked out version of DatabaseLibrary
-        run: |
-          pip install -e ${{ github.workspace }}
+          uv sync --locked
 
       - name: Setup Python DB module
         if: matrix.pip_install != 'none'
-
         run: |
-          pip install ${{ matrix.pip_install }}
+          uv pip install ${{ matrix.pip_install }}
       
       - name: Tests for ${{ matrix.job_name }}
         working-directory: ./test
         run: >-
+            uv run
             robot
             -d results
             --xunit result.xml
