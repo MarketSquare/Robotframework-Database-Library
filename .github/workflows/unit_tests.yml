@@ -54,7 +54,7 @@ jobs:
 
       - name: Install RF specific version and pytest dependencies
         run: |
-          uv pip install robotframework==${{ matrix.rf-version }}
+          uv pip install robotframework==${{ matrix.rf-version }} coverage pytest
 
       - name: Run unit tests with coverage
         run:
